@@ -187,13 +187,71 @@ Lição (advisor): eu mandava só **PNG estático** → ele não via animação 
 
 **Próximo passo recomendado:** construir a **Datilologia** (alfabeto manual) — funcional já, útil, e é **código nosso** (importa pro TCC ter trabalho original, não só embed). Decisão de enquadramento semântica-estrela/VLibras-camada **ainda pendente de OK do Cauê**.
 
-## 14. Lacunas / perguntas em aberto
+## 15. Backend nasce: auth + datilologia com ranking (2026-06-28/29)
 
-- **IA: regras vs. OpenAI vs. ML.** O material se contradiz — protótipo "por regras + biblioteca" mas infográfico diz "OpenAI". Definir o que entra no MVP do TCC.
+Repos criados na org **`Semantia-UniSenai`**: `semantia-api` (NestJS) e o front ganhou área
+logada. Decisão de stack/arquitetura registrada em `../projeto/Arquitetura-Backend.md` (Clean
+Architecture + Repository Pattern, Prisma 7, JWT+bcryptjs, Swagger→orval, deploy
+Vercel+Render+Neon com ping anti-cold-start). Feature gated do MVP: **treino de datilologia +
+ranking** (`gameKey` permite novos jogos sem mudar schema). Front `3d471b8`, API `b560316`.
+
+## 16. Sala de aula ao vivo — full-stack (2026-07-02)
+
+A feature principal do MVP pós-banca: professor fala → **legenda em tempo real** pros alunos.
+Detalhe completo em `../arquitetura/sala-ao-vivo.md`. Resumo:
+
+- **Schema:** `User.role` (PROFESSOR|ALUNO), `SchoolClass`+`ClassMember`, `LiveSession`
+  (joinToken, status LIVE|ENDED), `TranscriptSegment` (seq), `ChatMessage`.
+- **Gateway Socket.IO `/live` fino**: JWT no handshake, presença em `LiveRoomStateService`,
+  toda regra de negócio nos **usecases** (os mesmos da REST); acks `{ ok } | { ok:false, error }`.
+- **STT no browser do professor** (Web Speech API, custo zero de servidor): `transcript:partial`
+  (throttle 150ms, efêmero) + `transcript:final` (persiste). Chat + fila de mãos + encerramento.
+- API `2605434`+`b27bce4`; front `fd21a59`.
+- **Gotcha Brave (fix `7f43c22`):** erro `network` consecutivo no SpeechRecognition vira fatal
+  e avisa o professor (antes ficava em retry silencioso infinito).
+
+## 17. Decisão: adaptação semântica = LLM em camadas, NÃO ML próprio (2026-07-04)
+
+Resolve a lacuna "regras vs. OpenAI vs. ML" (§14) — o motor semântico do TCC é um **pipeline
+em camadas no backend**:
+
+1. **Camada 1 (FEITA):** regex de disfluências — remove vícios de fala ("ééé", "né", "tipo
+   assim"), gagueira e pontuação órfã. Conservadora (ambíguas ficam).
+2. **Camada 2 (A FAZER):** LLM rápido (Haiku/Gemini Flash) reescreve a frase final adaptada e
+   emite `transcript:adapted` (substitui na UI ~1s depois; toggle literal/adaptado).
+
+**ML próprio descartado:** não existe corpus PT→PT-adaptado-pra-surdos, não cabe no prazo; o
+prompt engineering da camada 2 vira a seção de metodologia do artigo, ML fica como trabalho
+futuro. Custo estimado: centavos por aula de 1h.
+
+**Mapa VLibras/avatares (mesma conversa):** não existe avatar 3D de Libras gratuito e maduro
+além do VLibras (Hand Talk/Rybená pagos, ProDeaf morto). Caminho recomendado: transcrição
+adaptada + **vídeos de sinais humanos** (Signbank UFSC, INES) pros conceitos-chave, VLibras
+**self-hosted** (é open source) como fallback — sinaliza o diferencial em vez de competir com
+a Hand Talk. (Mapa de memória até jan/2026; reconferir com busca web.)
+
+## 18. UI karaokê + correção arquitetural do filtro (2026-07-04)
+
+- **Legendas karaokê** na tela do aluno: linhas ≤7 palavras balanceadas (`captionLines.ts`),
+  linha corrente em destaque, scroll livre pra reler + "↓ Voltar ao vivo", A−/A+ persistido,
+  acessibilidade (`aria-live`, `prefers-reduced-motion`). Front `25b164d`.
+- **Correção do Cauê (regra de arquitetura):** o filtro de disfluências tinha nascido no front —
+  **regra de negócio nunca no cliente**. Movido pro `AppendTranscriptSegmentUseCase` (API
+  `9db4751`, front `31faa92`): texto canônico é limpo no backend; frase 100% ruído → `null`,
+  sem broadcast. De quebra corrigido bug da pontuação órfã ("né?" sobrava "?"). No front fica
+  só apresentação (quebra de linhas, palco).
+- Testes: API **138 jest**, front **91 vitest** verdes.
+
+## 14→ Lacunas / perguntas em aberto (revisado 2026-07-04)
+
+- ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: LLM em camadas no backend).
+- ~~**Motor de adaptação semântica**~~ → **especificado** (§17 + `../arquitetura/sala-ao-vivo.md`);
+  falta implementar a camada 2.
 - **Integrantes da equipe:** nomes não informados ainda.
-- **Como vem o conteúdo do professor:** só texto colado? upload de arquivo (PDF/slide)? Material atual fala em texto.
-- **Biblioteca de sinais:** origem dos vídeos (gravados? banco existente? parceria com intérprete?) não definida.
-- **Motor de adaptação semântica:** algoritmo/abordagem concreta ainda não especificada (é o coração técnico do TCC).
+- **Como vem o conteúdo do professor:** a sala ao vivo respondeu o caso "aula falada" (STT);
+  adaptação de material estático (PDF/slide) segue em aberto.
+- **Biblioteca de sinais:** origem dos vídeos (Signbank UFSC/INES apontados no §17, mas
+  integração não desenhada).
 - Pendências de entrega do INOVA: pitch, vídeo do protótipo, canvas em PDF.
 
 ---

@@ -32,13 +32,21 @@ src/
 │   │   ├── dtos/  entities/  repositories/  usecases/
 │   │   ├── auth.controller.ts + .spec.ts
 │   │   └── auth.module.ts
-│   └── games/                # feature gated (treino datilologia + ranking)
-│       ├── dtos/  entities/  repositories/  usecases/
-│       ├── games.controller.ts + .spec.ts
-│       └── games.module.ts
-└── shared/
-    ├── filters/   guards/   decorators/
+│   ├── games/                # feature gated (treino datilologia + ranking)
+│   │   ├── dtos/  entities/  repositories/  usecases/
+│   │   ├── games.controller.ts + .spec.ts
+│   │   └── games.module.ts
+│   ├── classes/              # turmas (professor cria, aluno entra)
+│   ├── sessions/             # sessões ao vivo, transcript, chat (usecases compartilhados REST+socket)
+│   └── live/                 # gateway Socket.IO /live (fino, delega pros usecases de sessions)
+├── shared/
+│   ├── filters/   guards/   decorators/   enums/
+└── health/
 ```
+
+> **Evolução 2026-07-02/04:** sala de aula ao vivo (roles PROFESSOR/ALUNO, turmas, sessões,
+> transcript com filtro de disfluências no usecase, chat, fila de mãos) — arquitetura e
+> protocolo em [`../arquitetura/sala-ao-vivo.md`](../arquitetura/sala-ao-vivo.md).
 
 ## Modelo de dados (futureproof)
 
