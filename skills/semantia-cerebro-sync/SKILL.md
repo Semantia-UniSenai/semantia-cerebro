@@ -36,7 +36,7 @@ que chegar depois, **registra**.
 
 ## Onde fica o cérebro
 
-- Local: `/home/foyth/senai/semantia-cerebro`
+- Local: `/home/foyth/semantia/semantia-cerebro`
 - Remoto: `github.com/Semantia-UniSenai/semantia-cerebro` (privado) · branch **`main`**
 
 Estrutura (crie subpastas novas quando fizer sentido):
@@ -81,7 +81,7 @@ Tokens, chaves e credenciais (ex.: Trello, GitHub) ficam **fora** do repositóri
 Após registrar, **commit + push** no `semantia-cerebro` (`main`):
 
 ```bash
-cd /home/foyth/senai/semantia-cerebro
+cd /home/foyth/semantia/semantia-cerebro
 git add -A
 git -c user.name="CaueFoyth" -c user.email="foythcaue@gmail.com" \
   commit -m "docs: <resumo curto da atualização do cérebro>"

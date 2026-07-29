@@ -4,6 +4,11 @@
 > **2026-07-04**. Ver decisões em `../contexto/historico-e-decisoes.md` e a base do backend em
 > `../projeto/Arquitetura-Backend.md`.
 
+> **Status de produto (2026-07-29):** este documento descreve fielmente a fundação implementada,
+> mas o enquadramento restrito a professor/aluno/turma foi substituído por salas genéricas de
+> comunicação acessível. A migração e o backlog atual estão em
+> [`../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md`](../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md).
+
 ## O que é
 
 O professor abre uma **sessão ao vivo** de uma turma e fala normalmente; a fala vira **legenda

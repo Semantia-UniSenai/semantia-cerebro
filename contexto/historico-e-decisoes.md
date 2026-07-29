@@ -242,6 +242,29 @@ a Hand Talk. (Mapa de memória até jan/2026; reconferir com busca web.)
   só apresentação (quebra de linhas, palco).
 - Testes: API **138 jest**, front **91 vitest** verdes.
 
+## 19. Transcrição acessível vira o núcleo abrangente do produto (2026-07-29)
+
+Depois da validação do MVP anterior, o Semantia deixa de ser pensado apenas como sala de aula
+e passa a ser uma plataforma de **comunicação acessível em tempo real** para escolas, empresas,
+palestras, eventos e comunidade. O objetivo é permitir que uma pessoa ouvinte que não sabe
+Libras fale normalmente e uma pessoa surda acompanhe a comunicação pela transcrição.
+
+**Prioridade absoluta:** concluir o pipeline
+`áudio → STT → limpeza de disfluências → agente especializado → legenda karaokê`.
+Chat, mãos levantadas, mídia de conferência, moderação, VLibras, análise sentimental e as
+ferramentas educativas permanecem desejáveis, mas não bloqueiam o núcleo.
+
+O anfitrião configura o contexto da plateia antes da sessão (tipo de encontro, faixa etária,
+familiaridade com português escrito, domínio e nível de simplificação). Cada participante pode
+escolher transcrição literal ou adaptada e mudar sua preferência durante a reunião. O agente de
+IA é consumido por token no backend e adapta o texto limpo sem alterar fatos; falha da IA deve
+manter o modo literal disponível.
+
+A implementação atual de `PROFESSOR`, `ALUNO`, `SchoolClass`, `ClassMember`, turma e aula é uma
+fundação técnica a ser generalizada, não o contrato final. O backlog macro e os cards prontos
+para Trello foram registrados em
+[`../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md`](../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md).
+
 ## 14→ Lacunas / perguntas em aberto (revisado 2026-07-04)
 
 - ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: LLM em camadas no backend).
