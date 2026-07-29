@@ -261,9 +261,14 @@ IA é consumido por token no backend e adapta o texto limpo sem alterar fatos; f
 manter o modo literal disponível.
 
 A implementação atual de `PROFESSOR`, `ALUNO`, `SchoolClass`, `ClassMember`, turma e aula é uma
-fundação técnica a ser generalizada, não o contrato final. O backlog macro e os cards prontos
-para Trello foram registrados em
+fundação técnica a ser generalizada, não o contrato final. O backlog macro foi registrado em
 [`../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md`](../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md).
+
+Em **2026-07-29**, as 18 entregas desse backlog foram cadastradas como tasks no ClickUp, todas
+em `PENDENTE`, atribuídas ao Cauê, com prioridade e etiqueta de tipo. O cadastro foi validado
+task a task no Brave após recarga; o board passou a exibir 24 pendências, somando 6 itens
+anteriores e 18 novos. IDs, links e o gate de verificação estão em
+[`../planejamento/2026-07-29-registro-tasks-clickup-mvp-transcricao.md`](../planejamento/2026-07-29-registro-tasks-clickup-mvp-transcricao.md).
 
 ## 14→ Lacunas / perguntas em aberto (revisado 2026-07-04)
 

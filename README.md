@@ -33,6 +33,11 @@ contexto/       Histórico de desenvolvimento, decisões e gotchas (vivo)
 planejamento/   Backlogs, planos e divisão de entregas do produto
 ```
 
+## Planejamento atual
+
+- [Backlog do MVP de transcrição em tempo real](planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md).
+- [Registro das 18 tasks cadastradas no ClickUp](planejamento/2026-07-29-registro-tasks-clickup-mvp-transcricao.md).
+
 ## Repositórios do Semantia (org `Semantia-UniSenai`)
 
 - **semantia-web** — front-end da plataforma (Vue 3 + Vite).
