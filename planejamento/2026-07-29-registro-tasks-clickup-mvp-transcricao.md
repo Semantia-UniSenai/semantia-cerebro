@@ -17,7 +17,7 @@
 - **Distribuição de prioridade:** 11 Urgente (P0), 6 Alta (P1) e 1 Normal (P2).
 - **Total exibido em PENDENTE após o cadastro:** 24 (6 tarefas anteriores + 18 do novo backlog).
 - **Verificação final:** 2026-07-29T14:46:37-03:00.
-- **Auditoria do Card 01 em execução:** 2026-07-29T21:12:26-03:00.
+- **Última auditoria do Card 01:** 2026-07-29T21:23:00-03:00.
 
 ## Convenção usada no ClickUp
 
@@ -32,7 +32,7 @@
 
 | # | Task | Prioridade | Etiqueta | Status | Link |
 |---:|---|---|---|---|---|
-| 01 | Consolidar o novo escopo do produto e higienizar o backlog | Urgente | documentação, negócio, pesquisa/tcc | EM PROGRESSO | [86e2j4gtn](https://app.clickup.com/t/90171419563/86e2j4gtn) |
+| 01 | Consolidar o novo escopo do produto e higienizar o backlog | Urgente | documentação, negócio, pesquisa/tcc | EM REVISÃO | [86e2j4gtn](https://app.clickup.com/t/90171419563/86e2j4gtn) |
 | 02 | Generalizar o domínio de aula para salas de comunicação | Urgente | refatoração | PENDENTE | [86e2j4qky](https://app.clickup.com/t/90171419563/86e2j4qky) |
 | 03 | Fechar a experiência UX/UI acessível das salas ao vivo | Urgente | melhoria | PENDENTE | [86e2j4uyj](https://app.clickup.com/t/90171419563/86e2j4uyj) |
 | 04 | Implementar a configuração de contexto e nível da plateia | Urgente | nova funcionalidade | PENDENTE | [86e2j4vuj](https://app.clickup.com/t/90171419563/86e2j4vuj) |
@@ -65,10 +65,17 @@ Cada task foi aberta individualmente no Brave pelo próprio URL e recarregada an
 
 O arquivo de auditoria da execução confirmou 18 IDs únicos e todos os sete checks verdadeiros para as 18 tasks. Ao final, o navegador retornou ao board e o ClickUp exibiu `PENDENTE = 24`.
 
-Em 2026-07-29T21:12:26-03:00, o Card 01 foi reaberto e confirmou: status `EM PROGRESSO`,
-responsável Cauê Marchi Foyth, prioridade `Urgente` e as três flags exigidas — `documentação`,
-`negócio` e `pesquisa/tcc`. Os demais 17 cards permanecem com responsável, prioridade e etiqueta
-de tipo conforme o gate inicial.
+Em 2026-07-29T21:23:00-03:00, o Card 01 foi recarregado e confirmou: status `EM REVISÃO`,
+responsável Cauê Marchi Foyth, prioridade `Urgente`, as três flags exigidas — `documentação`,
+`negócio` e `pesquisa/tcc` — e descrição persistida com as decisões e os três PRs. Os demais 17
+cards permanecem com responsável, prioridade e etiqueta de tipo conforme o gate inicial.
+
+Branches e revisão do Card 01:
+
+- `docs/novo-escopo-transcricao`;
+- [PR do cérebro #1](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/1);
+- [PR da API #3](https://github.com/Semantia-UniSenai/semantia-api/pull/3);
+- [PR do frontend #3](https://github.com/Semantia-UniSenai/semantia-web/pull/3).
 
 ## Observação operacional
 
