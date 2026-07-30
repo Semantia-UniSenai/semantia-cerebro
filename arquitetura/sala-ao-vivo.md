@@ -14,23 +14,40 @@
 | Área | Validado na branch de generalização | Ainda planejado |
 |---|---|---|
 | Papéis | `HOST`, `MODERATOR`, `PARTICIPANT` e `GUEST`, todos contextuais | separar comunicador do anfitrião quando houver necessidade comprovada |
-| Agregado | `Room`, `RoomMember`, `RoomSession` e `SessionParticipant` | contexto detalhado e versionado da plateia |
+| Agregado | `Room` como reunião do produto; `RoomSession` e `SessionParticipant` como persistência interna | contexto detalhado e versionado da plateia |
 | Entrada | JWT para conta; `joinToken` + token efêmero para convidado | revogação administrativa antes do encerramento e rate limit |
 | Transcript | uma versão literal limpa e persistida | literal + adaptada por segmento |
-| Retenção | sessão encerrada somente leitura, sem expiração automática | exclusão antecipada e automática em 30 dias |
+| Retenção | reunião encerrada somente leitura, sem expiração automática | exclusão antecipada e automática em 30 dias |
 | Capacidade | jornada multiator funcional | carga e reconexão comprovadas para 25/50 conexões |
 | Duração | ciclo explícito sem limite automático | limite de até 4 horas |
 
 Código validado na branch não deve ser descrito como já integrado em `dev`; da mesma forma, itens
 planejados não devem ser anunciados como entregues.
 
+## Decisão de produto: reunião instantânea
+
+Para o MVP, **`Room` é a reunião percebida pelo usuário**. A jornada segue o modelo do Google Meet:
+um clique em **Nova reunião** executa uma criação transacional, gera o convite e entrega a
+experiência já ao vivo. Não existem no contrato de UX:
+
+- criação manual de ocorrência;
+- estado ou tela de preparação;
+- ação separada para iniciar;
+- painel de configuração antes da entrada;
+- histórico de sessões dentro de uma sala.
+
+`RoomSession` permanece no schema como um registro técnico interno para preservar participantes,
+transcript, chat e os dados migrados. Toda nova `Room` criada pelo fluxo atual recebe exatamente
+uma ocorrência interna já em `LIVE`. Registros históricos migrados podem preservar ocorrências
+anteriores sem reintroduzir esse modelo na interface.
+
 ## Modelo validado
 
 - `User`: identidade autenticada sem papel global de produto.
-- `Room`: nome, anfitrião (`hostId`), código de convite e timestamps.
+- `Room`: reunião do produto, com nome, anfitrião (`hostId`), código legado e timestamps.
 - `RoomMember`: associação persistente com papel `MODERATOR` ou `PARTICIPANT`.
-- `RoomSession`: vínculo obrigatório com a sala, título, `joinToken`, estado e horários.
-- `SessionParticipant`: identidade autenticada ou convidada restrita à sessão.
+- `RoomSession`: ocorrência interna obrigatória, criada já `LIVE`, com `joinToken`, estado e horários.
+- `SessionParticipant`: identidade autenticada ou convidada restrita à reunião.
 - `TranscriptSegment`: `sessionId`, sequência estável, texto literal e data.
 - `ChatMessage`: sessão, identidade contextual, texto e data.
 - `Score`: datilologia/ranking, fora do núcleo atual.
@@ -43,32 +60,34 @@ membros persistentes.
 
 | Operação | Host | Moderator | Participant | Guest |
 |---|---:|---:|---:|---:|
-| configurar e renomear sala | sim | sim | não | não |
+| abrir reunião instantânea | sim | não | não | não |
+| configurar e renomear durante a reunião | sim | sim | não | não |
 | administrar membros | sim | sim, dentro do contrato autorizado | não | não |
-| preparar, iniciar e encerrar sessão | sim | sim | não | não |
-| acessar sessão em `PREPARING` | sim | sim | não | não |
-| entrar em sessão `LIVE` autorizada | sim | sim | sim | sim, por token efêmero |
+| encerrar reunião | sim | sim | não | não |
+| entrar em reunião `LIVE` autorizada | sim | sim | sim | sim, por token efêmero |
 | consultar conteúdo após `ENDED` | sim | sim | sim, se associado | sim, enquanto o token for válido |
 | enviar chat/transcript após `ENDED` | não | não | não | não |
 | receber `joinToken` reutilizável | sim | sim | não | não |
 
 Detalhes, listagens e snapshots removem o `joinToken` para quem não possui `canManage`. O token
-efêmero do convidado carrega identidade e sessão específicas e não funciona em outra sessão.
+efêmero do convidado carrega identidade e reunião específicas e não funciona em outra reunião.
 
 ## Ciclo de vida
 
 ```text
-PREPARING ── start ──▶ LIVE ── end ──▶ ENDED
-    │                    │                │
-    │ host/moderator     │ acesso válido  └─ leitura de transcript/chat
-    └─ plateia bloqueada └─ mutações habilitadas
+POST /rooms ── transação ──▶ Room + ocorrência interna LIVE ── end ──▶ ENDED
+                                      │                               │
+                                      │ acesso por link               └─ leitura de transcript/chat
+                                      └─ mutações habilitadas
 ```
 
-- criação produz `PREPARING` por padrão;
-- apenas anfitrião ou moderador inicia e encerra;
+- criação produz `LIVE` e `startedAt` na mesma transação que cria a `Room`;
+- não há endpoint público para criar/listar ocorrência ou iniciá-la manualmente;
+- apenas anfitrião ou moderador encerra;
 - encerramento é idempotente;
 - chat, transcript e ações ao vivo recusam mutações depois de `ENDED`;
 - conteúdo persistido continua consultável conforme a política de retenção vigente.
+- `PREPARING` permanece apenas para compatibilidade da migration e não faz parte da jornada ativa.
 
 ## Migração preservadora
 
@@ -92,9 +111,10 @@ A prova foi executada em PostgreSQL 16 por dois caminhos:
 
 ## API REST e OpenAPI
 
-O contrato público usa `/api/rooms`, `/api/rooms/:roomId/sessions`, `/api/sessions` e operações de
-membros, convidados, transcript e ciclo de vida. Swagger foi gerado a partir da API real com 19
-paths e 22 operações; o cliente frontend foi regenerado pelo Orval.
+O contrato público usa `POST /api/rooms` para abrir a reunião instantânea e `/api/sessions`
+internamente para convite, snapshot, transcript e encerramento. As rotas públicas de criar/listar
+ocorrências e iniciar manualmente foram removidas. Swagger foi gerado a partir da API real com 17
+paths e 19 operações; o cliente frontend foi recapturado e regenerado pelo fluxo `pnpm api:sync`.
 
 As jornadas ativas não expõem `/classes`, `/turmas` ou `/aula`. Compatibilidade com o domínio
 escolar acontece pela migration dos dados, não pela manutenção indefinida de dois contratos
@@ -166,14 +186,16 @@ Em 2026-07-30, na branch de generalização:
 - PR API: [Semantia-UniSenai/semantia-api#4](https://github.com/Semantia-UniSenai/semantia-api/pull/4);
 - PR web: [Semantia-UniSenai/semantia-web#4](https://github.com/Semantia-UniSenai/semantia-web/pull/4);
 
-- API: 15 suites e 66 testes unitários, lint e build aprovados;
+- API: 15 suites e 61 testes unitários, lint, build e Prisma aprovados;
 - E2E multiator aprovado contra PostgreSQL 16;
 - migration limpa e migration com dados legados aprovadas;
 - OpenAPI/Orval sincronizados;
-- frontend: 10 arquivos e 63 testes, além do build, aprovados;
+- frontend: 13 arquivos e 68 testes, além do build, aprovados;
 - audit de produção sem vulnerabilidades altas; web sem advisories e API com 3 moderadas;
-- jornada real em Brave/Chromium aprovada em desktop e 390 px: cadastro, criação de sala,
-  preparação, início, Socket.IO/chat, encerramento e leitura posterior;
+- jornada anterior de preparação foi rejeitada na revisão de produto e removida. O QA final em
+  Brave/Chromium provou em 1440×900 e 390×844: cadastro, **Nova reunião** em um clique, entrada ao
+  vivo, convite `/convite/reuniao/:token`, Socket.IO/chat, encerramento, leitura posterior e card
+  recente ligado diretamente à reunião; a abertura observada no ambiente local levou 162 ms;
 - QA visual não encontrou overflow, clipping ou hierarquia quebrada nas telas críticas.
 
 Essas evidências provam o Card 02 na branch. Não provam os requisitos ainda planejados de IA,

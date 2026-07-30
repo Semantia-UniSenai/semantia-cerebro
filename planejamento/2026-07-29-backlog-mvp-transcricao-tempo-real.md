@@ -107,7 +107,8 @@ O schema atual possui `Role.PROFESSOR/ALUNO`, `SchoolClass`, `ClassMember`, `tea
 ### Fluxo sugerido
 
 1. Definir entidades, papéis, estados e permissões da sala genérica.
-2. Permitir que o anfitrião crie uma sala em preparação, configure-a, inicie e encerre a sessão.
+2. Permitir que o anfitrião abra uma reunião instantânea em um clique, já ao vivo e com link/token
+   gerado, sem preparação ou início manual.
 3. Manter convite seguro e entrada de participantes conforme a política de autenticação definida no Card 01.
 4. Migrar modelos, DTOs, use cases, endpoints REST, eventos Socket.IO e tipos do front.
 5. Atualizar rotas, telas e textos para os novos conceitos.
@@ -118,14 +119,15 @@ O schema atual possui `Role.PROFESSOR/ALUNO`, `SchoolClass`, `ClassMember`, `tea
 
 - Somente o anfitrião ou moderador autorizado gerencia e encerra a sala.
 - Participante acessa apenas salas para as quais possui autorização ou convite válido.
-- Sala encerrada é somente leitura, conforme a política de retenção.
+- Reunião encerrada é somente leitura, conforme a política de retenção.
+- Sala e reunião são o mesmo conceito na UX do MVP; `RoomSession` é apenas persistência interna.
 - O histórico existente não pode ser perdido pela migração.
 - Papéis globais de cadastro não devem conceder livremente privilégios de anfitrião sem regra explícita.
 
 ### Validações necessárias
 
-- Testes unitários de permissões e transições de estado.
-- Testes E2E para criar, configurar, iniciar, entrar, sair e encerrar uma sala.
+- Testes unitários da criação transacional e permissões contextuais.
+- Testes E2E para abrir em um clique, receber convite, entrar, sair e encerrar a reunião.
 - Migration aplicada sobre banco descartável com dados no formato atual.
 - Rotas, Swagger/orval e Socket.IO sincronizados.
 - Busca textual sem termos educacionais ativos nas jornadas genéricas, exceto conteúdo histórico ou contexto escolhido como “sala de aula”.
@@ -149,10 +151,15 @@ Não renomear apenas a interface. O contrato de domínio, banco, autorização e
 - Migration aprovada na cadeia limpa e em fixture educacional com salas, vínculo, sessões,
   transcript e chat preservados.
 - Audit de produção sem vulnerabilidades altas; web sem advisories e API com 3 moderadas.
-- Swagger com 19 paths/22 operações e cliente Orval regenerado.
-- 10 arquivos/63 testes do frontend e build aprovados.
-- Jornada real em Brave/Chromium aprovada em desktop e mobile: cadastro sem papel global, criação,
-  preparação, início, chat, encerramento e leitura pós-sessão.
+- Swagger simplificado para 17 paths/19 operações e cliente Orval recapturado/regenerado.
+- API cria `Room` + ocorrência interna `LIVE` atomicamente e remove criação/início manual.
+- Frontend remove a tela de configuração mostrada na revisão de produto e abre a reunião ao vivo
+  diretamente pela home ou listagem.
+- API: 15 suites/61 testes unitários, lint, build, Prisma e E2E PostgreSQL/Socket.IO aprovados.
+- Frontend: 13 arquivos/68 testes, build e audit aprovados.
+- QA Brave/Chromium em 1440×900 e 390×844: um clique abriu a reunião já ao vivo em 162 ms no
+  ambiente local, o link `/convite/reuniao/:token` foi validado e o card recente apontou diretamente
+  para a reunião encerrada.
 
 ### Gestão do card
 
@@ -175,7 +182,8 @@ A UI atual comprova o fluxo escolar, mas o novo produto exige configuração de 
 
 ### Fluxo sugerido
 
-1. Mapear a jornada do anfitrião: criar sala, configurar público, compartilhar convite, iniciar, transcrever, acompanhar estado e encerrar.
+1. Mapear a jornada do anfitrião: clicar em **Nova reunião**, entrar imediatamente, compartilhar o
+   convite, configurar opções dentro da reunião quando necessário, transcrever e encerrar.
 2. Mapear a jornada do participante: entrar, configurar transcrição, acompanhar a legenda, alterar preferências e sair.
 3. Desenhar wireframes e protótipos de alta fidelidade para desktop, tablet e mobile.
 4. Especificar estados de carregamento, permissão negada, navegador incompatível, reconexão, IA indisponível, sala encerrada e transcript vazio.
@@ -236,16 +244,18 @@ A mesma fala exige vocabulário e estrutura diferentes em uma turma infantil, re
 3. Criar formulário acessível com explicação e exemplos para cada parâmetro.
 4. Validar e persistir a configuração no backend.
 5. Expor o contexto no snapshot da sala e no contrato interno do agente.
-6. Bloquear alterações estruturais depois que a sessão for iniciada, mantendo consistência para todos os segmentos.
-7. Exibir resumo da configuração ao anfitrião antes de iniciar.
+6. Versionar alterações de contexto feitas durante a reunião e aplicá-las somente aos segmentos
+   seguintes, mantendo o histórico coerente.
+7. Exibir o resumo no próprio ambiente ao vivo, sem criar uma etapa bloqueante anterior.
 
 ### Regras de negócio
 
 - Somente o anfitrião configura o contexto da sala.
-- Configuração deve ser concluída antes do estado ao vivo.
+- Configuração não bloqueia a abertura instantânea; valores padrão seguros mantêm a transcrição
+  disponível até o anfitrião ajustar o contexto.
 - O sistema não deve rotular pessoas como “baixo nível”; os campos descrevem necessidades de comunicação.
 - O contexto orienta a adaptação, mas não autoriza omitir fatos ou alterar o sentido da fala.
-- Valores usados pelo agente devem ser versionados junto à sessão.
+- Valores usados pelo agente devem ser versionados junto à reunião e ao intervalo de segmentos.
 
 ### Validações necessárias
 
