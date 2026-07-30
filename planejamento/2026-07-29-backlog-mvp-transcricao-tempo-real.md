@@ -140,7 +140,7 @@ Não renomear apenas a interface. O contrato de domínio, banco, autorização e
 - Card ClickUp: [86e2j4qky](https://app.clickup.com/t/90171419563/86e2j4qky).
 - PR API: [Semantia-UniSenai/semantia-api#4](https://github.com/Semantia-UniSenai/semantia-api/pull/4).
 - PR web: [Semantia-UniSenai/semantia-web#4](https://github.com/Semantia-UniSenai/semantia-web/pull/4).
-- PR cérebro: será aberto a partir desta sincronização documental.
+- PR cérebro: [Semantia-UniSenai/semantia-cerebro#2](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/2).
 
 ### Evidências de validação em 2026-07-30
 
