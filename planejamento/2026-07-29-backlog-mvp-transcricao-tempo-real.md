@@ -1,6 +1,6 @@
 # Backlog macro — MVP de transcrição acessível em tempo real
 
-> Criado em 2026-07-29 a partir do direcionamento do produto, do estado real das branches `dev` de `semantia-api` e `semantia-web` e da auditoria do board Trello **Semantia**.
+> Criado em 2026-07-29 a partir do direcionamento do produto, do estado real das branches `dev` de `semantia-api` e `semantia-web` e da auditoria histórica do Trello. A operação vigente ocorre exclusivamente no ClickUp.
 
 ## Objetivo do backlog
 
@@ -19,18 +19,18 @@ Chat, mãos levantadas, áudio/vídeo de conferência, moderação, VLibras, an�
 - A camada de adaptação por LLM está documentada, porém não implementada.
 - Preferências individuais de transcrição, contexto da plateia, sentimento, intérprete configurável, câmera, mídia de conferência e remoção de participantes ainda não existem.
 - A produção publicada permanece legada em relação às branches `dev`.
-- O board possui 38 cards antigos, todos no Backlog e sem responsáveis. Vários descrevem um estado de junho que já não é verdadeiro, como API vazia e front sem rotas.
+- A auditoria histórica encontrou 38 cards antigos no Trello. O backlog operacional vigente foi consolidado no ClickUp e não deve ser duplicado no Trello.
 
 ## Convenções para os cards
 
 - **Responsável sugerido de desenvolvimento:** `@foythcaue`.
 - **Revisores sugeridos para produto/TCC:** `@carlakeitemachado2` e `@emersonamancio1`, conforme disponibilidade e responsabilidade real da equipe.
-- O responsável sugerido deve ser substituído no Trello se outra pessoa assumir o item; nenhum card pode ficar sem membro.
+- O responsável sugerido deve ser substituído no ClickUp se outra pessoa assumir o item; nenhum card pode ficar sem responsável.
 - Usar as flags já existentes no board: `Front`, `Back`, `Motor/IA`, `Design/UX`, `Acessibilidade`, `Infra`, `Auth`, `Documentação`, `Negócio`, `Pesquisa/TCC`, `Tradutor/VLibras` e `Ferramentas`.
-- O board ainda não possui flags de prioridade. Criar e usar: `P0 — Crítica`, `P1 — Alta`, `P2 — Média` e `P3 — Baixa`.
-- Atualizar descrição, discussões, evidências, branch e PR durante o trabalho; mover o card por `A fazer → Fazendo → Revisão → Em Teste → Feito`.
+- O ClickUp usa as prioridades `P0 — Crítica`, `P1 — Alta`, `P2 — Média` e `P3 — Baixa`.
+- Atualizar descrição, discussões, evidências, branch e PR no ClickUp durante o trabalho; mover o card conforme o workflow vigente.
 - Não mover para `Feito` sem validação executada e registrada no card.
-- Branches sugeridas abaixo ainda **não existem**. O campo deve ser atualizado quando o desenvolvimento começar.
+- Branches sugeridas são planejamento; cada card deve registrar a branch real assim que o desenvolvimento começar.
 
 ---
 
@@ -94,6 +94,8 @@ Resolver neste card as decisões que mudam contratos posteriores, especialmente 
 
 ## Card 02 — Generalizar o domínio de aula para salas de comunicação
 
+**Status em 2026-07-30:** EM REVISÃO, sem merge automático.
+
 ### Objetivo
 
 Substituir o contrato centrado em professor, aluno, turma e aula por um domínio genérico de salas ao vivo, preservando os dados e fluxos úteis já implementados.
@@ -134,10 +136,23 @@ Não renomear apenas a interface. O contrato de domínio, banco, autorização e
 
 ### Alterações
 
-- Branch: não criada.
-- Branch sugerida API: `feat/salas-comunicacao`.
-- Branch sugerida web: `feat/salas-comunicacao`.
-- PR: não aberto.
+- Branch cérebro, API e web: `feat/salas-comunicacao`, empilhada sobre `docs/novo-escopo-transcricao`.
+- Card ClickUp: [86e2j4qky](https://app.clickup.com/t/90171419563/86e2j4qky).
+- PR API: [Semantia-UniSenai/semantia-api#4](https://github.com/Semantia-UniSenai/semantia-api/pull/4).
+- PR web: [Semantia-UniSenai/semantia-web#4](https://github.com/Semantia-UniSenai/semantia-web/pull/4).
+- PR cérebro: será aberto a partir desta sincronização documental.
+
+### Evidências de validação em 2026-07-30
+
+- 15 suites/66 testes unitários da API, lint e build aprovados.
+- E2E multiator aprovado contra PostgreSQL 16 descartável.
+- Migration aprovada na cadeia limpa e em fixture educacional com salas, vínculo, sessões,
+  transcript e chat preservados.
+- Audit de produção sem vulnerabilidades altas; web sem advisories e API com 3 moderadas.
+- Swagger com 19 paths/22 operações e cliente Orval regenerado.
+- 10 arquivos/63 testes do frontend e build aprovados.
+- Jornada real em Brave/Chromium aprovada em desktop e mobile: cadastro sem papel global, criação,
+  preparação, início, chat, encerramento e leitura pós-sessão.
 
 ### Gestão do card
 

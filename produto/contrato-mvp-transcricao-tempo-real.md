@@ -1,7 +1,7 @@
 ---
 title: Contrato canônico do MVP de transcrição em tempo real
 status: canônico
-atualizado: 2026-07-29
+atualizado: 2026-07-30
 substitui: escopo educacional de adaptação de materiais estáticos
 ---
 
@@ -54,7 +54,8 @@ O fluxo prioritário é:
   legenda.
 - **Convidado:** participante que entra por link/token sem precisar criar conta.
 - **Plateia:** perfil coletivo de contexto configurado para a sessão; não é um papel de usuário.
-- **Moderador:** papel futuro para apoiar gestão e segurança; não bloqueia o núcleo do MVP.
+- **Moderador:** conta autenticada autorizada no contexto da sala para apoiar configuração,
+  gestão e encerramento, sem receber privilégios por papel global.
 
 O vocabulário detalhado e as substituições de termos legados estão em
 [`glossario.md`](./glossario.md).
@@ -69,9 +70,13 @@ O vocabulário detalhado e as substituições de termos legados estão em
 - O link/token concede acesso apenas à sala correspondente e pode ser revogado ao encerrar a
   sessão.
 
-**Estado atual:** a API e o frontend ainda exigem JWT de todos os participantes. O `joinToken` já
-existe, mas o ingresso realmente anônimo é **planejado**, não implementado. Essa diferença deve
-ser resolvida no card de generalização do domínio e protegida no card de privacidade.
+**Estado validado na branch `feat/salas-comunicacao`:** anfitriões e participantes persistentes
+usam JWT; convidados entram por `joinToken`, nome de exibição e token efêmero restrito à sessão.
+O `joinToken` reutilizável só é devolvido a anfitrião ou moderador. A entrega aguarda revisão e
+merge dos PRs empilhados antes de ser descrita como integrada em `dev`.
+
+PRs de implementação em revisão: [API #4](https://github.com/Semantia-UniSenai/semantia-api/pull/4)
+e [web #4](https://github.com/Semantia-UniSenai/semantia-web/pull/4). Nenhum merge foi realizado.
 
 ## Ciclo de vida, duração e retenção
 
@@ -137,9 +142,9 @@ Datilologia, ranking, dicionário, ferramentas gratuitas e demais funcionalidade
 - Não aplicar mudanças destrutivas às tabelas educacionais antes de uma migração de dados
   separada e validada.
 
-## Verdade implementada em 2026-07-29
+## Verdade validada em 2026-07-30
 
-### Implementado e reutilizável
+### Implementado e reutilizável em `dev`
 
 - autenticação JWT e PostgreSQL/Prisma;
 - sessões ao vivo com token, transcript e chat persistidos;
@@ -149,22 +154,31 @@ Datilologia, ranking, dicionário, ferramentas gratuitas e demais funcionalidade
 - palco de legenda karaokê literal;
 - datilologia/ranking e integração global do VLibras.
 
-### Planejado para o contrato atual
+### Validado na branch `feat/salas-comunicacao`, pendente de revisão
 
-- domínio e papéis genéricos;
-- ingresso de convidado sem conta;
+- domínio `Room`, `RoomMember` e `RoomSession` com papéis contextuais `HOST`, `MODERATOR`,
+  `PARTICIPANT` e `GUEST`;
+- ingresso de convidado sem conta por identidade e token efêmeros restritos à sessão;
+- ciclo `PREPARING → LIVE → ENDED`, gestão contextual e modo somente leitura após encerramento;
+- migration preservadora de salas, membros, sessões, transcripts e chats legados;
+- REST, Swagger/OpenAPI, cliente Orval, Socket.IO, rotas e telas sincronizados;
+- jornada real em Brave/Chromium validada em desktop e mobile.
+
+### Planejado para o contrato atual após a generalização
+
 - contexto da plateia;
 - versões literal e adaptada do mesmo segmento;
 - agente especializado e fallback medido;
 - retenção/exclusão e limites de sessão;
-- moderação genérica e validação de capacidade.
+- validação de capacidade e endurecimento de produção.
 
 ### Legado explícito
 
 `PROFESSOR`, `ALUNO`, `SchoolClass`, `ClassMember`, `teacherId`, `/turmas` e `/aula` representam a
-fundação educacional implementada. Permanecem no código até a migração, mas não são o contrato
-final. Documentos de junho sobre CRUD de material educacional, texto → glosas e API vazia são
-registros históricos, não o backlog vigente.
+fundação educacional integrada em `dev`. Na branch de generalização, o contrato ativo foi removido
+e uma migration converte os dados preservando IDs e relações. Documentos de junho sobre CRUD de
+material educacional, texto → glosas e API vazia continuam como registros históricos, não como
+backlog vigente.
 
 ## Documentos relacionados
 

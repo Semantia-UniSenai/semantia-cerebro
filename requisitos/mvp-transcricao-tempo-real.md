@@ -1,7 +1,7 @@
 ---
 title: Requisitos do MVP de transcrição em tempo real
 status: canônico
-atualizado: 2026-07-29
+atualizado: 2026-07-30
 ---
 
 # Requisitos do MVP de transcrição em tempo real
@@ -9,6 +9,8 @@ atualizado: 2026-07-29
 ## Legenda de estado
 
 - **IMPLEMENTADO:** comprovado no código integrado em `dev` em 2026-07-29.
+- **VALIDADO NA BRANCH:** implementado e comprovado em `feat/salas-comunicacao`, mas ainda depende
+  de revisão e merge dos PRs empilhados.
 - **PARCIAL:** existe uma fundação reutilizável, mas o contrato atual ainda não está completo.
 - **PLANEJADO:** requisito ativo ainda não implementado.
 - **LEGADO:** existe no sistema ou em documentos antigos, mas será migrado ou mantido fora do
@@ -18,11 +20,11 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 
 ## Requisitos funcionais
 
-| ID | Requisito | Prioridade | Estado em 2026-07-29 | Evidência ou lacuna |
+| ID | Requisito | Prioridade | Estado em 2026-07-30 | Evidência ou lacuna |
 |---|---|---|---|---|
-| RF01 | Anfitrião cria conta, autentica-se e administra salas próprias. | P0 | PARCIAL | Auth JWT existe; autorização ainda usa `PROFESSOR`. |
-| RF02 | Anfitrião cria uma sessão e compartilha link/token revogável. | P0 | PARCIAL | Sessão e `joinToken` existem; domínio ainda é aula/turma. |
-| RF03 | Convidado entra pelo link com nome de exibição, sem conta. | P0 | PLANEJADO | Front e Socket.IO ainda exigem JWT. |
+| RF01 | Anfitrião cria conta, autentica-se e administra salas próprias. | P0 | VALIDADO NA BRANCH | Auth sem papel global e permissão contextual `HOST`/`MODERATOR`. |
+| RF02 | Anfitrião cria uma sessão e compartilha link/token revogável. | P0 | VALIDADO NA BRANCH | `RoomSession`, `joinToken` restrito a gestores e ciclo explícito. |
+| RF03 | Convidado entra pelo link com nome de exibição, sem conta. | P0 | VALIDADO NA BRANCH | REST e Socket.IO usam token efêmero limitado à sessão. |
 | RF04 | Anfitrião configura tipo do encontro, faixa etária, familiaridade com português, domínio e simplificação. | P0 | PLANEJADO | Não há modelo nem tela de contexto. |
 | RF05 | Navegador do comunicador captura fala e publica hipóteses parciais e finais. | P0 | IMPLEMENTADO | Web Speech API e eventos `transcript:partial/final`. |
 | RF06 | Backend limpa disfluências inequívocas apenas nos segmentos finais. | P0 | IMPLEMENTADO | `AppendTranscriptSegmentUseCase` e `stripDisfluencies`. |
@@ -33,7 +35,7 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 | RF11 | Legenda karaokê acompanha a fala, permite releitura e retorno ao vivo. | P0 | PARCIAL | Palco literal existe; falta integrar versão adaptada e preferências. |
 | RF12 | Anfitrião encerra a sessão sem duplicar efeitos. | P0 | IMPLEMENTADO | REST/Socket.IO usam encerramento idempotente. |
 | RF13 | Anfitrião consulta e exclui transcript/chat dentro da política de 30 dias. | P0 | PLANEJADO | Consulta existe; exclusão e expiração automática não. |
-| RF14 | Participantes usam chat e mãos levantadas com moderação genérica. | P1 | PARCIAL | Chat/mãos existem; papéis e moderação são escolares/limitados. |
+| RF14 | Participantes usam chat e mãos levantadas com moderação genérica. | P1 | VALIDADO NA BRANCH | Chat/mãos usam papéis contextuais; anfitrião e moderador gerenciam a sala. |
 | RF15 | Sala oferece áudio e vídeo de conferência sem confundir o microfone da transcrição. | P1 | PLANEJADO | Não há WebRTC/conferência. |
 | RF16 | Participante aciona VLibras como camada opcional na sala. | P1 | PARCIAL | Widget existe globalmente; integração da experiência ao vivo não validada. |
 | RF17 | Análise sentimental, quando ativada, mostra incerteza e nunca diagnostica pessoas. | P1 | PLANEJADO | Não existe no produto atual. |
@@ -48,8 +50,8 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 | RNF03 | Latência observável | PLANEJADO | Medir parcial, final limpo e adaptado; adaptação deve buscar p95 ≤ 2 s e cair para literal em até 3 s. |
 | RNF04 | Capacidade | PLANEJADO | Provar 25 participantes concorrentes; só anunciar alvo de 50 após teste de carga/reconexão. |
 | RNF05 | Duração da sessão | PLANEJADO | Suportar até 4 h sem reiniciar sequência nem perder ordem. |
-| RNF06 | Privacidade | PARCIAL | Não armazenar áudio; token restrito à sala; transcript/chat/metadados identificáveis expiram em 30 dias; logs técnicos sem conteúdo/identidade expiram ou são agregados após 90 dias. |
-| RNF07 | Segurança | PARCIAL | Hash de senha e JWT existem; faltam guest token restrito, rate limit e revisão de acesso pós-sessão. |
+| RNF06 | Privacidade | PARCIAL | Áudio não é armazenado e tokens ficam restritos à sessão; expiração de 30/90 dias ainda não foi implementada. |
+| RNF07 | Segurança | PARCIAL | Hash, JWT, guest token contextual e acesso pós-sessão somente leitura foram validados; rate limit ainda falta. |
 | RNF08 | Auditabilidade da IA | PLANEJADO | Registrar versão, latência e status da adaptação sem logar segredo ou transcript fora da política. |
 | RNF09 | Compatibilidade | PARCIAL | Mensagem explícita quando STT não for suportado; fluxo validado em Brave/Chrome e fallback documentado. |
 | RNF10 | Observabilidade | PLANEJADO | Métricas sem conteúdo sensível para conexão, reconexão, fila, latência, timeout e erro. |
@@ -154,8 +156,8 @@ Links individuais estão em
 
 ## Contradições conhecidas e tratamento
 
-- `PROFESSOR`/`ALUNO`, turmas e rotas `/aula` estão **implementados como legado**, não removidos.
-- O ingresso por convite ainda exige login, apesar do contrato de convidado sem conta.
+- `PROFESSOR`/`ALUNO`, turmas e rotas `/aula` continuam integrados em `dev`, mas foram removidos do
+  contrato ativo na branch de generalização e cobertos por migration preservadora.
 - Não existe agente de IA nem preferência adaptada.
 - Não existe expiração de transcript/chat/metadados nem política automática de 90 dias para logs técnicos.
 - Documentos do Desafio Interdisciplinar de junho são snapshots históricos e não descrevem o

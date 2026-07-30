@@ -1,39 +1,132 @@
-# Sala ao vivo — fundação implementada e arquitetura-alvo
+# Sala ao vivo — arquitetura do domínio genérico
 
-> **Status em 2026-07-29:** a sala educacional foi implementada e é uma fundação reutilizável.
-> O contrato vigente é uma sala genérica de comunicação acessível. Use este documento junto ao
+> **Status em 2026-07-30:** o contrato genérico foi implementado e validado na branch
+> `feat/salas-comunicacao`, empilhada sobre `docs/novo-escopo-transcricao`. Ainda depende de revisão
+> e merge dos PRs para ser considerado integrado em `dev`.
+>
+> Use este documento junto ao
 > [contrato canônico](../produto/contrato-mvp-transcricao-tempo-real.md), ao
 > [glossário](../produto/glossario.md) e aos
 > [requisitos atuais](../requisitos/mvp-transcricao-tempo-real.md).
 
 ## Fronteira entre realidade e alvo
 
-| Área | Implementado em `dev` | Contrato atual ainda planejado |
+| Área | Validado na branch de generalização | Ainda planejado |
 |---|---|---|
-| Papéis | `PROFESSOR` e `ALUNO` autenticados | anfitrião/comunicador e participante/convidado |
-| Agregado | `SchoolClass`/`ClassMember` | sala genérica sem dependência escolar |
-| Entrada | conta JWT + turma ou `joinToken` | convidado por link/token sem conta |
-| Transcript | uma versão literal limpa | literal + adaptada por segmento |
-| Contexto | título da sessão | perfil da plateia estável |
-| Retenção | persistência sem expiração | exclusão antecipada e automática em 30 dias |
-| Capacidade | não comprovada por carga | alvo de 50 conexões, condicionado a teste |
-| Duração | sem limite explícito | até 4 horas por sessão |
+| Papéis | `HOST`, `MODERATOR`, `PARTICIPANT` e `GUEST`, todos contextuais | separar comunicador do anfitrião quando houver necessidade comprovada |
+| Agregado | `Room`, `RoomMember`, `RoomSession` e `SessionParticipant` | contexto detalhado e versionado da plateia |
+| Entrada | JWT para conta; `joinToken` + token efêmero para convidado | revogação administrativa antes do encerramento e rate limit |
+| Transcript | uma versão literal limpa e persistida | literal + adaptada por segmento |
+| Retenção | sessão encerrada somente leitura, sem expiração automática | exclusão antecipada e automática em 30 dias |
+| Capacidade | jornada multiator funcional | carga e reconexão comprovadas para 25/50 conexões |
+| Duração | ciclo explícito sem limite automático | limite de até 4 horas |
 
-O código legado não deve ser descrito como inexistente, nem o alvo como já entregue.
+Código validado na branch não deve ser descrito como já integrado em `dev`; da mesma forma, itens
+planejados não devem ser anunciados como entregues.
 
-## Modelo implementado
+## Modelo validado
 
-- `User.role`: `PROFESSOR` ou `ALUNO`.
-- `SchoolClass` e `ClassMember`: turma e associação de alunos.
-- `LiveSession`: título, dono (`teacherId`), turma opcional, `joinToken`, status, início e fim.
-- `TranscriptSegment`: `sessionId`, sequência, texto literal e data.
-- `ChatMessage`: sessão, usuário, texto e data.
+- `User`: identidade autenticada sem papel global de produto.
+- `Room`: nome, anfitrião (`hostId`), código de convite e timestamps.
+- `RoomMember`: associação persistente com papel `MODERATOR` ou `PARTICIPANT`.
+- `RoomSession`: vínculo obrigatório com a sala, título, `joinToken`, estado e horários.
+- `SessionParticipant`: identidade autenticada ou convidada restrita à sessão.
+- `TranscriptSegment`: `sessionId`, sequência estável, texto literal e data.
+- `ChatMessage`: sessão, identidade contextual, texto e data.
 - `Score`: datilologia/ranking, fora do núcleo atual.
 
-A migração para sala genérica deve preservar dados históricos e ser tratada em migration
-separada. Renomear copy sem mudar permissões/modelo não conclui a generalização.
+O anfitrião é derivado de `Room.hostId`, não de uma função global no cadastro. Moderadores e
+participantes recebem permissões somente pela associação à sala. Convidados não são promovidos a
+membros persistentes.
 
-## Fluxo implementado da transcrição
+## Papéis e permissões
+
+| Operação | Host | Moderator | Participant | Guest |
+|---|---:|---:|---:|---:|
+| configurar e renomear sala | sim | sim | não | não |
+| administrar membros | sim | sim, dentro do contrato autorizado | não | não |
+| preparar, iniciar e encerrar sessão | sim | sim | não | não |
+| acessar sessão em `PREPARING` | sim | sim | não | não |
+| entrar em sessão `LIVE` autorizada | sim | sim | sim | sim, por token efêmero |
+| consultar conteúdo após `ENDED` | sim | sim | sim, se associado | sim, enquanto o token for válido |
+| enviar chat/transcript após `ENDED` | não | não | não | não |
+| receber `joinToken` reutilizável | sim | sim | não | não |
+
+Detalhes, listagens e snapshots removem o `joinToken` para quem não possui `canManage`. O token
+efêmero do convidado carrega identidade e sessão específicas e não funciona em outra sessão.
+
+## Ciclo de vida
+
+```text
+PREPARING ── start ──▶ LIVE ── end ──▶ ENDED
+    │                    │                │
+    │ host/moderator     │ acesso válido  └─ leitura de transcript/chat
+    └─ plateia bloqueada └─ mutações habilitadas
+```
+
+- criação produz `PREPARING` por padrão;
+- apenas anfitrião ou moderador inicia e encerra;
+- encerramento é idempotente;
+- chat, transcript e ações ao vivo recusam mutações depois de `ENDED`;
+- conteúdo persistido continua consultável conforme a política de retenção vigente.
+
+## Migração preservadora
+
+A migration `20260730090000_generalize_communication_rooms`:
+
+1. acrescenta os novos valores de estado e torna `PREPARING` o default;
+2. converte `school_classes` em `rooms`, preservando IDs, criador e timestamps;
+3. converte `class_members` em `room_members`;
+4. converte `live_sessions` em `room_sessions` e troca `classId` por `roomId`;
+5. cria salas de fallback determinísticas para sessões antigas sem turma;
+6. cria identidades contextuais para sessões e chats existentes;
+7. mantém as chaves de `transcript_segments` e `chat_messages` ligadas às sessões renomeadas;
+8. remove `User.role` e os enums escolares apenas depois da conversão.
+
+A prova foi executada em PostgreSQL 16 por dois caminhos:
+
+- cadeia completa em banco vazio via `prisma migrate deploy`;
+- schema educacional anterior + fixture contendo turma, vínculo, duas sessões — uma sem turma —,
+  transcript e chat, seguido da migration e de assertivas SQL de cardinalidade, IDs, relações,
+  papéis e default de estado.
+
+## API REST e OpenAPI
+
+O contrato público usa `/api/rooms`, `/api/rooms/:roomId/sessions`, `/api/sessions` e operações de
+membros, convidados, transcript e ciclo de vida. Swagger foi gerado a partir da API real com 19
+paths e 22 operações; o cliente frontend foi regenerado pelo Orval.
+
+As jornadas ativas não expõem `/classes`, `/turmas` ou `/aula`. Compatibilidade com o domínio
+escolar acontece pela migration dos dados, não pela manutenção indefinida de dois contratos
+públicos concorrentes.
+
+## Protocolo Socket.IO
+
+Namespace `/live`, room `session:<id>` e handshake por uma das identidades:
+
+- JWT autenticado;
+- `guestToken` efêmero emitido para a sessão.
+
+Eventos cliente → servidor:
+
+- `session:join/leave/end`;
+- `transcript:partial/final`;
+- `chat:send`;
+- `hand:raise/lower`.
+
+Eventos servidor → cliente:
+
+- snapshot de sessão, presença e permissões contextuais;
+- atualizações de participantes;
+- parciais e finais de transcript;
+- chat e fila de mãos;
+- encerramento e falhas reconhecidas.
+
+Todo comando recebe `{ ok: true, ... }` ou `{ ok: false, error: { code, message } }`. O gateway
+permanece fino e delega autorização, persistência e transições aos mesmos serviços usados pelo
+REST.
+
+## Fluxo atual da transcrição
 
 ```text
 Comunicador no browser                   API                         Participantes
@@ -43,12 +136,11 @@ Web Speech API ─ final ───▶ transcript:final ───▶ usecase ─�
                                                    └─ stripDisfluencies()
 ```
 
-- Parciais são efêmeras, literais e não persistidas.
-- Finais recebem limpeza conservadora dentro do `AppendTranscriptSegmentUseCase`.
-- Frase 100% ruído retorna `seq: null` e não é persistida nem emitida.
-- Sequência e transcript sobrevivem à sessão.
-- O navegador Brave pode emitir erro `network` no SpeechRecognition; o front trata repetição como
-  falha fatal em vez de reiniciar indefinidamente.
+- parciais são efêmeras e não persistidas;
+- finais recebem limpeza conservadora;
+- ruído puro não recebe sequência nem broadcast;
+- sequência, transcript e chat sobrevivem ao encerramento;
+- o Brave pode emitir erro `network` no reconhecimento; o front evita reinício infinito.
 
 ## Arquitetura-alvo do pipeline
 
@@ -63,68 +155,26 @@ Web Speech API ─ final ───▶ transcript:final ───▶ usecase ─�
   → preferência individual + legenda karaokê
 ```
 
-Regras:
+A adaptação, o contexto da plateia e a preferência literal/adaptada permanecem planejados. Falha
+de IA nunca poderá bloquear o literal e credenciais de provedor deverão existir somente no
+backend por variável de ambiente.
 
-1. Apenas finais entram na limpeza, persistência e IA.
-2. O texto literal limpo não pode depender do provedor de IA.
-3. O agente recebe contexto da plateia e preserva fatos, nomes, números e intenção.
-4. Timeout/erro da IA não bloqueia a legenda; o literal continua.
-5. Uma adaptação por sala/contexto é preferida a uma chamada por participante.
-6. Tokens do provedor ficam somente em variável de ambiente do backend.
-7. Metadados de versão, latência e status podem ser auditados sem copiar transcript para logs.
-8. A preferência literal/adaptada é apresentação individual, não uma nova geração por usuário.
+## Evidências de validação
 
-## Protocolo Socket.IO implementado
+Em 2026-07-30, na branch de generalização:
 
-Namespace `/live`, handshake autenticado por JWT e room `session:<id>`.
+- PR API: [Semantia-UniSenai/semantia-api#4](https://github.com/Semantia-UniSenai/semantia-api/pull/4);
+- PR web: [Semantia-UniSenai/semantia-web#4](https://github.com/Semantia-UniSenai/semantia-web/pull/4);
 
-Eventos cliente → servidor:
+- API: 15 suites e 66 testes unitários, lint e build aprovados;
+- E2E multiator aprovado contra PostgreSQL 16;
+- migration limpa e migration com dados legados aprovadas;
+- OpenAPI/Orval sincronizados;
+- frontend: 10 arquivos e 63 testes, além do build, aprovados;
+- audit de produção sem vulnerabilidades altas; web sem advisories e API com 3 moderadas;
+- jornada real em Brave/Chromium aprovada em desktop e 390 px: cadastro, criação de sala,
+  preparação, início, Socket.IO/chat, encerramento e leitura posterior;
+- QA visual não encontrou overflow, clipping ou hierarquia quebrada nas telas críticas.
 
-- `session:join/leave/end`;
-- `transcript:partial/final`;
-- `chat:send`;
-- `hand:raise/lower`.
-
-Todo evento é reconhecido com `{ ok: true, ... }` ou
-`{ ok: false, error: { code, message } }`. O gateway é fino e delega acesso, propriedade e
-persistência aos mesmos usecases usados pela API REST.
-
-## Evolução necessária do protocolo
-
-- permitir identidade efêmera de convidado sem aceitar JWT arbitrário;
-- transmitir contexto/versionamento da sessão;
-- relacionar literal e adaptado pelo mesmo `seq`;
-- emitir status da adaptação e fallback sem expor prompts;
-- separar papel de anfitrião/comunicador de ocupações como professor;
-- aplicar limites de presença, reconexão e capacidade medidos;
-- proteger consulta pós-sessão pela política de retenção.
-
-## Legenda karaokê
-
-A fundação literal já possui linhas curtas, trecho atual em destaque, releitura, retorno ao vivo,
-tamanho persistido, `aria-live` e respeito a movimento reduzido. O alvo deve adicionar:
-
-- escolha literal/adaptada sem perder posição;
-- estado visual de adaptação atrasada sem “pular” contexto;
-- fallback explícito e não alarmista;
-- QA de contraste, teclado, leitores de tela, mobile e baixa conectividade.
-
-## Ciclo de vida e privacidade-alvo
-
-- anfitrião autenticado cria e encerra;
-- convidado entra por token restrito à sessão;
-- duração máxima de 4 horas;
-- áudio não é gravado nem armazenado;
-- transcript/chat e metadados identificáveis retidos por 30 dias e removíveis antes;
-- conteúdo, nomes, tokens e IDs de participante não entram em logs operacionais; logs técnicos
-  mínimos expiram ou são agregados após 90 dias;
-- sessão suporta alvo de 50 conexões somente após teste de carga.
-
-Esses itens são contrato planejado enquanto não houver migration, usecases, jobs de expiração e
-testes correspondentes.
-
-## Evidência de testes disponível
-
-Em 2026-07-04, a API registrava 138 testes Jest e o front 91 testes Vitest, incluindo gateway,
-usecases, limpeza e palco de legenda. Essas contagens são evidência histórica, não prova dos
-requisitos planejados neste documento. Cada card deve executar gates frescos.
+Essas evidências provam o Card 02 na branch. Não provam os requisitos ainda planejados de IA,
+retenção automática, carga, quatro horas ou produção distribuída.
