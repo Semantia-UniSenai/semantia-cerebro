@@ -1,12 +1,17 @@
 ---
 tags: [tcc, senai, semantia, libras, acessibilidade]
-status: em-andamento
-atualizado: 2026-06-13
+status: histórico-vivo
+atualizado: 2026-07-29
 ---
 
 # Semantia 🤟
 
-> **Nota mestre do projeto.** Fonte de verdade do TCC do Cauê. Atualizar conforme novo material chegar pelo canal #semantia.
+> **Registro cronológico do projeto.** As seções 1–18 preservam decisões e entregas da fase
+> educacional iniciada em junho. O contrato vigente está em
+> [`../produto/contrato-mvp-transcricao-tempo-real.md`](../produto/contrato-mvp-transcricao-tempo-real.md),
+> e os requisitos atuais em
+> [`../requisitos/mvp-transcricao-tempo-real.md`](../requisitos/mvp-transcricao-tempo-real.md).
+> Em caso de divergência, os documentos canônicos prevalecem; o histórico não deve ser apagado.
 
 **Slogan:** _"Inclusão não é adaptação, é o padrão."_
 **Logo:** mão estilizada como rede neural / grafo de nós + wordmark "SEMANTIA" (gradiente azul→roxo). Já existe (gerada por IA).
@@ -270,17 +275,46 @@ task a task no Brave após recarga; o board passou a exibir 24 pendências, soma
 anteriores e 18 novos. IDs, links e o gate de verificação estão em
 [`../planejamento/2026-07-29-registro-tasks-clickup-mvp-transcricao.md`](../planejamento/2026-07-29-registro-tasks-clickup-mvp-transcricao.md).
 
-## 14→ Lacunas / perguntas em aberto (revisado 2026-07-04)
+## 20. Contrato estrutural do novo MVP (2026-07-29)
 
-- ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: LLM em camadas no backend).
-- ~~**Motor de adaptação semântica**~~ → **especificado** (§17 + `../arquitetura/sala-ao-vivo.md`);
-  falta implementar a camada 2.
+As decisões que condicionam os próximos cards foram fechadas e registradas em
+[`../produto/contrato-mvp-transcricao-tempo-real.md`](../produto/contrato-mvp-transcricao-tempo-real.md):
+
+- anfitrião autenticado cria e administra a sala;
+- participante pode entrar como convidado por link/token sem conta;
+- `sala`, `sessão ao vivo`, `anfitrião/comunicador`, `participante` e `plateia` são os termos
+  canônicos; professor/aluno/turma/aula ficam como legado ou copy de uma vertical escolar;
+- o MVP não armazena áudio;
+- sessões têm duração-alvo de até 4 horas;
+- transcript, chat e metadados identificáveis têm retenção planejada de 30 dias, com exclusão
+  antecipada pelo anfitrião; logs técnicos mínimos sem conteúdo/identidade têm janela de 90 dias;
+- a capacidade-alvo é de até 50 conexões, mas só pode ser anunciada depois do teste de carga;
+- o texto literal limpo é canônico e sempre disponível; adaptação por IA é uma versão adicional,
+  nunca tradução completa para Libras.
+
+A implementação atual ainda exige JWT de participantes, persiste conteúdo sem expiração e usa
+papéis escolares. Esses pontos estão explicitamente marcados como **planejados/legados**, não
+como funcionalidades já entregues.
+
+A auditoria dos 38 cards antigos do Trello classificou 7 como concluídos, 9 como substituídos,
+10 como incorporados e 12 como mantidos para fase posterior, todos com vínculo para o backlog
+atual. Registro em
+[`../planejamento/2026-07-29-auditoria-backlog-legado-trello.md`](../planejamento/2026-07-29-auditoria-backlog-legado-trello.md).
+O Trello foi descontinuado e permanece apenas como registro histórico; o ClickUp é o único board
+operacional e nenhuma higienização futura deve ser feita diretamente no board antigo.
+
+## Lacunas / perguntas em aberto (revisado 2026-07-29)
+
+- ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: limpeza conservadora + agente LLM).
+- ~~**Motor de adaptação semântica**~~ → **especificado** (§17 + contrato canônico); falta
+  implementar a camada de IA.
+- ~~**Conta versus convidado**~~ → **resolvida** (§20: anfitrião com conta, participante convidado).
+- ~~**Duração, retenção e tamanho da sala**~~ → **resolvidos como contrato-alvo** (§20), ainda
+  dependentes de implementação e teste.
 - **Integrantes da equipe:** nomes não informados ainda.
-- **Como vem o conteúdo do professor:** a sala ao vivo respondeu o caso "aula falada" (STT);
-  adaptação de material estático (PDF/slide) segue em aberto.
-- **Biblioteca de sinais:** origem dos vídeos (Signbank UFSC/INES apontados no §17, mas
-  integração não desenhada).
-- Pendências de entrega do INOVA: pitch, vídeo do protótipo, canvas em PDF.
+- **Adaptação de material estático:** preservada como possibilidade futura, fora do núcleo atual.
+- **Biblioteca de sinais:** fontes candidatas mapeadas, integração ainda não desenhada.
+- **INOVA SENAI:** pitch, vídeo do protótipo e canvas continuam pendentes no fluxo acadêmico.
 
 ---
 

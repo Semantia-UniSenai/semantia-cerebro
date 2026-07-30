@@ -4,10 +4,17 @@ atividade: Desafio Interdisciplinar - Tecnologia Aplicada à Solução de Proble
 professores: Emerson Amancio, Tiago Ricaldi (Anunciação)
 entrega: 2026-06-25
 apresentacao: 2026-06-29 19:15 (presencial, 15 min)
-status: rascunho-para-entrega
+status: histórico-superado
 ---
 
 # Desafio Interdisciplinar — Semantia
+
+> **STATUS HISTÓRICO — SUPERADO.** Este documento retrata a entrega de junho de 2026 e preserva
+> o que foi apresentado naquela fase. Afirmações como “frontend-only”, “API planejada” e o
+> domínio centrado em professor/aluno não descrevem o sistema nem o produto atuais. Não atualizar
+> este snapshot para parecer contemporâneo: consulte o
+> [contrato canônico](../produto/contrato-mvp-transcricao-tempo-real.md) e os
+> [requisitos atuais](../requisitos/mvp-transcricao-tempo-real.md).
 
 > **Nota de escopo (honestidade técnica).** Este documento mapeia o projeto **Semantia** nas
 > etapas do Desafio Interdisciplinar. O Semantia hoje é um **hub web funcional (frontend)** com

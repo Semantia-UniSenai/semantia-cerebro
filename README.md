@@ -9,6 +9,20 @@ qualquer agente de IA (ou pessoa nova) trabalhar no Semantia, o contexto vem **d
 > **Regra de ouro:** decisão tomada → registrada aqui. Documento recebido → guardado aqui.
 > Se não está no cérebro, é como se não tivesse acontecido.
 
+## Comece pelo contrato atual
+
+1. [Contrato canônico do MVP](produto/contrato-mvp-transcricao-tempo-real.md) — propósito,
+   público, acesso, retenção, capacidade, prioridades e limites.
+2. [Glossário canônico](produto/glossario.md) — sala, anfitrião, comunicador, participante e
+   termos que substituem o domínio escolar.
+3. [Requisitos, regras e casos de uso](requisitos/mvp-transcricao-tempo-real.md) — cada item
+   marcado como implementado, parcial, planejado ou legado.
+4. [Arquitetura da sala ao vivo](arquitetura/sala-ao-vivo.md) — fundação existente e migração
+   para o contrato atual.
+
+Documentos de junho em `projeto/` e as seções antigas do histórico continuam preservados como
+evidência do TCC, mas **não substituem** os documentos canônicos acima.
+
 ## O que é o Semantia
 
 Plataforma web de **comunicação acessível em tempo real** para aproximar pessoas ouvintes
@@ -25,18 +39,21 @@ UNISENAI Joinville (jul–dez/2026), também submetido ao INOVA SENAI.
 ## Estrutura
 
 ```
-projeto/        Documentos oficiais do TCC e da inscrição INOVA
-                (projeto, detalhamentos, canvas, casos de uso, orientações)
+produto/        Contrato e vocabulário canônicos do produto atual
+requisitos/     Requisitos, regras de negócio, casos de uso e rastreabilidade
+projeto/        Documentos oficiais e snapshots históricos do TCC/INOVA
 referencias/    Material de estudo e artigos científicos de base
 identidade/     Logo e infográfico da marca
-contexto/       Histórico de desenvolvimento, decisões e gotchas (vivo)
-planejamento/   Backlogs, planos e divisão de entregas do produto
+contexto/       Histórico cronológico de decisões e gotchas
+arquitetura/    Fundação implementada e arquitetura-alvo explicitamente separadas
+planejamento/   Backlogs, auditorias, planos e divisão de entregas do produto
 ```
 
 ## Planejamento atual
 
 - [Backlog do MVP de transcrição em tempo real](planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md).
 - [Registro das 18 tasks cadastradas no ClickUp](planejamento/2026-07-29-registro-tasks-clickup-mvp-transcricao.md).
+- [Auditoria documental dos 38 cards do Trello descontinuado](planejamento/2026-07-29-auditoria-backlog-legado-trello.md).
 
 ## Repositórios do Semantia (org `Semantia-UniSenai`)
 

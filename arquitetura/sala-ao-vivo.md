@@ -1,84 +1,130 @@
-# 🎓 Sala de Aula ao Vivo — arquitetura e protocolo
+# Sala ao vivo — fundação implementada e arquitetura-alvo
 
-> Feature principal do MVP pós-banca, construída em **2026-07-02** (full-stack) e refinada até
-> **2026-07-04**. Ver decisões em `../contexto/historico-e-decisoes.md` e a base do backend em
-> `../projeto/Arquitetura-Backend.md`.
+> **Status em 2026-07-29:** a sala educacional foi implementada e é uma fundação reutilizável.
+> O contrato vigente é uma sala genérica de comunicação acessível. Use este documento junto ao
+> [contrato canônico](../produto/contrato-mvp-transcricao-tempo-real.md), ao
+> [glossário](../produto/glossario.md) e aos
+> [requisitos atuais](../requisitos/mvp-transcricao-tempo-real.md).
 
-> **Status de produto (2026-07-29):** este documento descreve fielmente a fundação implementada,
-> mas o enquadramento restrito a professor/aluno/turma foi substituído por salas genéricas de
-> comunicação acessível. A migração e o backlog atual estão em
-> [`../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md`](../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md).
+## Fronteira entre realidade e alvo
 
-## O que é
+| Área | Implementado em `dev` | Contrato atual ainda planejado |
+|---|---|---|
+| Papéis | `PROFESSOR` e `ALUNO` autenticados | anfitrião/comunicador e participante/convidado |
+| Agregado | `SchoolClass`/`ClassMember` | sala genérica sem dependência escolar |
+| Entrada | conta JWT + turma ou `joinToken` | convidado por link/token sem conta |
+| Transcript | uma versão literal limpa | literal + adaptada por segmento |
+| Contexto | título da sessão | perfil da plateia estável |
+| Retenção | persistência sem expiração | exclusão antecipada e automática em 30 dias |
+| Capacidade | não comprovada por carga | alvo de 50 conexões, condicionado a teste |
+| Duração | sem limite explícito | até 4 horas por sessão |
 
-O professor abre uma **sessão ao vivo** de uma turma e fala normalmente; a fala vira **legenda
-em tempo real** na tela de cada aluno (surdo ou não). Alunos entram por **join token**, têm
-chat e **fila de mãos levantadas**. Tudo persiste (transcript e chat sobrevivem à sessão).
+O código legado não deve ser descrito como inexistente, nem o alvo como já entregue.
 
-## Modelo de dados (Prisma)
+## Modelo implementado
 
-- `User.role` (`Role`: `PROFESSOR` | `ALUNO`) — eixo de permissão.
-- `SchoolClass` + `ClassMember` — turmas e vínculo aluno↔turma.
-- `LiveSession` — sessão de aula: `joinToken` (unique), `status` (`SessionStatus`: `LIVE` |
-  `ENDED`), dona = professor da turma.
-- `TranscriptSegment` — frase final persistida com `seq` incremental por sessão.
-- `ChatMessage` — chat da sala.
+- `User.role`: `PROFESSOR` ou `ALUNO`.
+- `SchoolClass` e `ClassMember`: turma e associação de alunos.
+- `LiveSession`: título, dono (`teacherId`), turma opcional, `joinToken`, status, início e fim.
+- `TranscriptSegment`: `sessionId`, sequência, texto literal e data.
+- `ChatMessage`: sessão, usuário, texto e data.
+- `Score`: datilologia/ranking, fora do núcleo atual.
 
-## Fluxo da transcrição
+A migração para sala genérica deve preservar dados históricos e ser tratada em migration
+separada. Renomear copy sem mudar permissões/modelo não conclui a generalização.
 
+## Fluxo implementado da transcrição
+
+```text
+Comunicador no browser                   API                         Participantes
+Web Speech API ─ parcial ─▶ transcript:partial ─▶ broadcast ─▶ legenda parcial
+Web Speech API ─ final ───▶ transcript:final ───▶ usecase ──▶ persistência + broadcast
+                                                   │
+                                                   └─ stripDisfluencies()
 ```
-Professor (browser)                    API                          Alunos
-Web Speech API ─ parcial ──▶ transcript:partial ──▶ broadcast ─▶ legenda cinza (literal)
-   (throttle 150ms no front)          (não persiste)
-Web Speech API ─ final ────▶ transcript:final ────▶ usecase ──▶ broadcast + persistência
-                                       │  stripDisfluencies()
-                                       │  100% ruído → null (nada emite/persiste)
+
+- Parciais são efêmeras, literais e não persistidas.
+- Finais recebem limpeza conservadora dentro do `AppendTranscriptSegmentUseCase`.
+- Frase 100% ruído retorna `seq: null` e não é persistida nem emitida.
+- Sequência e transcript sobrevivem à sessão.
+- O navegador Brave pode emitir erro `network` no SpeechRecognition; o front trata repetição como
+  falha fatal em vez de reiniciar indefinidamente.
+
+## Arquitetura-alvo do pipeline
+
+```text
+áudio do navegador
+  → STT parcial (efêmero)
+  → STT final
+  → limpeza conservadora no backend
+  → transcript literal canônico + persistência
+  → fila de adaptação contextual
+  → transcript adaptado OU fallback literal
+  → preferência individual + legenda karaokê
 ```
 
-- **STT no browser do professor** (Web Speech API) — sem custo de servidor no MVP.
-  Gotcha real: **Brave** falha com `network` consecutivo → front trata como fatal e avisa o
-  professor (fix 2026-07-02, `7f43c22`).
-- **Parciais são efêmeras e literais** (é o "ao vivo cru"); só a **final** vira segmento.
+Regras:
 
-## Gateway Socket.IO (`/live`) — fino de propósito
+1. Apenas finais entram na limpeza, persistência e IA.
+2. O texto literal limpo não pode depender do provedor de IA.
+3. O agente recebe contexto da plateia e preserva fatos, nomes, números e intenção.
+4. Timeout/erro da IA não bloqueia a legenda; o literal continua.
+5. Uma adaptação por sala/contexto é preferida a uma chamada por participante.
+6. Tokens do provedor ficam somente em variável de ambiente do backend.
+7. Metadados de versão, latência e status podem ser auditados sem copiar transcript para logs.
+8. A preferência literal/adaptada é apresentação individual, não uma nova geração por usuário.
 
-Autentica o JWT no handshake, mantém presença (`LiveRoomStateService`) e **delega toda decisão
-de negócio aos usecases** — os mesmos da REST. Todo evento cliente→servidor é ackado com
-`{ ok: true, ... }` ou `{ ok: false, error: { code, message } }`.
+## Protocolo Socket.IO implementado
 
-Eventos: `session:join/leave/end`, `transcript:partial/final`, `chat:send`,
-`hand:raise/lower`. Broadcast por room `session:<id>`.
+Namespace `/live`, handshake autenticado por JWT e room `session:<id>`.
 
-## Adaptação semântica em camadas (decisão 2026-07-04)
+Eventos cliente → servidor:
 
-O "motor semântico" do TCC vira um **pipeline em camadas no backend**:
+- `session:join/leave/end`;
+- `transcript:partial/final`;
+- `chat:send`;
+- `hand:raise/lower`.
 
-1. **Camada 1 — regex de disfluências** (`src/modules/sessions/usecases/disfluencies.ts`,
-   FEITA): remove vícios de fala ("ééé", "né", "tipo assim"), gagueira/repetição e pontuação
-   órfã. Conservadora: palavras ambíguas ("tipo", "então") ficam. Aplicada **dentro do
-   `AppendTranscriptSegmentUseCase`** (depois das validações de acesso, antes do append).
-   Frase 100% ruído → usecase retorna `null`, gateway acka `{ ok: true, seq: null }` **sem
-   broadcast**. Gotcha de regex: `\b` do JS é ASCII → limites de palavra com lookarounds
-   unicode (`(?<!\p{L})…(?!\p{L})`, flag `u`).
-2. **Camada 2 — LLM rápido** (Haiku/Gemini Flash, A FAZER): reescreve a frase final adaptada
-   (sinônimos mais simples, estrutura mais direta) e emite `transcript:adapted`, que substitui
-   a frase na UI ~1s depois. Toggle literal/adaptado na tela do aluno. **ML próprio foi
-   descartado**: não há corpus PT→PT-adaptado-pra-surdos e não cabe no prazo do TCC — vira
-   trabalho futuro no artigo; o prompt engineering da camada 2 É a seção de metodologia.
+Todo evento é reconhecido com `{ ok: true, ... }` ou
+`{ ok: false, error: { code, message } }`. O gateway é fino e delega acesso, propriedade e
+persistência aos mesmos usecases usados pela API REST.
 
-**Regra de arquitetura (correção do Cauê, 2026-07-04):** as duas camadas moram **no backend** —
-regra de negócio nunca no cliente (cliente alternativo publicaria texto sujo; o texto canônico
-não pode depender do front). No front fica só **apresentação**: quebra em linhas de ≤7 palavras
-(`captionLines.ts`) e o palco karaokê (`CaptionStage.vue`).
+## Evolução necessária do protocolo
 
-## UI do aluno — legendas karaokê (2026-07-04)
+- permitir identidade efêmera de convidado sem aceitar JWT arbitrário;
+- transmitir contexto/versionamento da sessão;
+- relacionar literal e adaptado pelo mesmo `seq`;
+- emitir status da adaptação e fallback sem expor prompts;
+- separar papel de anfitrião/comunicador de ocupações como professor;
+- aplicar limites de presença, reconexão e capacidade medidos;
+- proteger consulta pós-sessão pela política de retenção.
 
-- Frases finais viram **linhas curtas (≤7 palavras) balanceadas** (9 palavras → 5+4, nunca 7+2).
-- Linha corrente em destaque, anteriores esmaecem; entrada deslizando de baixo.
-- **Scroll livre pra reler**: rolar pra cima solta o auto-scroll e mostra "↓ Voltar ao vivo".
-- A−/A+ persistido em localStorage, `aria-live="polite"`, respeita `prefers-reduced-motion`.
+## Legenda karaokê
 
-## Estado dos testes (2026-07-04)
+A fundação literal já possui linhas curtas, trecho atual em destaque, releitura, retorno ao vivo,
+tamanho persistido, `aria-live` e respeito a movimento reduzido. O alvo deve adicionar:
 
-- API: **138 unit (jest)** — inclui specs do filtro, do `null` no usecase e no gateway.
-- Front: **91 (vitest)** — inclui captionLines, CaptionStage (scroll/pin) e useLiveSession.
+- escolha literal/adaptada sem perder posição;
+- estado visual de adaptação atrasada sem “pular” contexto;
+- fallback explícito e não alarmista;
+- QA de contraste, teclado, leitores de tela, mobile e baixa conectividade.
+
+## Ciclo de vida e privacidade-alvo
+
+- anfitrião autenticado cria e encerra;
+- convidado entra por token restrito à sessão;
+- duração máxima de 4 horas;
+- áudio não é gravado nem armazenado;
+- transcript/chat e metadados identificáveis retidos por 30 dias e removíveis antes;
+- conteúdo, nomes, tokens e IDs de participante não entram em logs operacionais; logs técnicos
+  mínimos expiram ou são agregados após 90 dias;
+- sessão suporta alvo de 50 conexões somente após teste de carga.
+
+Esses itens são contrato planejado enquanto não houver migration, usecases, jobs de expiração e
+testes correspondentes.
+
+## Evidência de testes disponível
+
+Em 2026-07-04, a API registrava 138 testes Jest e o front 91 testes Vitest, incluindo gateway,
+usecases, limpeza e palco de legenda. Essas contagens são evidência histórica, não prova dos
+requisitos planejados neste documento. Cada card deve executar gates frescos.
