@@ -163,10 +163,11 @@ getUserMedia + AudioContext + AudioWorklet ─▶ Vosk português em WebAssembly
   áudio não implica que o navegador ofereça conversão de fala em texto;
 - o caminho rápido usa a implementação de `SpeechRecognition` fornecida pelo navegador, que pode
   depender do serviço do próprio fornecedor;
-- Firefox/Zen, ou o caminho nativo bloqueado, carrega sob demanda o modelo
-  `vosk-model-small-pt-0.3.tar.gz` e processa os samples no próprio navegador;
-- o modelo padrão tem 32.440.432 bytes, licença Apache-2.0 e URL substituível por
-  `VITE_VOSK_MODEL_URL`; produção controlada deve preferir hospedagem no próprio domínio;
+- Firefox/Zen, um microfone específico selecionado ou o caminho nativo bloqueado carregam sob
+  demanda `/models/vosk-model-small-pt-0.3.model` e processam os samples no próprio navegador;
+- o modelo padrão tem 32.440.432 bytes, licença Apache-2.0, tamanho e SHA-256 verificados na
+  preparação. A extensão pública neutra `.model` evita `Content-Encoding: gzip` e descompactação
+  dupla; o binário é servido same-origin e permanece fora do Git;
 - no fallback local, a API Semantia e terceiros não recebem áudio; somente texto parcial/final
   atravessa Socket.IO;
 - não existe chave, custo por minuto, endpoint de upload ou dependência de provedor STT no backend;
@@ -182,6 +183,32 @@ getUserMedia + AudioContext + AudioWorklet ─▶ Vosk português em WebAssembly
 - a interface permite cancelar a preparação, diferencia conexão/silêncio/áudio recebido e mantém o
   controle visível em altura reduzida. Esses sinais são derivados localmente e não enviam áudio,
   samples ou nível sonoro à API.
+
+### Seleção e teste da entrada de áudio
+
+A central de áudio segue a hierarquia do Google Meet sem reproduzir sua identidade visual: ação
+primária de transcrição, cápsula com a entrada atual e popover de configuração. A implementação:
+
+- descobre somente entradas por `navigator.mediaDevices.enumerateDevices()` e atualiza a relação por
+  `devicechange` quando headset ou microfone é conectado ou removido;
+- mantém a interface utilizável antes da permissão com labels acessíveis (`Microfone padrão`,
+  `Microfone N`) e substitui os nomes assim que o navegador os expõe;
+- persiste apenas o `deviceId` escolhido no storage local do site e volta para a entrada padrão ou
+  primeira disponível quando o dispositivo desaparece;
+- testa a entrada selecionada com `getUserMedia` + `AnalyserNode`, mostra nível e confirmação local e
+  encerra track, source, analyser, animation frame e `AudioContext` ao parar, trocar ou desmontar;
+- usa constraint exata de `deviceId` tanto no teste quanto na captura Vosk. Como a API
+  `SpeechRecognition` não permite escolher entrada, uma seleção específica ativa o Vosk local em vez
+  de fingir que o ASR nativo está usando o microfone escolhido;
+- troca somente captura/grafo/reconhecedor quando a transcrição está ativa. Reunião, presença e chat
+  continuam conectados;
+- não conecta o teste ao Socket.IO, não grava áudio e não transmite samples ou nível. Somente texto
+  parcial/final produzido pelo ASR segue para o contrato canônico.
+
+No Vosk, frames de áudio não são tratados como prova de transcrição. O transporte rápido por porta do
+worker recebe um watchdog de áudio audível sem hipótese; após oito segundos ele fecha a porta e troca
+para o transporte compatível por PCM local. A interface só confirma transcrição depois de texto não
+vazio e torna observável uma falha também no segundo transporte.
 
 ### Limites medidos do fallback local
 
@@ -246,3 +273,18 @@ Em 2026-07-30, na branch de generalização:
 
 Essas evidências provam o Card 02 na branch. Não provam os requisitos ainda planejados de IA,
 retenção automática, carga, quatro horas ou produção distribuída.
+
+### Evidências adicionais em 2026-07-31
+
+- seleção, persistência, remoção, erros específicos, troca durante teste e cleanup foram cobertos em
+  testes unitários; mudança reativa de dispositivo reinicia somente o ASR;
+- QA da central de áudio em Chromium enumerou três entradas, selecionou uma entrada específica,
+  persistiu a escolha e confirmou nível 100; Firefox enumerou a entrada fake do engine e confirmou
+  nível 23;
+- popover desktop `1280×720` e mobile `390×844` permaneceu integralmente na viewport. No mobile,
+  reserva 84 px de safe area para não colidir com o chat e o widget VLibras;
+- em ambos os engines, o teste não emitiu request de áudio, chamada para provedor STT, erro de console
+  ou erro de página;
+- após a integração de dispositivos, Firefox aprovou novamente o pipeline completo nos transportes
+  direto e compatível, reconhecendo e persistindo “este é um teste técnico de transcrição em
+  português”, sem request de áudio.
