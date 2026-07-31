@@ -1,7 +1,7 @@
 ---
 tags: [tcc, senai, semantia, libras, acessibilidade]
 status: histórico-vivo
-atualizado: 2026-07-29
+atualizado: 2026-07-31
 ---
 
 # Semantia 🤟
@@ -302,6 +302,20 @@ atual. Registro em
 [`../planejamento/2026-07-29-auditoria-backlog-legado-trello.md`](../planejamento/2026-07-29-auditoria-backlog-legado-trello.md).
 O Trello foi descontinuado e permanece apenas como registro histórico; o ClickUp é o único board
 operacional e nenhuma higienização futura deve ser feita diretamente no board antigo.
+
+## 21. Sala caption-first aplicada e convite autenticado corrigido (2026-07-31)
+
+A Variante A — Palco central saiu do protótipo e foi aplicada no frontend real no PR web #5,
+empilhado sobre a generalização de salas do PR web #4. Legenda domina a hierarquia; chat e pessoas
+ficam fechados por padrão, redimensionam o palco no desktop e viram bottom sheet modal no mobile.
+
+O teste de usabilidade surdo/comunicador revelou um P0: uma conta autenticada podia validar o convite
+e criar identidade de convidado, mas o Socket.IO priorizava o JWT global e recebia `forbidden` por a
+conta não ter vínculo com a sessão. A regra fechada é: quando existe acesso efêmero para a mesma
+`sessionId`, ele prevalece no handshake e na identidade corrente; fora dela, o JWT continua sendo a
+credencial normal. O smoke com duas contas comprovou entrada, refresh, presença e chat sem liberar
+acesso indiscriminado. O contrato wire real do gateway passou a ser normalizado no composable, e não
+nos componentes. Áudio continua local; nenhum endpoint ou upload de áudio foi adicionado.
 
 ## Lacunas / perguntas em aberto (revisado 2026-07-29)
 

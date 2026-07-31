@@ -1,9 +1,10 @@
 # UX da sala ao vivo — contrato e validação
 
 > **Status em 2026-07-31:** contrato e protótipo navegável implementados na branch
-> `docs/ux-sala-acessivel`; validação automatizada e heurística concluída, com aprovação de produto,
-> zoom manual, leitor de tela e validação externa ainda pendentes. Este documento não declara contexto
-> da plateia, preferência literal/adaptada ou agente de IA como implementados no frontend.
+> `docs/ux-sala-acessivel`; Variante A aplicada e validada no frontend real pelo
+> [PR web #5](https://github.com/Semantia-UniSenai/semantia-web/pull/5). Aprovação humana final com
+> pessoa surda/intérprete e leitor de tela real ainda está pendente. Este documento não declara
+> contexto da plateia, preferência literal/adaptada ou agente de IA como implementados no frontend.
 
 ## Vínculos
 
@@ -16,9 +17,9 @@
 
 ## Escopo deste card
 
-Este card fecha a jornada, o contrato visual, os estados e um protótipo navegável antes de alterar o
-frontend de produção. Ele não implementa IA, contexto persistido, preferências persistidas, WebRTC,
-moderação, retenção nem precisão lexical do ASR.
+Este card fecha a jornada, o contrato visual e os estados; o protótipo validado conduziu a aplicação
+da Variante A no frontend real. Ele não implementa IA, contexto persistido, preferências persistidas,
+WebRTC, moderação, retenção nem precisão lexical do ASR.
 
 A superfície é primariamente **Monitor**: a pessoa acompanha a legenda e o estado da reunião. A barra
 de ações e os painéis são uma camada secundária **Operate**. Essa ordem impede que configurações,
@@ -89,8 +90,11 @@ separado para melhoria posterior.
 
 ### Achados P0
 
-Nenhum P0 foi observado na jornada funcional validada. Isso não significa que o contrato visual
-esteja fechado; significa apenas que a legenda permanece alcançável e legível no cenário auditado.
+Na auditoria inicial, nenhum P0 foi observado. No teste de usabilidade posterior, uma segunda conta
+autenticada abriu convite válido, mas o frontend priorizou o JWT global em vez do token efêmero da
+reunião; o gateway negou corretamente a conta sem vínculo. A correção dá precedência ao token do
+convite somente para a mesma `sessionId`. O cenário foi protegido por teste RED/GREEN e smoke E2E com
+duas contas, refresh, presença e chat.
 
 ### Achados P1
 
@@ -205,11 +209,10 @@ Cards 04, 05, 08 e 09 existirem.
 - Nome da reunião e subtítulo repetem informação em alguns cenários de QA.
 - A linha parcial poderia ter um sinal editorial mais distinto sem depender apenas de cor.
 
-## Defeitos técnicos conhecidos fora deste card
+## Defeitos técnicos resolvidos na implementação
 
-- `CaptionStage.vue`: na ausência de valor salvo, `Number(localStorage.getItem(...))` converte `null`
-  para `0`, podendo substituir o default de 34 px por 22 px. O futuro card de implementação deve
-  corrigir em RED/GREEN.
+- `CaptionStage.vue`: o bug em que `Number(null)` trocava silenciosamente o tamanho padrão foi
+  corrigido em RED/GREEN. Os passos atuais são 28/36/48 px e a ausência de preferência mantém 36 px.
 - A precisão do Vosk para nomes próprios, ruído e algumas palavras segue limitada. O Card 03 não
   altera modelo nem pós-processa o literal com IA.
 
@@ -410,9 +413,8 @@ Somente um de cada vez:
 chat | pessoas | contexto | preferências | ajuda de áudio | nenhum
 ```
 
-- `≥ 1200 px`: painel lateral de 360–400 px.
-- `1024–1199 px`: painel sobreposto para preservar largura de legenda.
-- `< 1024 px`: bottom sheet modal com backdrop, conteúdo externo inerte e altura máxima de 68 svh.
+- `≥ 1024 px`: painel lateral participa do layout e redimensiona o palco, sem cobrir a legenda.
+- `< 1024 px`: bottom sheet modal com backdrop, conteúdo externo inerte e altura máxima de 78 svh.
 - Fechar preserva estado do painel e devolve foco ao gatilho.
 
 ---
