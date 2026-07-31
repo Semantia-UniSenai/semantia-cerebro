@@ -121,3 +121,6 @@ ao cérebro.
 
 Decisões, jornadas, microcopy, WCAG, responsividade e handoff estão em
 [`produto/ux-sala-ao-vivo.md`](../../produto/ux-sala-ao-vivo.md).
+
+Resultados técnicos, correções, limites humanos e seis capturas finais estão em
+[`validacao.md`](./validacao.md).

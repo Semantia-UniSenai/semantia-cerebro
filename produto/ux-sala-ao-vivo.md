@@ -1,9 +1,9 @@
 # UX da sala ao vivo — contrato e validação
 
-> **Status em 2026-07-31:** em desenvolvimento na branch `docs/ux-sala-acessivel`, derivada da
-> experiência funcional aceita em `feat/salas-comunicacao`. Este documento descreve decisões de
-> produto e UX; não declara contexto da plateia, preferência literal/adaptada ou agente de IA como
-> implementados.
+> **Status em 2026-07-31:** contrato e protótipo navegável implementados na branch
+> `docs/ux-sala-acessivel`; validação automatizada e heurística concluída, com aprovação de produto,
+> zoom manual, leitor de tela e validação externa ainda pendentes. Este documento não declara contexto
+> da plateia, preferência literal/adaptada ou agente de IA como implementados no frontend.
 
 ## Vínculos
 
@@ -11,6 +11,8 @@
 - [Contrato canônico do MVP](./contrato-mvp-transcricao-tempo-real.md).
 - [Arquitetura da sala ao vivo](../arquitetura/sala-ao-vivo.md).
 - [Plano de implementação](../.hermes/plans/2026-07-31_104527-fechar-ux-sala-ao-vivo.md).
+- [Protótipo navegável](../prototipos/sala-ao-vivo/README.md).
+- [Relatório de validação e evidências](../prototipos/sala-ao-vivo/validacao.md).
 
 ## Escopo deste card
 
@@ -693,3 +695,10 @@ O contrato e o protótipo podem ser aprovados por produto e por auditoria automa
 registrar validação com pessoa surda ou intérprete quando a sessão realmente acontecer. Na ausência
 dessa pessoa durante o card, declarar a limitação e manter a atividade humana no Card 17, sem fabricar
 aceite do público.
+
+## Direção técnica após o QA
+
+A recomendação técnica preliminar é usar a **Variante A — Palco central** como base do handoff e
+incorporar da Variante B o palco mais aberto em telas estreitas. Ela não equivale a aprovação de
+produto. A decisão final depende da revisão das duas variantes pelo Foyth e deve ser registrada aqui
+antes de qualquer alteração no frontend Vue.

@@ -19,6 +19,10 @@ qualquer agente de IA (ou pessoa nova) trabalhar no Semantia, o contexto vem **d
    marcado como implementado, parcial, planejado ou legado.
 4. [Arquitetura da sala ao vivo](arquitetura/sala-ao-vivo.md) — fundação existente e migração
    para o contrato atual.
+5. [UX acessível da sala ao vivo](produto/ux-sala-ao-vivo.md) — jornadas, estados, microcopy,
+   responsividade, WCAG e handoff visual.
+6. [Protótipo navegável e validação](prototipos/sala-ao-vivo/README.md) — variantes, cenários,
+   evidências e limites de validação humana.
 
 Documentos de junho em `projeto/` e as seções antigas do histórico continuam preservados como
 evidência do TCC, mas **não substituem** os documentos canônicos acima.
@@ -47,6 +51,7 @@ identidade/     Logo e infográfico da marca
 contexto/       Histórico cronológico de decisões e gotchas
 arquitetura/    Fundação implementada e arquitetura-alvo explicitamente separadas
 planejamento/   Backlogs, auditorias, planos e divisão de entregas do produto
+prototipos/      Contratos visuais navegáveis e evidências de validação
 ```
 
 ## Planejamento atual
