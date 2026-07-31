@@ -172,6 +172,9 @@ Não renomear apenas a interface. O contrato de domínio, banco, autorização e
 
 ## Card 03 — Fechar a experiência UX/UI acessível das salas ao vivo
 
+**Status em 2026-07-31:** CONCLUÍDO após aceite humano de Foyth. Precisão do reconhecimento foi
+separada para o Card 06 e para o gate ponta a ponta do Card 11.
+
 ### Objetivo
 
 Projetar e validar a experiência completa do anfitrião e da pessoa surda antes de consolidar os contratos visuais da implementação.
@@ -213,9 +216,11 @@ UI/UX é um diferencial central do produto, não acabamento posterior. A valida�
 
 ### Alterações
 
-- Branch: não criada.
-- Branch sugerida: `docs/ux-sala-acessivel` no `semantia-cerebro` e artefatos vinculados ao card.
-- PR: não aberto.
+- Branch cérebro: `docs/ux-sala-acessivel`.
+- Branch web: `feat/ux-sala-acessivel`.
+- PR cérebro: [Semantia-UniSenai/semantia-cerebro#3](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/3).
+- PR web: [Semantia-UniSenai/semantia-web#5](https://github.com/Semantia-UniSenai/semantia-web/pull/5).
+- ClickUp: [86e2j4uyj](https://app.clickup.com/t/90171419563/86e2j4uyj), `CONCLUÍDO`.
 
 ### Gestão do card
 

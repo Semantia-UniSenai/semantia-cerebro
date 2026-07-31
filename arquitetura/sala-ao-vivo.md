@@ -308,3 +308,8 @@ retenção automática, carga, quatro horas ou produção distribuída.
   sem erro de console ou página;
 - a colisão entre VLibras e `Enviar mensagem` foi reproduzida por geometria e eliminada movendo o
   widget para fora do painel lateral aberto; o clique real passou sem `force` ou bypass.
+- o teste humano dos lados comunicador e pessoa surda aprovou a UI/UX e encerrou o Card 03;
+- a leitura de um roteiro controlado produziu WER de aproximadamente 24,4% no Vosk local, com erros
+  semânticos relevantes. Essa evidência foi registrada no Card 06, que passa a tratar benchmark e
+  escolha do fallback/modelo; o Card 11 continua sendo o gate de qualidade ponta a ponta. A precisão
+  do reconhecedor não pertence ao aceite visual do Card 03.

@@ -317,7 +317,21 @@ credencial normal. O smoke com duas contas comprovou entrada, refresh, presença
 acesso indiscriminado. O contrato wire real do gateway passou a ser normalizado no composable, e não
 nos componentes. Áudio continua local; nenhum endpoint ou upload de áudio foi adicionado.
 
-## Lacunas / perguntas em aberto (revisado 2026-07-29)
+## 22. UI/UX aceita e qualidade do ASR separada do escopo visual (2026-07-31)
+
+Depois de testar os lados comunicador e pessoa surda, Foyth aprovou a experiência da sala como
+“tudo muito bom”. O Card 03 foi concluído com o palco central, hierarquia da legenda, convite,
+entrada, chat, presença, painéis, controles e comportamento responsivo aceitos. Os PRs continuam sem
+merge automático.
+
+A baixa precisão do Vosk local não reabre o escopo visual. Em roteiro controlado com 45 palavras, a
+legenda apresentou 11 erros — 8 substituições, 2 exclusões e 1 inserção —, WER aproximado de 24,4%,
+incluindo trocas de sentido como “acessibilidade” por “a sensibilidade” e “em texto diretamente no
+navegador” por “diretamente para o vendedor”. A amostra e os critérios de benchmark foram registrados
+no Card 06; o Card 11 permanece como gate full-stack. Áudio deve continuar local e erros não podem ser
+mascarados por correção textual que invente conteúdo.
+
+## Lacunas / perguntas em aberto (revisado 2026-07-31)
 
 - ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: limpeza conservadora + agente LLM).
 - ~~**Motor de adaptação semântica**~~ → **especificado** (§17 + contrato canônico); falta
