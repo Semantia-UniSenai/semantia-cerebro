@@ -34,7 +34,7 @@
 |---:|---|---|---|---|---|
 | 01 | Consolidar o novo escopo do produto e higienizar o backlog | Urgente | documentação, negócio, pesquisa/tcc | EM REVISÃO | [86e2j4gtn](https://app.clickup.com/t/90171419563/86e2j4gtn) |
 | 02 | Generalizar o domínio de aula para salas de comunicação | Urgente | refatoração | PENDENTE | [86e2j4qky](https://app.clickup.com/t/90171419563/86e2j4qky) |
-| 03 | Fechar a experiência UX/UI acessível das salas ao vivo | Urgente | melhoria | CONCLUÍDO | [86e2j4uyj](https://app.clickup.com/t/90171419563/86e2j4uyj) |
+| 03 | Fechar a experiência UX/UI acessível das salas ao vivo | Urgente | melhoria | EM REVISÃO | [86e2j4uyj](https://app.clickup.com/t/90171419563/86e2j4uyj) |
 | 04 | Implementar a configuração de contexto e nível da plateia | Urgente | nova funcionalidade | PENDENTE | [86e2j4vuj](https://app.clickup.com/t/90171419563/86e2j4vuj) |
 | 05 | Implementar preferências individuais de transcrição | Urgente | nova funcionalidade | PENDENTE | [86e2j4vxe](https://app.clickup.com/t/90171419563/86e2j4vxe) |
 | 06 | Robustecer a captura de fala e o transporte em tempo real | Urgente | refatoração | PENDENTE | [86e2j4w0k](https://app.clickup.com/t/90171419563/86e2j4w0k) |
@@ -70,10 +70,11 @@ responsável Cauê Marchi Foyth, prioridade `Urgente`, as três flags exigidas �
 `negócio` e `pesquisa/tcc` — e descrição persistida com as decisões e os três PRs. Os demais 17
 cards permanecem com responsável, prioridade e etiqueta de tipo conforme o gate inicial.
 
-Em **2026-07-31**, Foyth aprovou a UI/UX após testar comunicador e pessoa surda. O Card 03 foi
-reaberto diretamente pelo URL e confirmou `CONCLUÍDO`/`COMPLETE` após recarga. A evidência de baixa
-precisão do Vosk local foi registrada no Card 06, mantido em `PENDENTE`, e vinculada ao gate do Card
-11 para não misturar qualidade do reconhecedor com aceite visual.
+Em **2026-07-31**, Foyth aprovou a UI/UX após testar comunicador e pessoa surda. Como os PRs web #5 e
+cérebro #3 permanecem abertos, com CarlaKeite solicitada e sem review concluída, o Card 03 foi
+reaberto diretamente pelo URL e confirmado em `EM REVISÃO`. A evidência de baixa precisão do Vosk
+local foi registrada no Card 06, mantido em `PENDENTE`, e vinculada ao gate do Card 11 para não
+misturar qualidade do reconhecedor com aceite visual.
 
 Branches e revisão do Card 01:
 

@@ -320,9 +320,11 @@ nos componentes. Áudio continua local; nenhum endpoint ou upload de áudio foi 
 ## 22. UI/UX aceita e qualidade do ASR separada do escopo visual (2026-07-31)
 
 Depois de testar os lados comunicador e pessoa surda, Foyth aprovou a experiência da sala como
-“tudo muito bom”. O Card 03 foi concluído com o palco central, hierarquia da legenda, convite,
-entrada, chat, presença, painéis, controles e comportamento responsivo aceitos. Os PRs continuam sem
-merge automático.
+“tudo muito bom”. Palco central, hierarquia da legenda, convite, entrada, chat, presença, painéis,
+controles e comportamento responsivo foram aceitos. Isso não conclui o workflow: como os PRs web #5
+e cérebro #3 continuam abertos, com revisão solicitada e sem review concluída, o Card 03 permanece em
+`EM REVISÃO`. Card com PR aberto não pode ser movido para concluído; aceite funcional e revisão de
+código/documentação são gates distintos. Os PRs continuam sem merge automático.
 
 A baixa precisão do Vosk local não reabre o escopo visual. Em roteiro controlado com 45 palavras, a
 legenda apresentou 11 erros — 8 substituições, 2 exclusões e 1 inserção —, WER aproximado de 24,4%,

@@ -30,6 +30,8 @@ Chat, mãos levantadas, áudio/vídeo de conferência, moderação, VLibras, an�
 - O ClickUp usa as prioridades `P0 — Crítica`, `P1 — Alta`, `P2 — Média` e `P3 — Baixa`.
 - Atualizar descrição, discussões, evidências, branch e PR no ClickUp durante o trabalho; mover o card conforme o workflow vigente.
 - Não mover para `Feito` sem validação executada e registrada no card.
+- Card com PR aberto permanece em `EM REVISÃO`, mesmo após aceite funcional; só pode ser concluído
+  depois do fluxo de revisão dos PRs. Aceite funcional não autoriza merge automático.
 - Branches sugeridas são planejamento; cada card deve registrar a branch real assim que o desenvolvimento começar.
 
 ---
@@ -172,8 +174,9 @@ Não renomear apenas a interface. O contrato de domínio, banco, autorização e
 
 ## Card 03 — Fechar a experiência UX/UI acessível das salas ao vivo
 
-**Status em 2026-07-31:** CONCLUÍDO após aceite humano de Foyth. Precisão do reconhecimento foi
-separada para o Card 06 e para o gate ponta a ponta do Card 11.
+**Status em 2026-07-31:** EM REVISÃO. A UI/UX recebeu aceite humano de Foyth, mas os PRs web #5 e
+cérebro #3 continuam abertos e aguardando revisão. Precisão do reconhecimento foi separada para o
+Card 06 e para o gate ponta a ponta do Card 11.
 
 ### Objetivo
 
@@ -220,7 +223,7 @@ UI/UX é um diferencial central do produto, não acabamento posterior. A valida�
 - Branch web: `feat/ux-sala-acessivel`.
 - PR cérebro: [Semantia-UniSenai/semantia-cerebro#3](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/3).
 - PR web: [Semantia-UniSenai/semantia-web#5](https://github.com/Semantia-UniSenai/semantia-web/pull/5).
-- ClickUp: [86e2j4uyj](https://app.clickup.com/t/90171419563/86e2j4uyj), `CONCLUÍDO`.
+- ClickUp: [86e2j4uyj](https://app.clickup.com/t/90171419563/86e2j4uyj), `EM REVISÃO`.
 
 ### Gestão do card
 

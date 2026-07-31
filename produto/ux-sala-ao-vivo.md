@@ -3,7 +3,8 @@
 > **Status em 2026-07-31:** contrato e protótipo navegável implementados na branch
 > `docs/ux-sala-acessivel`; Variante A aplicada e validada no frontend real pelo
 > [PR web #5](https://github.com/Semantia-UniSenai/semantia-web/pull/5). Foyth aprovou a UI/UX após
-> testar os lados comunicador e pessoa surda, e o Card 03 foi movido para `CONCLUÍDO`. Validação
+> testar os lados comunicador e pessoa surda. Como os PRs web #5 e cérebro #3 continuam abertos e
+> aguardam revisão, o Card 03 permanece em `EM REVISÃO`. Validação
 > especializada futura com pessoa surda/intérprete e leitor de tela real continua desejável, mas não
 > bloqueia o aceite deste card. Este documento não declara contexto da plateia, preferência
 > literal/adaptada, agente de IA ou precisão lexical do ASR como entregues.
