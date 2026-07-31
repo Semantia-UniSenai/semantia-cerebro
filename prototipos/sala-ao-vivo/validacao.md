@@ -1,9 +1,9 @@
 # Validação do protótipo — sala ao vivo acessível
 
-> **Data:** 2026-07-31  
-> **Branch:** `docs/ux-sala-acessivel`  
-> **Card:** [Fechar a experiência UX/UI acessível das salas ao vivo](https://app.clickup.com/t/86e2j4uyj)  
-> **Resultado técnico:** aprovado nos gates automatizados e na inspeção visual interna.  
+> **Data:** 2026-07-31
+> **Branch:** `docs/ux-sala-acessivel`
+> **Card:** [Fechar a experiência UX/UI acessível das salas ao vivo](https://app.clickup.com/t/86e2j4uyj)
+> **Resultado técnico:** aprovado nos gates automatizados e na inspeção visual interna.
 > **Resultado humano:** pendente de revisão do Foyth e validação externa; não confundir com aprovação final.
 
 ## Escopo validado
