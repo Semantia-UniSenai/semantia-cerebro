@@ -112,9 +112,10 @@ A prova foi executada em PostgreSQL 16 por dois caminhos:
 ## API REST e OpenAPI
 
 O contrato público usa `POST /api/rooms` para abrir a reunião instantânea e `/api/sessions`
-internamente para convite, snapshot, transcript e encerramento. As rotas públicas de criar/listar
-ocorrências e iniciar manualmente foram removidas. Swagger foi gerado a partir da API real com 17
-paths e 19 operações; o cliente frontend foi recapturado e regenerado pelo fluxo `pnpm api:sync`.
+internamente para convite, snapshot, transcript e encerramento. Não existe endpoint REST de upload ou
+transcrição de áudio: a API recebe somente texto pelos eventos Socket.IO. As rotas públicas de
+criar/listar ocorrências e iniciar manualmente foram removidas. Swagger e cliente Orval devem ser
+recapturados pelo fluxo `pnpm api:sync` sempre que o contrato mudar.
 
 As jornadas ativas não expõem `/classes`, `/turmas` ou `/aula`. Compatibilidade com o domínio
 escolar acontece pela migration dos dados, não pela manutenção indefinida de dois contratos
@@ -149,35 +150,65 @@ REST.
 ## Fluxo atual da transcrição
 
 ```text
-Comunicador no browser                   API                         Participantes
-Web Speech API ─ parcial ─▶ transcript:partial ─▶ broadcast ─▶ legenda parcial
-Web Speech API ─ final ───▶ transcript:final ───▶ usecase ──▶ persistência + broadcast
-                                                   │
-                                                   └─ stripDisfluencies()
+caminho rápido
+SpeechRecognition ─ parcial/final ─▶ Socket.IO ─▶ limpeza + persistência + broadcast
+        │ ausente ou erro network/service-not-allowed/start-failed
+        ▼
+fallback local cross-browser
+getUserMedia + AudioContext + AudioWorklet ─▶ Vosk português em WebAssembly/Web Worker
+                                           ─▶ texto parcial/final ─▶ mesmo Socket.IO canônico
 ```
 
-- parciais são efêmeras e não persistidas;
-- finais recebem limpeza conservadora;
-- ruído puro não recebe sequência nem broadcast;
-- sequência, transcript e chat sobrevivem ao encerramento;
-- o Brave pode emitir erro `network` no reconhecimento; o front evita reinício infinito.
+- captura de microfone funciona em navegadores modernos por `getUserMedia`; gravar ou transmitir
+  áudio não implica que o navegador ofereça conversão de fala em texto;
+- o caminho rápido usa a implementação de `SpeechRecognition` fornecida pelo navegador, que pode
+  depender do serviço do próprio fornecedor;
+- Firefox/Zen, ou o caminho nativo bloqueado, carrega sob demanda o modelo
+  `vosk-model-small-pt-0.3.tar.gz` e processa os samples no próprio navegador;
+- o modelo padrão tem 32.440.432 bytes, licença Apache-2.0 e URL substituível por
+  `VITE_VOSK_MODEL_URL`; produção controlada deve preferir hospedagem no próprio domínio;
+- no fallback local, a API Semantia e terceiros não recebem áudio; somente texto parcial/final
+  atravessa Socket.IO;
+- não existe chave, custo por minuto, endpoint de upload ou dependência de provedor STT no backend;
+- Vosk/Web Speech são ASR, não a futura IA generativa de adaptação. O literal não recebe correção
+  inventada por LLM;
+- todo texto final usa o mesmo `AppendTranscriptSegmentUseCase`, limpeza conservadora, sequência e
+  broadcast;
+- falhas distinguem permissão/captura, download do modelo e reconhecimento local sem recomendar
+  troca de navegador;
+- após a carga longa, o `AudioContext` é retomado novamente antes do estado ativo. O worklet é um
+  asset JavaScript same-origin, e um watchdog encerra a captura quando nenhum frame chega em quatro
+  segundos, evitando o falso estado “transcrevendo”;
+- a interface permite cancelar a preparação, diferencia conexão/silêncio/áudio recebido e mantém o
+  controle visível em altura reduzida. Esses sinais são derivados localmente e não enviam áudio,
+  samples ou nível sonoro à API.
+
+### Limites medidos do fallback local
+
+No spike automatizado Firefox de 2026-07-30, o modelo carregou em 43,643 s a frio e processou um
+áudio pt-BR de 8,064 s sem chamadas de transcrição externas. A frase esperada continha “projeto
+Semantia” e “navegador Firefox”; a saída reconheceu “projeto ser mantinha” e “navegador falha fox”.
+Isso prova viabilidade técnica no Firefox, mas também evidencia carga inicial e precisão inferiores
+às de modelos maiores. Cache, progresso visível, dispositivos reais, ruído, sotaques e nomes próprios
+precisam de QA antes de tratar o fallback como legenda de acessibilidade confiável.
 
 ## Arquitetura-alvo do pipeline
 
 ```text
-áudio do navegador
-  → STT parcial (efêmero)
-  → STT final
+captura no navegador
+  → ASR nativo ou Vosk local: parcial efêmero
+  → ASR nativo ou Vosk local: final
   → limpeza conservadora no backend
   → transcript literal canônico + persistência
-  → fila de adaptação contextual
+  → fila de adaptação contextual por IA generativa
   → transcript adaptado OU fallback literal
   → preferência individual + legenda karaokê
 ```
 
-A adaptação, o contexto da plateia e a preferência literal/adaptada permanecem planejados. Falha
-de IA nunca poderá bloquear o literal e credenciais de provedor deverão existir somente no
-backend por variável de ambiente.
+A adaptação, o contexto da plateia e a preferência literal/adaptada permanecem planejados. A IA
+generativa será acionada somente depois do literal final. Falha nessa etapa nunca poderá bloquear o
+literal; credenciais futuras de adaptação deverão existir somente no backend por variável de
+ambiente.
 
 ## Evidências de validação
 
@@ -189,8 +220,23 @@ Em 2026-07-30, na branch de generalização:
 - API: 15 suites e 61 testes unitários, lint, build e Prisma aprovados;
 - E2E multiator aprovado contra PostgreSQL 16;
 - migration limpa e migration com dados legados aprovadas;
-- OpenAPI/Orval sincronizados;
-- frontend: 13 arquivos e 68 testes, além do build, aprovados;
+- OpenAPI/Orval sincronizados em 17 paths e 19 operações, sem endpoint de áudio ou
+  `transcribeMeetingAudio`;
+- frontend: 16 arquivos e 84 testes, typecheck e build aprovados; o runtime Vosk foi isolado em
+  chunk lazy de 5,79 MB (2,38 MB gzip), fora do bundle inicial, e o `AudioWorklet` saiu como asset
+  JavaScript same-origin de 2,12 kB;
+- QA real do produto com Vosk forçado e microfone sintético: Firefox ficou pronto em 46,352 s e
+  Chromium em 43,172 s; ambos exibiram o estado ativo, requisitaram o modelo uma vez e não fizeram
+  request a `/transcriptions`, OpenAI ou Groq;
+- depois de uma falha relatada em Firefox/Zen real, o cenário de `AudioContext` suspenso durante a
+  carga longa foi reproduzido em teste, e o pipeline legado foi substituído por `AudioWorklet`;
+- QA final do build, com suspensão adicional forçada e viewport `1280×480`, percorreu
+  `MediaStream → AudioWorklet → Vosk → Socket.IO → PostgreSQL` em Firefox e Chromium. Persistiu cinco
+  palavras no Firefox e sete no Chromium, manteve o controle visível, não fez request de áudio,
+  OpenAI ou Groq e não produziu erro de console nem log Vosk;
+- no Firefox, “Pausar transcrição” deixou a track em `ended` e o `AudioContext` em `closed`; o asset
+  do worklet e o modelo foram requisitados uma vez. Isso comprova lifecycle e pipeline, não precisão
+  suficiente para acessibilidade;
 - audit de produção sem vulnerabilidades altas; web sem advisories e API com 3 moderadas;
 - jornada anterior de preparação foi rejeitada na revisão de produto e removida. O QA final em
   Brave/Chromium provou em 1440×900 e 390×844: cadastro, **Nova reunião** em um clique, entrada ao
