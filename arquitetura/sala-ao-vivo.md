@@ -1,8 +1,9 @@
 # Sala ao vivo — arquitetura do domínio genérico
 
-> **Status em 2026-07-30:** o contrato genérico foi implementado e validado na branch
-> `feat/salas-comunicacao`, empilhada sobre `docs/novo-escopo-transcricao`. Ainda depende de revisão
-> e merge dos PRs para ser considerado integrado em `dev`.
+> **Status em 2026-07-31:** o contrato genérico foi implementado e validado na branch
+> `feat/salas-comunicacao`; a experiência caption-first e a adaptação dos envelopes reais do gateway
+> foram validadas em `feat/ux-sala-acessivel`, empilhada sobre ela. Ambas ainda dependem de revisão e
+> merge dos PRs para serem consideradas integradas em `dev`.
 >
 > Use este documento junto ao
 > [contrato canônico](../produto/contrato-mvp-transcricao-tempo-real.md), ao
@@ -15,7 +16,7 @@
 |---|---|---|
 | Papéis | `HOST`, `MODERATOR`, `PARTICIPANT` e `GUEST`, todos contextuais | separar comunicador do anfitrião quando houver necessidade comprovada |
 | Agregado | `Room` como reunião do produto; `RoomSession` e `SessionParticipant` como persistência interna | contexto detalhado e versionado da plateia |
-| Entrada | JWT para conta; `joinToken` + token efêmero para convidado | revogação administrativa antes do encerramento e rate limit |
+| Entrada | JWT para conta; `joinToken` + token efêmero para convidado, inclusive com conta já autenticada | revogação administrativa antes do encerramento e rate limit |
 | Transcript | uma versão literal limpa e persistida | literal + adaptada por segmento |
 | Retenção | reunião encerrada somente leitura, sem expiração automática | exclusão antecipada e automática em 30 dias |
 | Capacidade | jornada multiator funcional | carga e reconexão comprovadas para 25/50 conexões |
@@ -55,6 +56,11 @@ anteriores sem reintroduzir esse modelo na interface.
 O anfitrião é derivado de `Room.hostId`, não de uma função global no cadastro. Moderadores e
 participantes recebem permissões somente pela associação à sala. Convidados não são promovidos a
 membros persistentes.
+
+Uma conta autenticada pode abrir um convite público e entrar com a identidade contextual criada por
+esse convite. Nesse caso, o token efêmero **específico da mesma `sessionId`** prevalece sobre o JWT
+global da conta durante o handshake Socket.IO. Isso evita negar o convite por a conta não ser membro,
+sem ampliar acesso: token de convidado, identidade e permissões continuam restritos àquela reunião.
 
 ## Papéis e permissões
 
@@ -142,6 +148,11 @@ Eventos servidor → cliente:
 - parciais e finais de transcript;
 - chat e fila de mãos;
 - encerramento e falhas reconhecidas.
+
+O gateway serializa o snapshot com `self`, mensagens com `name`/`role`/`at`, transcript com `at` e
+presença como `{ participant }`. O frontend normaliza esses envelopes na fronteira de
+`useLiveSession`; componentes de apresentação recebem apenas `Participant`, `ChatMessage` e
+`TranscriptEntry` canônicos. Não se deve espalhar compatibilidade de wire format pelos componentes.
 
 Todo comando recebe `{ ok: true, ... }` ou `{ ok: false, error: { code, message } }`. O gateway
 permanece fino e delega autorização, persistência e transições aos mesmos serviços usados pelo
@@ -288,3 +299,18 @@ retenção automática, carga, quatro horas ou produção distribuída.
 - após a integração de dispositivos, Firefox aprovou novamente o pipeline completo nos transportes
   direto e compatível, reconhecendo e persistindo “este é um teste técnico de transcrição em
   português”, sem request de áudio.
+- PR de UX/integração real: [Semantia-UniSenai/semantia-web#5](https://github.com/Semantia-UniSenai/semantia-web/pull/5),
+  empilhado sobre o PR web #4;
+- Vitest aprovou 42 suites e 123 testes; build/typecheck, `git diff --check` e audit de produção
+  também passaram;
+- smoke E2E em dois contextos isolados provou anfitrião autenticado + segunda conta autenticada
+  entrando pelo convite como `GUEST`, refresh direto ainda autorizado, presença e chat bidirecional,
+  sem erro de console ou página;
+- a colisão entre VLibras e `Enviar mensagem` foi reproduzida por geometria e eliminada movendo o
+  widget para fora do painel lateral aberto; o clique real passou sem `force` ou bypass.
+- o teste humano dos lados comunicador e pessoa surda aprovou a UI/UX; o Card 03 continua em
+  `EM REVISÃO` enquanto os PRs web #5 e cérebro #3 estiverem abertos e aguardando revisão;
+- a leitura de um roteiro controlado produziu WER de aproximadamente 24,4% no Vosk local, com erros
+  semânticos relevantes. Essa evidência foi registrada no Card 06, que passa a tratar benchmark e
+  escolha do fallback/modelo; o Card 11 continua sendo o gate de qualidade ponta a ponta. A precisão
+  do reconhecedor não pertence ao aceite visual do Card 03.
