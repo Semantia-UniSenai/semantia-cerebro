@@ -1,5 +1,12 @@
 # 🏗️ Arquitetura do Backend — Semantia
 
+> **Status em 2026-07-29:** este documento registra decisões de stack que continuam válidas e a
+> evolução implementada até a sala ao vivo. Os nomes `PROFESSOR`, `ALUNO`, turma e aula são
+> fundação legada a generalizar. O contrato de produto atual está em
+> [`../produto/contrato-mvp-transcricao-tempo-real.md`](../produto/contrato-mvp-transcricao-tempo-real.md);
+> o estado exato implementado versus planejado está em
+> [`../requisitos/mvp-transcricao-tempo-real.md`](../requisitos/mvp-transcricao-tempo-real.md).
+
 > Decisão tomada em **2026-06-28** (contexto: MVP para apresentação na banca em 29/06).
 > Registrada aqui pela regra de ouro do cérebro. Ver também `Desafio-Interdisciplinar-Semantia.md`.
 

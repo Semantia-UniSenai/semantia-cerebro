@@ -77,9 +77,10 @@ Resolver neste card as decisões que mudam contratos posteriores, especialmente 
 
 ### Alterações
 
-- Branch: não criada.
-- Branch sugerida: `docs/novo-escopo-transcricao` no `semantia-cerebro`.
-- PR: não aberto.
+- Branch: `docs/novo-escopo-transcricao` nos três repositórios.
+- PR cérebro: [Semantia-UniSenai/semantia-cerebro#1](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/1).
+- PR API: [Semantia-UniSenai/semantia-api#3](https://github.com/Semantia-UniSenai/semantia-api/pull/3).
+- PR web: [Semantia-UniSenai/semantia-web#3](https://github.com/Semantia-UniSenai/semantia-web/pull/3).
 
 ### Gestão do card
 
