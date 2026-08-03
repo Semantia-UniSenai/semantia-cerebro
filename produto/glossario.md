@@ -1,7 +1,7 @@
 ---
 title: Glossário canônico do Semantia
 status: canônico
-atualizado: 2026-07-29
+atualizado: 2026-07-30
 ---
 
 # Glossário canônico do Semantia
@@ -12,20 +12,21 @@ central.
 
 ## Termos do produto
 
-### Sala de comunicação
+### Reunião
 
-Espaço lógico que reúne anfitrião, participantes, configuração de contexto e sessões. Substitui
-**turma** como agregado genérico. Uma escola ainda pode chamar uma sala de turma na interface da
-vertical educacional, sem alterar o modelo central.
+Encontro instantâneo que reúne anfitrião, participantes, convite, transcrição e interações. É
+aberto com um clique e já nasce ao vivo. **Sala e reunião são o mesmo conceito no MVP.** Uma escola
+ainda pode chamá-la de aula ou turma na interface de uma vertical, sem alterar o modelo central.
 
-### Sessão ao vivo
+### Registro interno de ciclo de vida
 
-Período com início e fim em que há presença, transcrição e interação em tempo real. Substitui
-**aula ao vivo** no domínio central.
+`RoomSession` delimita tecnicamente presença, transcrição, chat e encerramento. Não é um conceito
+exposto na interface: não há criação, preparação, início manual nem histórico de sessões dentro de
+uma reunião.
 
 ### Anfitrião
 
-Pessoa autenticada que cria, configura, inicia, encerra e administra a sala. Substitui
+Pessoa autenticada que abre, configura durante o uso, encerra e administra a reunião. Substitui
 **professor** como papel de autorização. Professor continua sendo uma ocupação possível do
 anfitrião.
 
@@ -41,7 +42,7 @@ Pessoa que entra para acompanhar a comunicação e escolher a apresentação da 
 
 ### Convidado
 
-Participante que entra por link/token e usa uma identidade efêmera da sessão, sem conta
+Participante que entra por link/token e usa uma identidade efêmera da reunião, sem conta
 obrigatória.
 
 ### Plateia
@@ -52,8 +53,9 @@ usuário ou permissão.
 
 ### Contexto da plateia
 
-Configuração estável durante a sessão que orienta o agente de adaptação. Mudanças depois de a
-sessão entrar ao vivo exigirão versionamento explícito; o MVP não altera o contexto silenciosamente.
+Configuração feita já dentro da reunião para orientar o agente de adaptação. Alterações exigem
+versionamento explícito e valem para os segmentos seguintes; abrir a reunião nunca depende desse
+formulário.
 
 ### Segmento parcial
 
@@ -88,15 +90,16 @@ adaptação e não substitui intérprete humano.
 
 ### Moderador
 
-Papel futuro para apoiar controle de participantes e interações. Não bloqueia a primeira entrega
-do núcleo.
+Papel contextual para apoiar controle de participantes, configuração e encerramento. Não concede
+privilégios globais fora da reunião autorizada.
 
 ## Substituições obrigatórias
 
 | Legado | Canônico | Uso permitido do legado |
 |---|---|---|
-| turma | sala de comunicação | material histórico ou vertical escolar |
-| aula | sessão ao vivo | material histórico ou copy escolar |
+| turma | reunião ou sala | material histórico ou vertical escolar |
+| aula | reunião | material histórico ou copy escolar |
+| sessão | registro interno de ciclo de vida | código, banco e arquitetura; não usar na jornada do MVP |
 | professor | anfitrião ou comunicador | ocupação da pessoa em contexto escolar |
 | aluno | participante | ocupação da pessoa em contexto escolar |
 | classe escolar | sala | modelo legado até a migração |
