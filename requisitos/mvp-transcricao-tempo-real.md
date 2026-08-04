@@ -1,7 +1,7 @@
 ---
 title: Requisitos do MVP de transcrição em tempo real
 status: canônico
-atualizado: 2026-07-30
+atualizado: 2026-08-03
 ---
 
 # Requisitos do MVP de transcrição em tempo real
@@ -26,7 +26,7 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 | RF02 | Anfitrião abre uma reunião instantânea em um clique e recebe link/token de convite. | P0 | VALIDADO NA BRANCH | Criação transacional já `LIVE`; não há preparação nem início manual. |
 | RF03 | Convidado entra pelo link com nome de exibição, sem conta. | P0 | VALIDADO NA BRANCH | REST e Socket.IO usam token efêmero limitado à reunião. |
 | RF04 | Anfitrião configura durante a reunião tipo do encontro, faixa etária, familiaridade com português, domínio e simplificação. | P0 | PLANEJADO | Não há modelo nem tela de contexto; essa configuração não bloqueia a abertura. |
-| RF05 | Navegador do comunicador captura fala e publica hipóteses parciais e finais. | P0 | IMPLEMENTADO | Web Speech API e eventos `transcript:partial/final`. |
+| RF05 | Navegador do comunicador captura fala e publica hipóteses parciais e um final canônico. | P0 | VALIDADO NA BRANCH | SpeechRecognition somente on-device quando comprovado; Vosk + Whisper local como fallback cross-browser; somente texto trafega. |
 | RF06 | Backend limpa disfluências inequívocas apenas nos segmentos finais. | P0 | IMPLEMENTADO | `AppendTranscriptSegmentUseCase` e `stripDisfluencies`. |
 | RF07 | Backend persiste o transcript literal com sequência estável. | P0 | IMPLEMENTADO | `TranscriptSegment(sessionId, seq, text)`. |
 | RF08 | Agente produz versão adaptada contextual sem alterar fatos ou intenção. | P0 | PLANEJADO | Camada de IA ainda não existe. |
@@ -46,15 +46,15 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 | ID | Requisito | Estado | Critério de aceite |
 |---|---|---|---|
 | RNF01 | Acessibilidade e responsividade | PARCIAL | Teclado, foco, contraste, `aria-live`, movimento reduzido e QA mobile/desktop na sala. |
-| RNF02 | Continuidade da legenda | PLANEJADO | Falha da IA não interrompe o literal; reconexão não duplica sequência. |
-| RNF03 | Latência observável | PLANEJADO | Medir parcial, final limpo e adaptado; adaptação deve buscar p95 ≤ 2 s e cair para literal em até 3 s. |
+| RNF02 | Continuidade da legenda | VALIDADO NA BRANCH | Fila limitada/TTL/ACK/retry, reentrada antes do flush e idempotência por `clientSegmentId`; falha do Whisper preserva Vosk. A futura IA adaptadora ainda deve preservar o literal. |
+| RNF03 | Latência observável | PARCIAL | Janela parcial de 250 ms e benchmark local Vosk/Whisper registrados; falta medir p95 ponta a ponta e a futura adaptação. |
 | RNF04 | Capacidade | PLANEJADO | Provar 25 participantes concorrentes; só anunciar alvo de 50 após teste de carga/reconexão. |
 | RNF05 | Duração da reunião | PLANEJADO | Suportar até 4 h sem reiniciar sequência nem perder ordem. |
-| RNF06 | Privacidade | PARCIAL | Áudio não é armazenado e tokens ficam restritos à reunião; expiração de 30/90 dias ainda não foi implementada. |
+| RNF06 | Privacidade | PARCIAL | Auditoria do artefato provou zero frame/binário/corpo HTTP de áudio; PCM fica no browser e é limpo em todo lifecycle. Expiração de 30/90 dias ainda não foi implementada. |
 | RNF07 | Segurança | PARCIAL | Hash, JWT, guest token contextual e acesso pós-reunião somente leitura foram validados; rate limit ainda falta. |
 | RNF08 | Auditabilidade da IA | PLANEJADO | Registrar versão, latência e status da adaptação sem logar segredo ou transcript fora da política. |
-| RNF09 | Compatibilidade | PARCIAL | Mensagem explícita quando STT não for suportado; fluxo validado em Brave/Chrome e fallback documentado. |
-| RNF10 | Observabilidade | PLANEJADO | Métricas sem conteúdo sensível para conexão, reconexão, fila, latência, timeout e erro. |
+| RNF09 | Compatibilidade | VALIDADO NA BRANCH | Detecção por capacidades, não user-agent; captura local real validada em Brave/Chromium e Firefox, sem recomendar troca de browser. |
+| RNF10 | Observabilidade | PARCIAL | UX expõe carga, captura, refino, fallback e erro; benchmark e E2Es preservam métricas sem áudio. Falta telemetria agregada de produção sem conteúdo. |
 
 ## Regras de negócio
 
@@ -63,14 +63,14 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 | RN01 | Transcrição acessível em tempo real é o núcleo e precede mídia, avatar, jogos e ferramentas gratuitas. |
 | RN02 | Abrir/administrar reunião exige conta do anfitrião; acompanhar por convite não exige conta. |
 | RN03 | O convidado recebe identidade efêmera restrita à reunião. |
-| RN04 | Segmentos parciais não são persistidos nem enviados à IA. |
+| RN04 | Segmentos parciais não são persistidos nem enviados à IA; somente o final Vosk preliminar pode ser refinado pelo Whisper local. |
 | RN05 | Limpeza remove apenas ruído inequívoco e nunca “melhora” significado. |
 | RN06 | O transcript literal limpo é canônico e nunca depende do resultado da IA. |
 | RN07 | A versão adaptada preserva fatos, nomes, números, intenção e termos essenciais. |
 | RN08 | A preferência literal/adaptada é individual e pode mudar durante a reunião. |
 | RN09 | O contexto da plateia pode ser configurado já dentro da reunião; cada alteração futura deve ter versão explícita e valer apenas para novos segmentos. |
 | RN10 | O MVP usa uma fonte principal de transcrição por vez. |
-| RN11 | Áudio não é gravado nem armazenado no MVP. |
+| RN11 | Áudio não é gravado, armazenado nem enviado para fora do navegador no MVP. Download de pesos do modelo não é upload de áudio. |
 | RN12 | Transcript, chat e metadados identificáveis expiram 30 dias após o encerramento e podem ser apagados antes pelo anfitrião; logs técnicos mínimos sem conteúdo/identidade têm janela de 90 dias. |
 | RN13 | A reunião suporta no máximo 4 h e tem alvo de até 50 conexões, condicionado a teste. |
 | RN14 | VLibras é camada opcional e não é o agente de adaptação do Semantia. |
@@ -109,10 +109,11 @@ preparação ou início manual.
 **Ator:** comunicador/anfitrião.
 
 1. Autoriza o microfone.
-2. Publica parciais efêmeras.
-3. Confirma segmentos finais.
-4. Backend limpa e persiste o literal.
-5. Agente tenta produzir o adaptado.
+2. Publica parciais Vosk efêmeras, deduplicadas e limitadas.
+3. Refina localmente o final Vosk com Whisper e escolhe exatamente um final; erro/timeout mantém Vosk.
+4. Enfileira o final textual com `clientSegmentId`, ACK/retry/TTL e reconexão idempotente.
+5. Backend autoriza somente `HOST`, limpa e persiste o literal uma única vez.
+6. O futuro agente de adaptação tenta produzir o adaptado sem bloquear o literal.
 
 **Resultado:** legenda contínua, com fallback literal.
 
@@ -162,6 +163,8 @@ Links individuais estão em
 - `PROFESSOR`/`ALUNO`, turmas e rotas `/aula` continuam integrados em `dev`, mas foram removidos do
   contrato ativo na branch de generalização e cobertos por migration preservadora.
 - Não existe agente de IA nem preferência adaptada.
+- A robustez de captura/transporte do Card 06 está validada nas branches empilhadas, mas não integrada
+  em `dev` até revisão e merge dos PRs.
 - Não existe expiração de transcript/chat/metadados nem política automática de 90 dias para logs técnicos.
 - Documentos do Desafio Interdisciplinar de junho são snapshots históricos e não descrevem o
   backend atual nem o MVP vigente.

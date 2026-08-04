@@ -23,6 +23,8 @@ qualquer agente de IA (ou pessoa nova) trabalhar no Semantia, o contexto vem **d
    responsividade, WCAG e handoff visual.
 6. [Protótipo navegável e validação](prototipos/sala-ao-vivo/README.md) — variantes, cenários,
    evidências e limites de validação humana.
+7. [Captura de fala robusta e transporte — Card 06](arquitetura/captura-fala-transporte-card-06.md)
+   — ASR local, privacidade, idempotência, benchmark e validação cross-browser.
 
 Documentos de junho em `projeto/` e as seções antigas do histórico continuam preservados como
 evidência do TCC, mas **não substituem** os documentos canônicos acima.
@@ -52,6 +54,7 @@ contexto/       Histórico cronológico de decisões e gotchas
 arquitetura/    Fundação implementada e arquitetura-alvo explicitamente separadas
 planejamento/   Backlogs, auditorias, planos e divisão de entregas do produto
 prototipos/      Contratos visuais navegáveis e evidências de validação
+evidencias/      Resultados sanitizados, fixtures e harnesses reproduzíveis
 ```
 
 ## Planejamento atual

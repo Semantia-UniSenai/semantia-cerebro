@@ -1,7 +1,7 @@
 ---
 title: Contrato canônico do MVP de transcrição em tempo real
 status: canônico
-atualizado: 2026-07-30
+atualizado: 2026-08-03
 substitui: escopo educacional de adaptação de materiais estáticos
 ---
 
@@ -29,7 +29,8 @@ O fluxo prioritário é:
 `áudio → reconhecimento de fala → limpeza conservadora de disfluências → adaptação por IA → legenda karaokê`
 
 1. O comunicador abre uma reunião instantânea; a API já a inicia e gera o link/token de convite.
-2. O navegador captura a fala e envia segmentos parciais e finais.
+2. O navegador captura/processa a fala localmente e envia somente segmentos textuais parciais e o
+   único final canônico.
 3. Segmentos parciais são efêmeros e servem apenas à sensação de tempo real.
 4. Segmentos finais passam pela limpeza conservadora no backend.
 5. O texto limpo é o transcript literal canônico.
@@ -92,8 +93,9 @@ e [web #4](https://github.com/Semantia-UniSenai/semantia-web/pull/4). Nenhum mer
 - Uma reunião do MVP comporta até **4 horas** de duração contínua.
 - O anfitrião pode encerrá-la antes; encerramento é idempotente.
 - A reconexão do anfitrião não pode duplicar segmentos nem reiniciar a sequência.
-- O Semantia **não grava nem armazena áudio** no MVP. O áudio existe apenas no fluxo de captura do
-  navegador necessário ao reconhecimento de fala.
+- O Semantia **não grava, armazena nem envia áudio para fora do navegador** no MVP. PCM existe
+  transitoriamente apenas entre captura, `AudioWorklet` e Workers locais e é eliminado no lifecycle.
+  Download de pesos/metadados do ASR local não é upload de áudio.
 - Transcript, chat e metadados identificáveis da reunião — título, contexto da plateia, horários,
   participantes e metadados de adaptação — ficam disponíveis ao anfitrião por **30 dias após o
   encerramento**.
@@ -174,6 +176,20 @@ Datilologia, ranking, dicionário, ferramentas gratuitas e demais funcionalidade
 - REST, Swagger/OpenAPI, cliente Orval, Socket.IO, rotas e telas sincronizados;
 - jornada real em Brave/Chromium validada em desktop e mobile.
 
+### Validado nas branches do Card 06, pendente de revisão
+
+- SpeechRecognition somente quando o browser comprova processamento on-device pt-BR; Vosk local como
+  fallback por capacidades e Whisper Small q8/WASM como refinamento do final Vosk;
+- parciais efêmeras limitadas e único final canônico com fila, TTL, ACK, retry, reconexão e
+  idempotência persistente por `clientSegmentId`;
+- publicação exclusiva por `HOST`, com rejeição de moderador, participante e convidado;
+- cleanup de microfone, modelos, recognizers, workers, buffers, timers, ACKs e fila em stop, saída,
+  disconnect, encerramento e unmount;
+- runtime real em Brave/Chromium e Firefox, auditoria sem frame binário/corpo HTTP de áudio e
+  benchmark Vosk/Whisper em cinco condições;
+- detalhes e limitações em
+  [Card 06 — captura de fala robusta e transporte](../arquitetura/captura-fala-transporte-card-06.md).
+
 ### Planejado para o contrato atual após a generalização
 
 - contexto da plateia;
@@ -195,5 +211,6 @@ backlog vigente.
 - [Glossário canônico](./glossario.md)
 - [Requisitos, regras e casos de uso](../requisitos/mvp-transcricao-tempo-real.md)
 - [Arquitetura da sala ao vivo](../arquitetura/sala-ao-vivo.md)
+- [Captura de fala robusta e transporte — Card 06](../arquitetura/captura-fala-transporte-card-06.md)
 - [Backlog atual](../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md)
 - [Auditoria do backlog legado](../planejamento/2026-07-29-auditoria-backlog-legado-trello.md)
