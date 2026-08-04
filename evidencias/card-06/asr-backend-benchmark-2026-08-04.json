@@ -1,0 +1,86 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-04T14:23:02-03:00",
+  "service": "faster-whisper 1.2.1",
+  "model": "small",
+  "device": "cpu",
+  "computeType": "int8",
+  "audio": {
+    "durationMs": 5112,
+    "bytes": 163584,
+    "referenceWords": 11,
+    "controlledWer": 0.0
+  },
+  "method": {
+    "warmupRequests": 1,
+    "sequentialRequestsPerProfile": 10,
+    "percentile": "nearest-rank",
+    "concurrencyProbe": 3,
+    "overloadProbe": 6,
+    "notes": "Limites aplicados por Docker Compose. O host não é a VPS Hostinger real."
+  },
+  "profiles": [
+    {
+      "name": "KVM2-emulated",
+      "limits": {
+        "cpus": 2,
+        "memoryBytes": 3221225472,
+        "cpuThreads": 2,
+        "maxConcurrency": 1,
+        "maxQueue": 4
+      },
+      "warmup": { "wallMs": 3204, "inferenceMs": 3189 },
+      "sequential": {
+        "successes": 10,
+        "wallMs": { "min": 2027, "p50": 2085, "p95": 2581, "max": 2581 },
+        "inferenceMs": { "p50": 2083, "p95": 2579 },
+        "rtfWall": { "p50": 0.408, "p95": 0.505 }
+      },
+      "concurrency3": {
+        "statuses": [200, 200, 200],
+        "wallMs": [4347, 2113, 6534]
+      },
+      "overload6": {
+        "statuses": [200, 200, 200, 200, 200, 429],
+        "error": { "code": "QUEUE_FULL", "message": "ASR queue is full" }
+      },
+      "resources": {
+        "maxCpuPercent": 217.98,
+        "maxMemoryBytes": 853645722,
+        "maxMemoryMiB": 814.1
+      }
+    },
+    {
+      "name": "KVM4-emulated",
+      "limits": {
+        "cpus": 4,
+        "memoryBytes": 4294967296,
+        "cpuThreads": 3,
+        "maxConcurrency": 1,
+        "maxQueue": 4
+      },
+      "warmup": { "wallMs": 2038, "inferenceMs": 2034 },
+      "sequential": {
+        "successes": 10,
+        "wallMs": { "min": 1595, "p50": 1716, "p95": 1978, "max": 1978 },
+        "inferenceMs": { "p50": 1714, "p95": 1976 },
+        "rtfWall": { "p50": 0.336, "p95": 0.387 }
+      },
+      "concurrency3": {
+        "statuses": [200, 200, 200],
+        "wallMs": [1738, 3469, 5113]
+      },
+      "resources": {
+        "maxCpuPercent": 328.29,
+        "maxMemoryBytes": 862034330,
+        "maxMemoryMiB": 822.1
+      }
+    }
+  ],
+  "interpretation": {
+    "realtimeFactor": "abaixo de 1 nos dois perfis para esta amostra de 5,112 s",
+    "queue": "uma inferência por processo; trabalhos aceitos são serializados",
+    "backpressure": "KVM2 rejeitou explicitamente o sexto trabalho com 429 quando capacidade total era cinco",
+    "recommendedInitialRollout": "small/int8, uma inferência, fila pequena; medir fala humana e carga real antes de ampliar concorrência"
+  }
+}

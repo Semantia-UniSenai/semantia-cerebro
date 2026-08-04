@@ -162,32 +162,38 @@ REST.
 
 ## Fluxo atual da transcrição
 
-A captura robusta é detalhada em
-[Card 06 — captura de fala robusta e transporte em tempo real](./captura-fala-transporte-card-06.md).
-O contrato resumido é:
+A captura local-first anterior permanece documentada como baseline no
+[relatório histórico do Card 06](./captura-fala-transporte-card-06.md). O contrato vigente é definido
+pela [ADR-001](./decisoes/ADR-001-asr-backend-cpu-first.md):
 
 ```text
-SpeechRecognition local/on-device pt-BR, quando comprovado por capacidade
-  OU
-getUserMedia + AudioWorklet → Vosk local (parcial/final preliminar)
-                            → PCM local → Whisper Small q8/WASM (final refinado)
-
-único final escolhido → fila/ACK/retry → Socket.IO textual → HOST-only
-                      → idempotência por clientSegmentId → persistência/broadcast
+getUserMedia + AudioWorklet
+  ├─ Vosk pt-BR local → parcial efêmero, throttle 250 ms
+  └─ buffer PCM em memória → trim/resample 16 kHz → PCM16
+                           → fila cliente: 8 itens, TTL 60 s, mesmo clientSegmentId no retry
+                           → Socket.IO transcription:audio (HOST-only)
+                           → API: validação + idempotência + fila serial por sessão
+                           → ASR privado: faster-whisper small/int8 CPU
+                           → limpeza conservadora → único final → PostgreSQL/broadcast
 ```
 
-- Firefox/Zen e browsers sem reconhecimento on-device usam Vosk + Whisper local; não há detecção por
-  user-agent nem recomendação de troca de navegador;
-- parciais Vosk são textuais, deduplicadas, limitadas a uma janela de 250 ms e nunca persistidas;
-- o áudio existe somente no browser entre microfone, `AudioWorklet`, thread principal e Worker local;
-- a API Semantia, Socket.IO e provedores externos nunca recebem PCM, Blob ou frame binário de áudio;
-- pesos/metadados dos modelos podem ser baixados e cacheados, mas áudio não é enviado junto;
-- somente o anfitrião `HOST` publica transcript; moderador, participante e convidado são recusados;
-- o Whisper escolhe um final refinado ou retorna o Vosk em erro, vazio ou deadline de 20 s;
-- fila offline, TTL, ACK, retry e unicidade por `clientSegmentId` impedem duplicação após reconexão;
-- stop, saída, desconexão e encerramento cancelam captura, workers, modelos, buffers, timers, ACKs e
-  fila sem publicar resultados atrasados;
-- a UI diferencia carga, ready, captura, refinamento e fallback sem prometer precisão universal.
+- Firefox/Zen e demais navegadores são tratados por capacidade, sem user-agent nem recomendação de
+  troca;
+- Vosk produz somente prévias; não pode publicar final canônico no modo backend;
+- cada segmento tem 250–30000 ms, PCM16 mono/16 kHz e no máximo 960000 bytes;
+- Socket.IO limita o envelope a 1,1 MB; cliente e API limitam a oito segmentos por sessão;
+- somente `HOST` presente em sessão `LIVE` envia áudio; moderador, participante e convidado são
+  recusados antes da inferência;
+- a API consulta `(sessionId, clientSegmentId)` antes do ASR, coalesce duplicata concorrente e serializa
+  segmentos da mesma sessão;
+- o serviço ASR executa uma inferência concorrente por padrão e possui fila interna limitada;
+- áudio existe apenas em memória e é descartado em sucesso, falha definitiva, expiração, saída, stop
+  ou encerramento; não há WAV/PCM em storage, banco ou volume;
+- `transcript:final` vindo do navegador é rejeitado em `ASR_MODE=backend`;
+- estados `processing`, `complete` e `failed` expõem motor/modelo/latência sem logar áudio ou texto;
+- nenhum fallback cloud ocorre sem nova decisão, configuração e consentimento.
+
+O teste isolado de microfone continua estritamente local: calcula somente nível e nunca envia samples.
 
 ### Seleção e teste da entrada de áudio
 
@@ -233,19 +239,17 @@ privacidade e limitações estão no
 
 ```text
 captura no navegador
-  → SpeechRecognition on-device ou Vosk local: parcial efêmero
-  → final Vosk preliminar → Whisper local → único final escolhido
-  → fallback Vosk em erro/vazio/timeout do refinamento
-  → fila idempotente + limpeza conservadora no backend
-  → transcript literal canônico + persistência
-  → fila de adaptação contextual por IA generativa
+  → Vosk local: parcial efêmero
+  → PCM16 efêmero → provider ASR backend → transcript literal canônico
+  → persistência/broadcast idempotente
+  → fila separada de adaptação contextual por agente/LLM
   → transcript adaptado OU fallback literal
-  → preferência individual + legenda karaokê
 ```
 
-A adaptação, o contexto da plateia e a preferência literal/adaptada permanecem planejados. A IA
-generativa será acionada somente depois do literal final. Falha nessa etapa nunca poderá bloquear o
-literal; credenciais futuras de adaptação deverão existir somente no backend por variável de
+ASR e agente são serviços distintos. A LLM recebe texto final, nunca substitui o reconhecimento de
+fala e não pode reescrever silenciosamente nomes, números ou códigos. A adaptação, o contexto da
+plateia e a preferência literal/adaptada permanecem planejados. Falha nessa etapa nunca poderá
+bloquear o literal; credenciais futuras de STT/LLM deverão existir somente no backend por variável de
 ambiente.
 
 ## Evidências de validação

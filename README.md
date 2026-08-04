@@ -23,8 +23,12 @@ qualquer agente de IA (ou pessoa nova) trabalhar no Semantia, o contexto vem **d
    responsividade, WCAG e handoff visual.
 6. [Protótipo navegável e validação](prototipos/sala-ao-vivo/README.md) — variantes, cenários,
    evidências e limites de validação humana.
-7. [Captura de fala robusta e transporte — Card 06](arquitetura/captura-fala-transporte-card-06.md)
-   — ASR local, privacidade, idempotência, benchmark e validação cross-browser.
+7. [ASR backend CPU-first — operação em VPS](arquitetura/asr-backend-vps.md) — arquitetura
+   vigente, filas, privacidade, deploy, benchmark KVM 2/KVM 4 e rollback.
+8. [Captura de fala robusta e transporte — Card 06](arquitetura/captura-fala-transporte-card-06.md)
+   — baseline local-first histórico, preservado como evidência e rollback explícito.
+9. [Evidências runtime do ASR backend](evidencias/card-06/asr-backend-runtime-2026-08-04.json)
+   e [benchmark CPU](evidencias/card-06/asr-backend-benchmark-2026-08-04.json).
 
 Documentos de junho em `projeto/` e as seções antigas do histórico continuam preservados como
 evidência do TCC, mas **não substituem** os documentos canônicos acima.

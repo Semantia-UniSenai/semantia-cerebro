@@ -13,11 +13,20 @@ clickup: 86e2j4w0k
 > [semantia-api #6](https://github.com/Semantia-UniSenai/semantia-api/pull/6) e no PR documental desta
 > branch. A entrega não está integrada em `dev` e não possui merge automático.
 
-## Resultado
+## Situação após a evolução de 2026-08-04
 
-O navegador do anfitrião é a única origem de transcrição. O pipeline usa reconhecimento local por
-capacidade, mantém parciais textuais efêmeras e escolhe exatamente um final canônico. Nenhum áudio é
-enviado à API Semantia, Socket.IO, OpenAI, Groq ou outro provedor STT.
+> **Contrato local-first parcialmente superado pela [ADR-001](./decisoes/ADR-001-asr-backend-cpu-first.md).**
+> A partir desta evolução, Vosk continua apenas como parcial/endpointing; PCM16 efêmero segue ao
+> backend e `faster-whisper small/int8` produz o único final canônico. Os resultados, arquivos e
+> medições abaixo permanecem como registro fiel da implementação anterior e como baseline, não como
+> descrição do runtime vigente.
+
+## Resultado histórico local-first
+
+Na versão validada em 2026-08-03, o navegador do anfitrião era a única origem de transcrição. O
+pipeline usava reconhecimento local por capacidade, mantinha parciais textuais efêmeras e escolhia
+exatamente um final canônico. Naquela versão nenhum áudio era enviado à API Semantia, Socket.IO,
+OpenAI, Groq ou outro provedor STT.
 
 ```text
 microfone do anfitrião
