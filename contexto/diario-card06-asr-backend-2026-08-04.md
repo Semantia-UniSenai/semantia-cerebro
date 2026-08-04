@@ -1,7 +1,7 @@
 ---
 title: Diário de execução — evolução Card 06 para ASR backend
 data: 2026-08-04
-status: em-andamento
+status: concluido-aguardando-leitura-humana
 ---
 
 # Diário de execução — ASR backend CPU-first
@@ -106,3 +106,10 @@ Este arquivo registra decisões e mudanças da evolução autorizada por Foyth a
 - Três chamadas concorrentes foram serializadas. Em KVM 2, capacidade total cinco rejeitou a sexta com `429 QUEUE_FULL`.
 - WER controlado: 0% em 11 palavras. O áudio humano original não foi localizado; a comparação humana será feita na nova leitura de Foyth, sem inventar número.
 - Evidências: `evidencias/card-06/asr-backend-runtime-2026-08-04.json` e `evidencias/card-06/asr-backend-benchmark-2026-08-04.json`.
+
+### Publicação e backlog
+
+- Commits publicados: web `39ca322`, API `b40a63b`, cérebro `b229300`.
+- PRs #7, #6 e #4 receberam título/contexto/evidências atualizados via API REST; continuam abertos, sem merge/auto-merge.
+- ClickUp `86e2j4w0k` foi corrigido de **EM PROGRESSO** para **EM REVISÃO** e recebeu comentário com gates, benchmark, privacidade, riscos e links.
+- Implementação, runtime local, evidências e publicação estão concluídos. A única atividade seguinte é a validação humana por leitura do roteiro e eventual ajuste de modelo/configuração com base no WER real.

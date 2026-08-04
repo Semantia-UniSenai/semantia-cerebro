@@ -38,16 +38,16 @@
 - Erros estáveis: `INVALID_AUDIO`, `AUDIO_TOO_SHORT`, `AUDIO_TOO_LONG`, `QUEUE_FULL`, `MODEL_UNAVAILABLE`, `INFERENCE_FAILED`.
 
 **TDD:**
-- [ ] RED: config segura, limites e provider obrigatório.
-- [ ] GREEN: settings CPU-first.
-- [ ] RED: PCM inválido/curto/longo nunca chega ao provider.
-- [ ] GREEN: validação de áudio.
-- [ ] RED: concorrência serial e fila limitada.
-- [ ] GREEN: coordenador de inferência.
-- [ ] RED: provider Whisper converte PCM para float sem gravar arquivo.
-- [ ] GREEN: adapter lazy `faster-whisper`.
-- [ ] RED: health/readiness/endpoint e redaction de erros.
-- [ ] GREEN: FastAPI e container não-root.
+- [x] RED: config segura, limites e provider obrigatório.
+- [x] GREEN: settings CPU-first.
+- [x] RED: PCM inválido/curto/longo nunca chega ao provider.
+- [x] GREEN: validação de áudio.
+- [x] RED: concorrência serial e fila limitada.
+- [x] GREEN: coordenador de inferência.
+- [x] RED: provider Whisper converte PCM para float sem gravar arquivo.
+- [x] GREEN: adapter lazy `faster-whisper`.
+- [x] RED: health/readiness/endpoint e redaction de erros.
+- [x] GREEN: FastAPI e container não-root.
 
 ## Task 2 — Cliente ASR e coordenação na API
 
@@ -64,18 +64,18 @@
 - Evento final continua `transcript:final` e mantém o contrato dos consumidores.
 
 **TDD:**
-- [ ] RED: convidado/moderador/não ingressado/sala encerrada são rejeitados antes do cliente ASR.
-- [ ] GREEN: autorização centralizada.
-- [ ] RED: codec, sample rate, duração e bytes inconsistentes são rejeitados.
-- [ ] GREEN: parser/limites.
-- [ ] RED: retry de segmento já persistido não infere de novo.
-- [ ] GREEN: lookup idempotente.
-- [ ] RED: duplicata concorrente compartilha a mesma Promise e salas diferentes não se bloqueiam.
-- [ ] GREEN: coordenador por sessão.
-- [ ] RED: apenas resultado ASR válido chega ao append/broadcast.
-- [ ] GREEN: use case vertical.
-- [ ] RED: final textual do cliente é rejeitado quando `ASR_MODE=backend`.
-- [ ] GREEN: feature flag com backend como padrão.
+- [x] RED: convidado/moderador/não ingressado/sala encerrada são rejeitados antes do cliente ASR.
+- [x] GREEN: autorização centralizada.
+- [x] RED: codec, sample rate, duração e bytes inconsistentes são rejeitados.
+- [x] GREEN: parser/limites.
+- [x] RED: retry de segmento já persistido não infere de novo.
+- [x] GREEN: lookup idempotente.
+- [x] RED: duplicata concorrente compartilha a mesma Promise e salas diferentes não se bloqueiam.
+- [x] GREEN: coordenador por sessão.
+- [x] RED: apenas resultado ASR válido chega ao append/broadcast.
+- [x] GREEN: use case vertical.
+- [x] RED: final textual do cliente é rejeitado quando `ASR_MODE=backend`.
+- [x] GREEN: feature flag com backend como padrão.
 
 ## Task 3 — Captura e fila de segmentos no frontend
 
@@ -85,39 +85,39 @@
 - `useMeetingTranscription` sempre usa Vosk para captura/partial e fecha PCM no final Vosk.
 - `useLiveSession` envia áudio binário e expõe status/fila.
 - `LiveRoomView` e `MicControl` exibem preparação, fila, processamento, falha e privacidade real.
-- remover Transformers.js/Whisper Worker e modelo pesado do bundle após provar ausência de referências.
+- preservar Transformers.js/Whisper Worker somente como rollback explícito, sem inicializá-lo no modo backend.
 
 **TDD:**
-- [ ] RED: float→PCM16 satura extremos e preserva silêncio.
-- [ ] GREEN: encoder.
-- [ ] RED: cada final Vosk consome exatamente o áudio desde o final anterior e envia um id novo.
-- [ ] GREEN: segmentação por callbacks existentes.
-- [ ] RED: fila é serial, limitada, expira e retry reutiliza id/bytes.
-- [ ] GREEN: transporte backend.
-- [ ] RED: stop/unmount limpa PCM e impede envio tardio; request já aceito no backend pode finalizar canonicamente.
-- [ ] GREEN: lifecycle.
-- [ ] RED: UI comunica áudio efêmero no backend e engine/estado sem prometer precisão.
-- [ ] GREEN: UX.
+- [x] RED: float→PCM16 satura extremos e preserva silêncio.
+- [x] GREEN: encoder.
+- [x] RED: cada final Vosk consome exatamente o áudio desde o final anterior e envia um id novo.
+- [x] GREEN: segmentação por callbacks existentes.
+- [x] RED: fila é serial, limitada, expira e retry reutiliza id/bytes.
+- [x] GREEN: transporte backend.
+- [x] RED: stop/unmount limpa PCM e impede envio tardio; request já aceito no backend pode finalizar canonicamente.
+- [x] GREEN: lifecycle.
+- [x] RED: UI comunica áudio efêmero no backend e engine/estado sem prometer precisão.
+- [x] GREEN: UX.
 
 ## Task 4 — Runtime VPS e privacidade
 
-- [ ] Compose com `api`, `asr`, `postgres`, healthchecks e limites; sem expor porta ASR publicamente.
-- [ ] Modelo cacheado em volume; startup não baixa a cada reinício.
-- [ ] Configuração KVM 2 e KVM 4 documentada, incluindo uma inferência concorrente e backpressure.
-- [ ] Logs somente com ids, bytes, duração, engine e timings; nunca samples/texto.
-- [ ] TLS/reverse proxy, timeout, body limit e rate limit documentados.
-- [ ] Cloud provider permanece desabilitado e sem credenciais no frontend/banco.
+- [x] Compose de dependências com `asr`/`postgres`, healthchecks e limites; API no host conforme padrão do repositório e ASR em loopback no desenvolvimento.
+- [x] Modelo cacheado em volume; startup não baixa a cada reinício.
+- [x] Configuração KVM 2 e KVM 4 documentada, incluindo uma inferência concorrente e backpressure.
+- [x] Logs somente com ids, bytes, duração, engine e timings; nunca samples/texto.
+- [x] TLS/reverse proxy, timeout, body limit e rate limit documentados.
+- [x] Cloud provider permanece desabilitado e sem credenciais no frontend/banco.
 
 ## Task 5 — Verificação e publicação
 
-- [ ] Suites focais RED/GREEN e suites completas web/API/Python.
-- [ ] Builds, lint check-only, Prisma generate/validate, audit e `git diff --check`.
-- [ ] Docker build do ASR e Compose efetivo.
-- [ ] Smoke real: host envia fixture PCM → ASR → persistência → broadcast; convidado é rejeitado; retry não reinfere/duplica.
-- [ ] Benchmark no mesmo áudio: latência CPU, pico de RAM e WER quando houver referência alinhada.
-- [ ] Provar retenção zero: nenhum WAV/PCM em banco, volume, filesystem ou logs.
-- [ ] Atualizar ADR, arquitetura, requisitos, README, histórico e evidências.
-- [ ] Commits coerentes, push nos três PRs e comentário ClickUp com resultados; sem merge.
+- [x] Suites focais RED/GREEN e suites completas web/API/Python.
+- [x] Builds, lint check-only, Prisma generate/validate, audit e `git diff --check`.
+- [x] Docker build do ASR e Compose efetivo.
+- [x] Smoke real: host envia fixture PCM → ASR → persistência → broadcast; convidado é rejeitado; retry não reinfere/duplica.
+- [x] Benchmark no mesmo áudio: latência CPU, pico de RAM e WER quando houver referência alinhada.
+- [x] Provar retenção zero: nenhum WAV/PCM em banco, volume, filesystem ou logs.
+- [x] Atualizar ADR, arquitetura, requisitos, README, histórico e evidências.
+- [x] Commits coerentes, push nos três PRs e comentário ClickUp com resultados; sem merge.
 
 ## Critérios de aceite
 
@@ -129,3 +129,7 @@
 - Serviço cabe em 8 GB RAM no benchmark isolado; 16 GB é recomendado para margem operacional.
 - WER do roteiro real é reportado por categoria, sem inventar alinhamento.
 - Falha/ocupação é visível e nunca troca silenciosamente para cloud.
+
+## Validação humana externa pendente
+
+- [ ] Foyth lê o roteiro pt-BR no fluxo publicado para medir WER humano comparável. A ausência dessa gravação não bloqueia a implementação/publicação e nenhum valor foi inventado.
