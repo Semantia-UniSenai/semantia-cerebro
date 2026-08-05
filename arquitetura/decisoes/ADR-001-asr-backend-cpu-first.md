@@ -1,6 +1,6 @@
 ---
 id: ADR-001
-status: aceita
+status: aceita-complementada-por-ADR-002
 atualizado: 2026-08-04
 decisores: [Foyth]
 ---
@@ -13,8 +13,8 @@ O Card 06 implementou Vosk e Whisper Small no navegador para preservar áudio lo
 
 ## Decisão
 
-1. O navegador mantém Vosk somente para parciais de baixa latência e endpointing.
-2. O final literal canônico será produzido no backend.
+1. O navegador não executa ASR nem VAD: captura PCM enquanto o anfitrião mantém a transcrição explicitamente ligada, fecha janelas contíguas de 5 segundos e envia o residual ao parar.
+2. O final literal canônico será produzido exclusivamente no backend.
 3. O frontend enviará segmentos PCM mono 16 kHz/16-bit por Socket.IO autenticado, identificados por `clientSegmentId`.
 4. A API NestJS valida identidade, papel, sessão, limites e idempotência; ela não executa ML no event loop.
 5. Um serviço Python interno fornece o contrato ASR e usa `faster-whisper small`, CPU, `int8`, uma inferência concorrente por worker.
@@ -56,12 +56,14 @@ O Card 06 implementou Vosk e Whisper Small no navegador para preservar áudio lo
 
 - TLS em produção;
 - ASR não exposto diretamente à internet;
-- somente HOST em sessão LIVE;
+- o frontend não contém engine, modelo ou fallback de ASR e não faz VAD;
+- o gateway não expõe eventos para texto parcial/final fornecido pelo cliente;
+- somente HOST em sessão LIVE envia PCM em janelas fixas;
 - fila/bytes/duração limitados;
 - logs sem áudio e sem texto;
 - idempotência por `clientSegmentId`;
 - nenhuma credencial cloud no cliente, banco ou documentação;
-- final textual do cliente desabilitado no modo backend.
+- somente o ASR interno pode originar texto final canônico.
 
 ## Reavaliação
 

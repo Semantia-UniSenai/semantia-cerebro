@@ -33,7 +33,8 @@ O navegador nunca acessa a porta Python diretamente. A API recebe PCM no Socket.
 | fila ASR | 4 requests |
 | fila por sessão/API | 8 segmentos |
 | fila no navegador | 8 segmentos, TTL 60 s |
-| segmento | 250–30000 ms |
+| segmento recebido | janela fixa de 5000 ms; residual de 250–5000 ms no stop |
+| segmentação | controle explícito + contagem de frames, sem ASR/VAD no cliente |
 | PCM máximo | 960000 bytes |
 | Socket.IO máximo | 1100000 bytes |
 | retenção de áudio | zero |
@@ -135,7 +136,9 @@ Nunca registrar samples, base64, texto reconhecido, hotwords sensíveis ou paths
 - worker aceita somente fila limitada;
 - `ASR_BUSY`, timeout e indisponibilidade são retryable até três tentativas com o mesmo id;
 - falha definitiva remove o áudio da memória e fica visível;
-- Vosk não assume o final silenciosamente;
+- resultado vazio é no-speech bem-sucedido, não cria transcript e mantém replay idempotente em cache
+  efêmero por 120 s;
+- não existe ASR/VAD/fallback textual no navegador;
 - sessão encerrada limpa fila e impede novas inferências.
 
 A coordenação é em memória e atende uma instância de API. Escala horizontal futura exige fila/lock distribuído ou job persistido sem persistir o áudio bruto.

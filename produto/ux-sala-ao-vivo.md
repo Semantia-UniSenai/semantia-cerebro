@@ -51,11 +51,14 @@ Não fazem parte da UX ativa:
 - botão separado para iniciar a reunião;
 - hierarquia visível entre sala e sessão interna.
 
-“Iniciar transcrição” controla captura e ASR; não muda o ciclo de vida da reunião.
+“Iniciar transcrição” controla captura PCM e envio ao ASR protegido; não muda o ciclo de vida da reunião.
 
 ---
 
-## Estado atual auditado
+## Auditoria histórica da implementação local-first
+
+> Esta seção registra a UX observada antes da ADR-002. Referências a modelos locais, hipóteses e
+> transcript parcial não descrevem o runtime vigente; as direções normativas abaixo foram atualizadas.
 
 ### Evidência observada
 
@@ -107,17 +110,17 @@ O cabeçalho do palco mantém indicador colorido e a expressão “Transcrição
 inferior informa que o microfone está pausado. A pessoa pode interpretar disponibilidade do recurso
 como publicação ativa.
 
-**Direção:** separar `Legenda disponível` de `Transcrição ativa`; usar ícone, texto e tom coerentes
-para `pausada`, `preparando`, `voz detectada`, `texto confirmado`, `reconectando` e `falha`.
+**Direção vigente:** separar `Legenda disponível` de `Transcrição ativa`; usar ícone, texto e tom
+coerentes para `pausada`, `preparando captura`, `capturando áudio`, `processando no backend`, `texto
+confirmado`, `reconectando` e `falha`. Não inferir voz/silêncio.
 
 #### P1.2 — Estados técnicos competem com a ação principal
 
-MicControl concentra preparação, transporte local, sinal, hipótese, erro, nível e instruções abaixo da
-barra. Em telas curtas, o estado empurra o palco e exige leitura longa durante uma tarefa de alta
-pressão.
+MicControl concentra captura, fila, processamento, erro, nível e instruções abaixo da barra. Em telas
+curtas, o estado empurra o palco e exige leitura longa durante uma tarefa de alta pressão.
 
-**Direção:** um estado curto e acionável na barra; detalhes técnicos ficam em ajuda progressiva na
-central de áudio. Nunca transformar frames em confirmação de texto.
+**Direção vigente:** um estado curto e acionável na barra; detalhes técnicos ficam em ajuda progressiva
+na central de áudio. Frames confirmam apenas captura de áudio, nunca texto ou presença de voz.
 
 #### P1.3 — Modal de áudio cobre o palco sem contrato completo de foco
 
@@ -210,14 +213,15 @@ Cards 04, 05, 08 e 09 existirem.
   que de caixas e bordas.
 - Contadores `0` e `1` têm peso visual semelhante ao rótulo do painel.
 - Nome da reunião e subtítulo repetem informação em alguns cenários de QA.
-- A linha parcial poderia ter um sinal editorial mais distinto sem depender apenas de cor.
+- Não existe linha parcial no runtime vigente; enquanto o backend processa, preservar o último final e
+  anunciar um estado não textual discreto.
 
 ## Defeitos técnicos resolvidos na implementação
 
 - `CaptionStage.vue`: o bug em que `Number(null)` trocava silenciosamente o tamanho padrão foi
   corrigido em RED/GREEN. Os passos atuais são 28/36/48 px e a ausência de preferência mantém 36 px.
-- A precisão do Vosk para nomes próprios, ruído e algumas palavras segue limitada. O Card 03 não
-  altera modelo nem pós-processa o literal com IA.
+- A engine local auditada apresentou erros relevantes e foi removida pela ADR-002. O runtime vigente
+  exibe somente finais do ASR backend.
 
 ## Resultado da auditoria
 
@@ -264,7 +268,7 @@ Fontes consultadas em 2026-07-31:
 | Teams | muitas opções de cor/fonte | **Postergar** | MVP oferece presets testados, evitando combinações sem contraste |
 | Zoom | preferências junto da legenda | **Adotar** | reduz distância entre intenção e resultado |
 | Zoom | legenda móvel e redimensionável | **Adaptar** | a Variante B testa overlay; drag livre não entra no MVP |
-| Zoom | ASR local como resiliência | **Adotar conceitualmente** | é coerente com Vosk local e privacidade já implementados |
+| Zoom | ASR local como resiliência | **Rejeitar no runtime vigente** | ADR-002 centraliza precisão no backend e remove engines locais/VAD do frontend |
 | Ava | legenda em um gesto | **Adotar** | o texto aparece sem setup do participante |
 | Ava | convidado sem conta | **Preservar** | o convite atual já pede somente nome |
 | APG | modal realmente inerte | **Adotar** | evita foco/interação no conteúdo que está atrás do sheet/dialog |

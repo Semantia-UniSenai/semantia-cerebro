@@ -365,7 +365,19 @@ empilhadas sobre `feat/salas-comunicacao`, e permanece `EM REVISÃO` até os PRs
 merge automático. O relatório técnico e as evidências reproduzíveis estão em
 [`../arquitetura/captura-fala-transporte-card-06.md`](../arquitetura/captura-fala-transporte-card-06.md).
 
-## Lacunas / perguntas em aberto (revisado 2026-08-03)
+## 24. Final exclusivo no backend, sem ASR/VAD no frontend (2026-08-04)
+
+Foyth decidiu remover Vosk e não adicionar VAD. O cenário prioritário é presencial; o controle humano
+de iniciar/parar a captura substitui heurísticas de endpointing e a interface aceita pequeno atraso para
+mostrar somente o final canônico do backend.
+
+A implementação do Card 06 passou a usar janelas PCM fixas de 5 s e residual no stop. O frontend não
+contém reconhecedor nem publica texto; o gateway recebe somente `transcription:audio`; o serviço
+FastAPI/faster-whisper small CPU/int8, sem `vad_filter`, é a única origem textual. Resultado vazio é
+no-speech sem persistência. A ADR-002 registra detalhes, riscos e guardas. A decisão anterior local-first
+permanece nas seções 22–23 somente como histórico.
+
+## Lacunas / perguntas em aberto (revisado 2026-08-04)
 
 - ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: limpeza conservadora + agente LLM).
 - ~~**Motor de adaptação semântica**~~ → **especificado** (§17 + contrato canônico); falta

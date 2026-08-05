@@ -24,10 +24,12 @@ qualquer agente de IA (ou pessoa nova) trabalhar no Semantia, o contexto vem **d
 6. [Protótipo navegável e validação](prototipos/sala-ao-vivo/README.md) — variantes, cenários,
    evidências e limites de validação humana.
 7. [ASR backend CPU-first — operação em VPS](arquitetura/asr-backend-vps.md) — arquitetura
-   vigente, filas, privacidade, deploy, benchmark KVM 2/KVM 4 e rollback.
-8. [Captura de fala robusta e transporte — Card 06](arquitetura/captura-fala-transporte-card-06.md)
-   — baseline local-first histórico, preservado como evidência e rollback explícito.
-9. [Evidências runtime do ASR backend](evidencias/card-06/asr-backend-runtime-2026-08-04.json)
+   vigente, filas, privacidade, deploy e benchmark KVM 2/KVM 4.
+8. [ADR-002 — captura PCM sem ASR/VAD no frontend](arquitetura/decisoes/ADR-002-captura-pcm-janelas-fixas.md)
+   — janelas fixas, controle explícito e final exclusivo no backend.
+9. [Captura de fala e transporte — Card 06](arquitetura/captura-fala-transporte-card-06.md)
+   — contrato vigente e baseline local-first preservado como evidência histórica.
+10. [Evidências runtime do ASR backend](evidencias/card-06/asr-backend-runtime-2026-08-04.json)
    e [benchmark CPU](evidencias/card-06/asr-backend-benchmark-2026-08-04.json).
 
 Documentos de junho em `projeto/` e as seções antigas do histórico continuam preservados como

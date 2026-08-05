@@ -15,11 +15,32 @@ clickup: 86e2j4w0k
 
 ## Situação após a evolução de 2026-08-04
 
-> **Contrato local-first parcialmente superado pela [ADR-001](./decisoes/ADR-001-asr-backend-cpu-first.md).**
-> A partir desta evolução, Vosk continua apenas como parcial/endpointing; PCM16 efêmero segue ao
-> backend e `faster-whisper small/int8` produz o único final canônico. Os resultados, arquivos e
-> medições abaixo permanecem como registro fiel da implementação anterior e como baseline, não como
-> descrição do runtime vigente.
+> **O runtime vigente é definido pela [ADR-001](./decisoes/ADR-001-asr-backend-cpu-first.md) e pela [ADR-002](./decisoes/ADR-002-captura-pcm-janelas-fixas.md).**
+> O navegador não executa ASR nem VAD. Enquanto o anfitrião mantém a captura explicitamente ligada,
+> frames PCM formam janelas contíguas de 5 segundos; o residual com ao menos 250 ms é enviado ao
+> parar. O backend `faster-whisper small/int8` produz o único texto final canônico. Os resultados,
+> arquivos e medições locais abaixo permanecem como registro fiel da implementação anterior e como
+> baseline histórica, não como descrição do runtime vigente.
+
+## Contrato vigente
+
+```text
+iniciar captura explicitamente
+  → getUserMedia + AudioWorklet
+  → frames PCM contíguos, sem classificação de conteúdo
+  → janela fixa de 5 s ou residual no stop
+  → resample 16 kHz mono + PCM16 little-endian
+  → fila efêmera (8 itens, TTL 60 s, 3 tentativas, mesmo clientSegmentId)
+  → Socket.IO transcription:audio
+  → NestJS: HOST + LIVE + limites + idempotência + serialização
+  → FastAPI/faster-whisper small CPU/int8, sem vad_filter
+  → texto vazio: ACK/no-speech sem persistência
+  → texto final: limpeza conservadora + PostgreSQL + broadcast
+```
+
+Não existem eventos cliente→servidor para transcript parcial ou final textual. Áudio não entra em
+arquivo, volume, banco, storage do navegador ou logs. O botão explícito de captura é o limite humano
+da interação presencial; a implementação não infere início/fim por silêncio ou conteúdo.
 
 ## Resultado histórico local-first
 

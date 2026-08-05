@@ -4,7 +4,11 @@ data: 2026-08-04
 status: concluido-aguardando-leitura-humana
 ---
 
-# Diário de execução — ASR backend CPU-first
+# Diário do Card 06 — ASR backend CPU-first
+
+> **Atualização posterior — ADR-002:** a decisão abaixo de manter Vosk para endpointing foi
+> superada em 2026-08-04. O runtime atual não possui Vosk, ASR local ou VAD; usa janelas PCM fixas de
+> 5 s e final exclusivamente no backend. Ver a seção “Decisão final sem ASR/VAD no frontend”.
 
 Este arquivo registra decisões e mudanças da evolução autorizada por Foyth após o teste humano de precisão. Ele complementa o histórico; commits e evidências reproduzíveis continuam sendo a fonte técnica.
 
@@ -113,3 +117,37 @@ Este arquivo registra decisões e mudanças da evolução autorizada por Foyth a
 - PRs #7, #6 e #4 receberam título/contexto/evidências atualizados via API REST; continuam abertos, sem merge/auto-merge.
 - ClickUp `86e2j4w0k` foi corrigido de **EM PROGRESSO** para **EM REVISÃO** e recebeu comentário com gates, benchmark, privacidade, riscos e links.
 - Implementação, runtime local, evidências e publicação estão concluídos. A única atividade seguinte é a validação humana por leitura do roteiro e eventual ajuste de modelo/configuração com base no WER real.
+
+## Decisão final sem ASR/VAD no frontend
+
+Em 2026-08-04, Foyth autorizou explicitamente os merges do Card 06 e decidiu remover Vosk sem
+substituí-lo por VAD. A interação prioritária é presencial; o anfitrião controla a captura e aceita um
+pequeno atraso para receber somente texto mais confiável do backend.
+
+Implementação resultante:
+
+- frontend sem `vosk-browser`, Transformers.js, Web Speech, modelos ou workers de ASR;
+- controle explícito iniciar/parar; janelas contíguas de 5 s e residual ≥ 250 ms no stop;
+- `AudioWorklet` somente captura frames e nível visual; não classifica voz/silêncio;
+- nenhum `transcript:partial`, `publishPartial`, `publishFinal` ou `partialText` na web;
+- gateway sem handlers cliente→servidor para texto parcial/final e sem `ASR_MODE` de rollback;
+- `faster-whisper small`, CPU/int8, sem `vad_filter`, como único reconhecedor;
+- resposta vazia do ASR é ACK/no-speech, não persiste segmento e mantém replay em cache efêmero por
+  120 s;
+- áudio continua efêmero e limitado por fila, TTL, retry, bytes, duração e idempotência.
+
+Gates não-runtime executados após a mudança:
+
+- web: 18 arquivos, 93 testes; typecheck; build; audit de produção sem vulnerabilidades conhecidas;
+- API: 19 suítes, 86 testes; lint; build; Prisma validate/generate; audit sem vulnerabilidades conhecidas;
+- Python: 15 testes e compileall aprovados.
+
+A stack permaneceu parada. Docker/E2E com PostgreSQL e smoke real navegador→ASR→banco→broadcast só
+podem ser registrados depois de executados; não são inferidos dos testes unitários.
+
+### Pendências da integração final
+
+- atualizar os PRs #7 (web), #6 (API) e #4 (cérebro);
+- executar os gates que dependem de runtime quando a stack puder ser ligada;
+- integrar a pilha `feat/salas-comunicacao` em `dev`/`main`;
+- atualizar o ClickUp com links/SHAs efetivamente mesclados.

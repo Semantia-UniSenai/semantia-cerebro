@@ -1,7 +1,7 @@
 ---
 title: Contrato canônico do MVP de transcrição em tempo real
 status: canônico
-atualizado: 2026-08-03
+atualizado: 2026-08-04
 substitui: escopo educacional de adaptação de materiais estáticos
 ---
 
@@ -29,10 +29,11 @@ O fluxo prioritário é:
 `áudio → reconhecimento de fala → limpeza conservadora de disfluências → adaptação por IA → legenda karaokê`
 
 1. O comunicador abre uma reunião instantânea; a API já a inicia e gera o link/token de convite.
-2. O navegador captura/processa a fala localmente e envia somente segmentos textuais parciais e o
-   único final canônico.
-3. Segmentos parciais são efêmeros e servem apenas à sensação de tempo real.
-4. Segmentos finais passam pela limpeza conservadora no backend.
+2. O anfitrião liga explicitamente a captura; o navegador envia áudio PCM efêmero em janelas fixas,
+   sem ASR, prévia textual ou VAD local.
+3. O backend protegido executa `faster-whisper small` e produz o único texto final canônico.
+4. Resultado vazio é tratado como no-speech sem persistência; texto reconhecido passa pela limpeza
+   conservadora no backend.
 5. O texto limpo é o transcript literal canônico.
 6. O agente especializado produz uma versão adaptada sem mudar fatos ou intenção.
 7. Cada participante escolhe entre literal e adaptada e pode alternar durante a reunião.
@@ -93,9 +94,10 @@ e [web #4](https://github.com/Semantia-UniSenai/semantia-web/pull/4). Nenhum mer
 - Uma reunião do MVP comporta até **4 horas** de duração contínua.
 - O anfitrião pode encerrá-la antes; encerramento é idempotente.
 - A reconexão do anfitrião não pode duplicar segmentos nem reiniciar a sequência.
-- O Semantia **não grava, armazena nem envia áudio para fora do navegador** no MVP. PCM existe
-  transitoriamente apenas entre captura, `AudioWorklet` e Workers locais e é eliminado no lifecycle.
-  Download de pesos/metadados do ASR local não é upload de áudio.
+- O Semantia **não grava nem armazena áudio** no MVP. PCM existe transitoriamente em memória no
+  navegador, no transporte Socket.IO autenticado, na API NestJS e no serviço ASR privado; é eliminado
+  após ACK, falha definitiva ou expiração. Não entra em arquivo, volume, banco, `IndexedDB`,
+  `localStorage` ou logs.
 - Transcript, chat e metadados identificáveis da reunião — título, contexto da plateia, horários,
   participantes e metadados de adaptação — ficam disponíveis ao anfitrião por **30 dias após o
   encerramento**.
@@ -178,13 +180,14 @@ Datilologia, ranking, dicionário, ferramentas gratuitas e demais funcionalidade
 
 ### Validado nas branches do Card 06, pendente de revisão
 
-- SpeechRecognition somente quando o browser comprova processamento on-device pt-BR; Vosk local como
-  fallback por capacidades e Whisper Small q8/WASM como refinamento do final Vosk;
-- parciais efêmeras limitadas e único final canônico com fila, TTL, ACK, retry, reconexão e
-  idempotência persistente por `clientSegmentId`;
-- publicação exclusiva por `HOST`, com rejeição de moderador, participante e convidado;
-- cleanup de microfone, modelos, recognizers, workers, buffers, timers, ACKs e fila em stop, saída,
-  disconnect, encerramento e unmount;
+- captura PCM em navegador real com controle explícito, janelas fixas de 5 s e residual no stop;
+- frontend sem Vosk, Web Speech, Whisper local, VAD ou qualquer callback textual;
+- fila efêmera limitada, TTL, ACK, retry, reconexão e idempotência por `clientSegmentId`;
+- somente `HOST` em sessão `LIVE` envia áudio; moderador, participante e convidado são recusados;
+- FastAPI interno com `faster-whisper small`, CPU/int8, sem `vad_filter`, como único ASR;
+- gateway sem handlers cliente→servidor para transcript parcial/final; resultado vazio não persiste;
+- saída/encerramento aguardam a drenagem da fila por ACK antes de desconectar;
+- cleanup de microfone, buffers, timers, ACKs e fila em stop, saída, disconnect, encerramento e unmount;
 - runtime real em Brave/Chromium e Firefox, auditoria sem frame binário/corpo HTTP de áudio e
   benchmark Vosk/Whisper em cinco condições;
 - detalhes e limitações em
