@@ -1,0 +1,103 @@
+{
+  "schemaVersion": 1,
+  "capturedAt": "2026-08-04T14:23:02-03:00",
+  "scope": "Card 06 - ASR backend CPU-first",
+  "runtime": {
+    "python": "3.11.15",
+    "node": "22.23.1",
+    "pnpm": "11.16.0",
+    "docker": "29.1.3",
+    "composeProject": "semantia-card06",
+    "database": "PostgreSQL 16 scratch em 127.0.0.1:55435",
+    "asr": "faster-whisper 1.2.1 / small / CPU / int8",
+    "audioContract": "PCM16 little-endian, mono, 16000 Hz, efêmero"
+  },
+  "gates": {
+    "asrService": {
+      "pytest": { "passed": 15, "warningsAsErrors": true },
+      "ruffCheck": "passed",
+      "ruffFormatCheck": "passed",
+      "pipCheck": "passed",
+      "cleanInstallAndTest": "passed"
+    },
+    "api": {
+      "prismaGenerate": "passed",
+      "prismaValidate": "passed",
+      "migrationsApplied": 4,
+      "migrateStatus": "up-to-date",
+      "jest": { "suites": 19, "passed": 85 },
+      "eslint": "passed with zero warnings",
+      "build": "passed",
+      "e2e": { "suites": 1, "passed": 1 },
+      "productionAudit": "no known vulnerabilities"
+    },
+    "web": {
+      "vitest": { "files": 23, "passed": 167 },
+      "vueTscAndViteBuild": "passed",
+      "modelIntegrity": "passed",
+      "productionAudit": "no known vulnerabilities"
+    },
+    "docker": {
+      "composeConfig": "passed",
+      "imageBuild": "passed",
+      "finalManifest": "sha256:dbeabee4c2dc2808afac51e5724f752a61b085703b7c503f2af08b3c4ad636eb",
+      "containerHealth": "healthy",
+      "ready": { "status": "ready", "engine": "faster-whisper", "model": "small" },
+      "runtimeUser": "uid=10001(semantia) gid=10001(semantia)"
+    }
+  },
+  "realModel": {
+    "coldStartProbeSeconds": 110.04,
+    "directAudio": {
+      "durationMs": 5112,
+      "bytes": 163584,
+      "reference": "Semantia conecta pessoas por meio de comunicação acessível em tempo real.",
+      "hypothesis": "Semantia conecta pessoas por meio de comunicação acessível em tempo real.",
+      "inferenceMs": 1996,
+      "controlledWer": 0.0
+    }
+  },
+  "realtimeSmoke": {
+    "transport": "Socket.IO /live -> NestJS -> FastAPI -> faster-whisper -> Prisma -> Socket.IO",
+    "hostJoin": "passed",
+    "guestJoin": "passed",
+    "guestAudioPublication": { "ok": false, "code": "FORBIDDEN" },
+    "firstAck": { "ok": true, "seq": 1, "replayed": false, "engine": "faster-whisper", "model": "small", "inferenceMs": 2356 },
+    "retryAck": { "ok": true, "seq": 1, "replayed": true },
+    "broadcastFinalCount": 1,
+    "persistedFinalCount": 1,
+    "canonicalText": "Semantia conecta pessoas por meio de comunicação acessível em tempo real."
+  },
+  "browserSmoke": {
+    "browser": "Brave local via CDP",
+    "buildUrl": "http://127.0.0.1:4176",
+    "apiUrl": "http://127.0.0.1:3102",
+    "accountAndInstantMeetingViaUi": "passed",
+    "microphoneSource": "MediaStream sintético temporário; nenhum microfone ambiente capturado",
+    "pipeline": "getUserMedia -> AudioWorklet -> Vosk endpointing -> PCM16 -> Socket.IO -> API -> ASR -> banco -> UI",
+    "canonicalTextVisible": "Semantia conecta pessoas por meio de comunicação acessível em tempo real.",
+    "backendEngineVisible": "faster-whisper/small",
+    "backendInferenceMsVisible": 2350,
+    "privacyCopyRegressionFoundAndFixed": true
+  },
+  "zeroRetention": {
+    "containerAudioFilesFound": 0,
+    "scannedRoots": ["/app", "/tmp", "/models"],
+    "databaseBinaryColumnsFound": 0,
+    "transcriptColumns": ["id", "sessionId", "seq", "text", "createdAt", "clientSegmentId"],
+    "webQueue": { "maxSegments": 8, "ttlMs": 60000, "offlineExpiryTested": true },
+    "audioCommitted": false
+  },
+  "regressionsDiscoveredAndFixed": [
+    "Docker COPY preservava permissões incompatíveis com o usuário non-root; corrigido com COPY --chown.",
+    "ASR_TIMEOUT_MS chegava como string e causava TypeError em AbortSignal.timeout; parsing estrito e teste de regressão adicionados.",
+    "PCM offline expirava apenas em flush/reconexão; timer independente do socket e teste de retenção adicionados.",
+    "CaptionStage declarava processamento somente local em modo backend; prop e cópia corretas adicionadas por TDD."
+  ],
+  "limitations": {
+    "originalHumanAudioLocated": false,
+    "comparableHumanWer": "aguarda a nova leitura do roteiro por Foyth; não foi fabricado",
+    "controlledSyntheticWer": 0.0,
+    "productionCapacityClaim": "os números são do host local com limites Docker, não substituem soak no hardware Hostinger real"
+  }
+}

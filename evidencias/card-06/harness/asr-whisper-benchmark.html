@@ -1,0 +1,102 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>Semantia Card 06 Whisper benchmark</title>
+<pre id="output">preparing</pre>
+<script type="module">
+import { env, pipeline } from '@huggingface/transformers'
+
+const output = document.querySelector('#output')
+const reference = 'Olá, este é um teste de transcrição em português. Hoje vamos conversar sobre acessibilidade e comunicação. O sistema transforma a fala em texto diretamente no navegador. A legenda deve aparecer com clareza durante toda a reunião. Agora vou fazer uma pausa e terminar o teste.'
+const modelId = 'onnx-community/whisper-small'
+env.allowLocalModels = false
+env.allowRemoteModels = true
+env.useBrowserCache = true
+
+function normalize(text) {
+  return text.toLocaleLowerCase('pt-BR').normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9\s]/g, ' ')
+    .replace(/\s+/g, ' ').trim()
+}
+function wordErrorRate(expected, actual) {
+  const a = normalize(expected).split(' ').filter(Boolean)
+  const b = normalize(actual).split(' ').filter(Boolean)
+  const rows = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0))
+  for (let i = 0; i <= a.length; i += 1) rows[i][0] = i
+  for (let j = 0; j <= b.length; j += 1) rows[0][j] = j
+  for (let i = 1; i <= a.length; i += 1) {
+    for (let j = 1; j <= b.length; j += 1) {
+      rows[i][j] = Math.min(
+        rows[i - 1][j] + 1,
+        rows[i][j - 1] + 1,
+        rows[i - 1][j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1),
+      )
+    }
+  }
+  const errors = rows[a.length][b.length]
+  return { errors, referenceWords: a.length, hypothesisWords: b.length, wer: errors / a.length }
+}
+async function decode(url) {
+  const response = await fetch(url)
+  const buffer = await response.arrayBuffer()
+  const context = new AudioContext({ sampleRate: 16000 })
+  const decoded = await context.decodeAudioData(buffer)
+  const samples = decoded.getChannelData(0).slice()
+  await context.close()
+  return { samples, sampleRate: decoded.sampleRate, durationSeconds: samples.length / decoded.sampleRate }
+}
+
+window.__benchmarkPromise = (async () => {
+  const progress = []
+  const modelStartedAt = performance.now()
+  const transcriber = await pipeline('automatic-speech-recognition', modelId, {
+    dtype: 'q8',
+    device: 'wasm',
+    progress_callback: (event) => {
+      if (typeof event?.progress === 'number') progress.push(Math.round(event.progress))
+    },
+  })
+  const modelLoadMs = performance.now() - modelStartedAt
+  const fixtures = [
+    { name: 'clean', url: '/qa/card-06/reference-clean.wav' },
+    { name: 'pink-noise-light', url: '/qa/card-06/reference-noisy.wav' },
+    { name: 'pink-noise-strong', url: '/qa/card-06/reference-strong-noise.wav' },
+    { name: 'competing-speech', url: '/qa/card-06/reference-competing-speech.wav' },
+    { name: 'reverberant', url: '/qa/card-06/reference-reverberant.wav' },
+  ]
+  const results = []
+  for (const fixture of fixtures) {
+    const decoded = await decode(fixture.url)
+    const startedAt = performance.now()
+    const transcription = await transcriber(decoded.samples, {
+      language: 'portuguese',
+      task: 'transcribe',
+      return_timestamps: false,
+      chunk_length_s: 30,
+      stride_length_s: 5,
+    })
+    const inferenceMs = performance.now() - startedAt
+    const text = String(transcription?.text ?? '').trim()
+    results.push({
+      name: fixture.name,
+      sampleRate: decoded.sampleRate,
+      durationSeconds: decoded.durationSeconds,
+      inferenceMs,
+      realtimeFactor: inferenceMs / 1000 / decoded.durationSeconds,
+      text,
+      ...wordErrorRate(reference, text),
+    })
+    output.textContent = JSON.stringify({ modelId, modelLoadMs, results }, null, 2)
+  }
+  await transcriber.dispose?.()
+  const value = { engine: 'whisper-small-pt-onnx-q8-wasm', modelId, reference, modelLoadMs, progressSamples: progress.length, results }
+  window.__benchmarkResult = value
+  output.textContent = JSON.stringify(value, null, 2)
+  return value
+})().catch((error) => {
+  const value = { error: String(error?.stack ?? error) }
+  window.__benchmarkResult = value
+  output.textContent = JSON.stringify(value, null, 2)
+  throw error
+})
+</script>

@@ -19,6 +19,18 @@ qualquer agente de IA (ou pessoa nova) trabalhar no Semantia, o contexto vem **d
    marcado como implementado, parcial, planejado ou legado.
 4. [Arquitetura da sala ao vivo](arquitetura/sala-ao-vivo.md) — fundação existente e migração
    para o contrato atual.
+5. [UX acessível da sala ao vivo](produto/ux-sala-ao-vivo.md) — jornadas, estados, microcopy,
+   responsividade, WCAG e handoff visual.
+6. [Protótipo navegável e validação](prototipos/sala-ao-vivo/README.md) — variantes, cenários,
+   evidências e limites de validação humana.
+7. [ASR backend CPU-first — operação em VPS](arquitetura/asr-backend-vps.md) — arquitetura
+   vigente, filas, privacidade, deploy e benchmark KVM 2/KVM 4.
+8. [ADR-002 — captura PCM sem ASR/VAD no frontend](arquitetura/decisoes/ADR-002-captura-pcm-janelas-fixas.md)
+   — janelas fixas, controle explícito e final exclusivo no backend.
+9. [Captura de fala e transporte — Card 06](arquitetura/captura-fala-transporte-card-06.md)
+   — contrato vigente e baseline local-first preservado como evidência histórica.
+10. [Evidências runtime do ASR backend](evidencias/card-06/asr-backend-runtime-2026-08-04.json)
+   e [benchmark CPU](evidencias/card-06/asr-backend-benchmark-2026-08-04.json).
 
 Documentos de junho em `projeto/` e as seções antigas do histórico continuam preservados como
 evidência do TCC, mas **não substituem** os documentos canônicos acima.
@@ -47,6 +59,8 @@ identidade/     Logo e infográfico da marca
 contexto/       Histórico cronológico de decisões e gotchas
 arquitetura/    Fundação implementada e arquitetura-alvo explicitamente separadas
 planejamento/   Backlogs, auditorias, planos e divisão de entregas do produto
+prototipos/      Contratos visuais navegáveis e evidências de validação
+evidencias/      Resultados sanitizados, fixtures e harnesses reproduzíveis
 ```
 
 ## Planejamento atual

@@ -1,7 +1,7 @@
 ---
 title: Contrato canônico do MVP de transcrição em tempo real
 status: canônico
-atualizado: 2026-07-29
+atualizado: 2026-08-04
 substitui: escopo educacional de adaptação de materiais estáticos
 ---
 
@@ -28,13 +28,15 @@ O fluxo prioritário é:
 
 `áudio → reconhecimento de fala → limpeza conservadora de disfluências → adaptação por IA → legenda karaokê`
 
-1. O comunicador inicia uma sala e informa o contexto da plateia.
-2. O navegador captura a fala e envia segmentos parciais e finais.
-3. Segmentos parciais são efêmeros e servem apenas à sensação de tempo real.
-4. Segmentos finais passam pela limpeza conservadora no backend.
+1. O comunicador abre uma reunião instantânea; a API já a inicia e gera o link/token de convite.
+2. O anfitrião liga explicitamente a captura; o navegador envia áudio PCM efêmero em janelas fixas,
+   sem ASR, prévia textual ou VAD local.
+3. O backend protegido executa `faster-whisper small` e produz o único texto final canônico.
+4. Resultado vazio é tratado como no-speech sem persistência; texto reconhecido passa pela limpeza
+   conservadora no backend.
 5. O texto limpo é o transcript literal canônico.
 6. O agente especializado produz uma versão adaptada sem mudar fatos ou intenção.
-7. Cada participante escolhe entre literal e adaptada e pode alternar durante a sessão.
+7. Cada participante escolhe entre literal e adaptada e pode alternar durante a reunião.
 8. Se a IA falhar ou exceder o tempo limite, a legenda literal continua sem interrupção.
 
 ## Público
@@ -47,44 +49,60 @@ O fluxo prioritário é:
 
 ## Atores canônicos
 
-- **Anfitrião:** conta autenticada que cria, configura, inicia, encerra e administra a sala.
+- **Anfitrião:** conta autenticada que abre, encerra e administra a reunião.
 - **Comunicador:** fonte de fala/transcrição. No MVP é o próprio anfitrião; separar os papéis fica
   para uma evolução posterior.
 - **Participante:** pessoa que entra para acompanhar a comunicação e escolher sua experiência de
   legenda.
 - **Convidado:** participante que entra por link/token sem precisar criar conta.
-- **Plateia:** perfil coletivo de contexto configurado para a sessão; não é um papel de usuário.
-- **Moderador:** papel futuro para apoiar gestão e segurança; não bloqueia o núcleo do MVP.
+- **Plateia:** perfil coletivo de contexto configurável dentro da reunião; não é um papel de usuário.
+- **Moderador:** conta autenticada autorizada no contexto da reunião para apoiar configuração,
+  gestão e encerramento, sem receber privilégios por papel global.
 
 O vocabulário detalhado e as substituições de termos legados estão em
 [`glossario.md`](./glossario.md).
 
 ## Decisão de acesso
 
-- Criar, configurar e administrar uma sala **exige conta autenticada** do anfitrião.
-- Acompanhar uma sala pelo link de convite **não exige conta** no contrato do MVP.
-- O convidado informa um nome de exibição e recebe uma identidade efêmera limitada à sessão.
+- Abrir e administrar uma reunião **exige conta autenticada** do anfitrião.
+- Acompanhar uma reunião pelo link de convite **não exige conta** no contrato do MVP.
+- O convidado informa um nome de exibição e recebe uma identidade efêmera limitada à reunião.
 - Criar conta como participante é opcional e só será necessário para recursos persistentes
-  futuros, como histórico pessoal ou preferências entre sessões.
-- O link/token concede acesso apenas à sala correspondente e pode ser revogado ao encerrar a
-  sessão.
+  futuros, como histórico pessoal ou preferências entre reuniões.
+- O link/token concede acesso apenas à reunião correspondente e deixa de permitir mutações ao
+  encerrá-la.
 
-**Estado atual:** a API e o frontend ainda exigem JWT de todos os participantes. O `joinToken` já
-existe, mas o ingresso realmente anônimo é **planejado**, não implementado. Essa diferença deve
-ser resolvida no card de generalização do domínio e protegida no card de privacidade.
+**Estado validado na branch `feat/salas-comunicacao`:** um `POST /api/rooms` autenticado cria
+atomicamente a reunião já em `LIVE` e devolve o identificador e o `joinToken`. O frontend entra
+diretamente na experiência ao vivo. Convidados usam nome de exibição e token efêmero restrito à
+reunião; o `joinToken` reutilizável só é devolvido a anfitrião ou moderador. A entrega aguarda
+revisão e merge dos PRs empilhados antes de ser descrita como integrada em `dev`.
+
+### Decisão de simplicidade do MVP
+
+O modelo de produto segue a jornada do Google Meet: **sala e reunião são a mesma coisa para quem
+usa o Semantia**. Não existe criação manual de sessão, tela de preparação, botão separado para
+iniciar nem histórico de sessões dentro de uma sala. O registro `RoomSession` permanece somente
+como detalhe interno para preservar transcript, chat, participantes e compatibilidade da migration.
+Toda nova `Room` criada pelo produto recebe uma única ocorrência interna, já iniciada.
+
+PRs de implementação em revisão: [API #4](https://github.com/Semantia-UniSenai/semantia-api/pull/4)
+e [web #4](https://github.com/Semantia-UniSenai/semantia-web/pull/4). Nenhum merge foi realizado.
 
 ## Ciclo de vida, duração e retenção
 
-- Uma sessão do MVP comporta até **4 horas** de duração contínua.
+- Uma reunião do MVP comporta até **4 horas** de duração contínua.
 - O anfitrião pode encerrá-la antes; encerramento é idempotente.
 - A reconexão do anfitrião não pode duplicar segmentos nem reiniciar a sequência.
-- O Semantia **não grava nem armazena áudio** no MVP. O áudio existe apenas no fluxo de captura do
-  navegador necessário ao reconhecimento de fala.
-- Transcript, chat e metadados identificáveis da sessão — título, contexto da plateia, horários,
+- O Semantia **não grava nem armazena áudio** no MVP. PCM existe transitoriamente em memória no
+  navegador, no transporte Socket.IO autenticado, na API NestJS e no serviço ASR privado; é eliminado
+  após ACK, falha definitiva ou expiração. Não entra em arquivo, volume, banco, `IndexedDB`,
+  `localStorage` ou logs.
+- Transcript, chat e metadados identificáveis da reunião — título, contexto da plateia, horários,
   participantes e metadados de adaptação — ficam disponíveis ao anfitrião por **30 dias após o
   encerramento**.
 - O anfitrião pode excluir os dados antes do prazo; a exclusão deve remover transcript, chat e
-  identificadores efêmeros vinculados à sessão.
+  identificadores efêmeros vinculados à reunião.
 - Depois de 30 dias, a exclusão deve ser automática. Logs técnicos mínimos sem conteúdo,
   nomes, tokens ou IDs de participante podem existir por **90 dias** para segurança e métricas;
   depois disso devem ser excluídos ou agregados de forma não identificável.
@@ -95,7 +113,7 @@ os cards de privacidade e produção; não devem ser anunciados como implementad
 
 ## Capacidade esperada
 
-- Tamanho-alvo do MVP: até **50 conexões simultâneas por sala**, incluindo anfitrião.
+- Tamanho-alvo do MVP: até **50 conexões simultâneas por reunião**, incluindo anfitrião.
 - O núcleo assume uma fonte principal de transcrição por vez.
 - O gate de implementação deve provar pelo menos 25 participantes concorrentes sem perda de
   ordem; a capacidade de 50 só pode ser anunciada após teste de carga e reconexão.
@@ -137,39 +155,65 @@ Datilologia, ranking, dicionário, ferramentas gratuitas e demais funcionalidade
 - Não aplicar mudanças destrutivas às tabelas educacionais antes de uma migração de dados
   separada e validada.
 
-## Verdade implementada em 2026-07-29
+## Verdade validada em 2026-07-30
 
-### Implementado e reutilizável
+### Implementado e reutilizável em `dev`
 
 - autenticação JWT e PostgreSQL/Prisma;
-- sessões ao vivo com token, transcript e chat persistidos;
+- reuniões ao vivo com token, transcript e chat persistidos;
 - Socket.IO com presença, mãos levantadas e encerramento;
 - Web Speech API com parciais/finais;
 - limpeza conservadora de disfluências no backend;
 - palco de legenda karaokê literal;
 - datilologia/ranking e integração global do VLibras.
 
-### Planejado para o contrato atual
+### Validado na branch `feat/salas-comunicacao`, pendente de revisão
 
-- domínio e papéis genéricos;
-- ingresso de convidado sem conta;
+- domínio `Room`, `RoomMember` e registro interno `RoomSession` com papéis contextuais `HOST`,
+  `MODERATOR`, `PARTICIPANT` e `GUEST`;
+- reunião instantânea em um clique, já `LIVE`, com link/token de convite imediato;
+- ingresso de convidado sem conta por identidade e token efêmeros restritos à reunião;
+- ciclo ativo `LIVE → ENDED`, gestão contextual e modo somente leitura após encerramento;
+- migration preservadora de salas, membros, sessões, transcripts e chats legados;
+- REST, Swagger/OpenAPI, cliente Orval, Socket.IO, rotas e telas sincronizados;
+- jornada real em Brave/Chromium validada em desktop e mobile.
+
+### Validado nas branches do Card 06, pendente de revisão
+
+- captura PCM em navegador real com controle explícito, janelas fixas de 5 s e residual no stop;
+- frontend sem Vosk, Web Speech, Whisper local, VAD ou qualquer callback textual;
+- fila efêmera limitada, TTL, ACK, retry, reconexão e idempotência por `clientSegmentId`;
+- somente `HOST` em sessão `LIVE` envia áudio; moderador, participante e convidado são recusados;
+- FastAPI interno com `faster-whisper small`, CPU/int8, sem `vad_filter`, como único ASR;
+- gateway sem handlers cliente→servidor para transcript parcial/final; resultado vazio não persiste;
+- saída/encerramento aguardam a drenagem da fila por ACK antes de desconectar;
+- cleanup de microfone, buffers, timers, ACKs e fila em stop, saída, disconnect, encerramento e unmount;
+- runtime real em Brave/Chromium e Firefox, auditoria sem frame binário/corpo HTTP de áudio e
+  benchmark Vosk/Whisper em cinco condições;
+- detalhes e limitações em
+  [Card 06 — captura de fala robusta e transporte](../arquitetura/captura-fala-transporte-card-06.md).
+
+### Planejado para o contrato atual após a generalização
+
 - contexto da plateia;
 - versões literal e adaptada do mesmo segmento;
 - agente especializado e fallback medido;
 - retenção/exclusão e limites de sessão;
-- moderação genérica e validação de capacidade.
+- validação de capacidade e endurecimento de produção.
 
 ### Legado explícito
 
 `PROFESSOR`, `ALUNO`, `SchoolClass`, `ClassMember`, `teacherId`, `/turmas` e `/aula` representam a
-fundação educacional implementada. Permanecem no código até a migração, mas não são o contrato
-final. Documentos de junho sobre CRUD de material educacional, texto → glosas e API vazia são
-registros históricos, não o backlog vigente.
+fundação educacional integrada em `dev`. Na branch de generalização, o contrato ativo foi removido
+e uma migration converte os dados preservando IDs e relações. Documentos de junho sobre CRUD de
+material educacional, texto → glosas e API vazia continuam como registros históricos, não como
+backlog vigente.
 
 ## Documentos relacionados
 
 - [Glossário canônico](./glossario.md)
 - [Requisitos, regras e casos de uso](../requisitos/mvp-transcricao-tempo-real.md)
 - [Arquitetura da sala ao vivo](../arquitetura/sala-ao-vivo.md)
+- [Captura de fala robusta e transporte — Card 06](../arquitetura/captura-fala-transporte-card-06.md)
 - [Backlog atual](../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md)
 - [Auditoria do backlog legado](../planejamento/2026-07-29-auditoria-backlog-legado-trello.md)

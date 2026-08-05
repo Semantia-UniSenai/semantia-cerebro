@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="dark" />
+    <meta
+      name="description"
+      content="Protótipo acessível e navegável da experiência de salas ao vivo do Semantia."
+    />
+    <title>Semantia · Protótipo da sala ao vivo</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='9' fill='%2358c3c9'/%3E%3Cpath d='M9 17h2v6H9zm4-7h2v13h-2zm4 3h2v10h-2zm4-5h2v15h-2z' fill='%230b1c29'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body
+    data-variant="stage"
+    data-role="host"
+    data-state="live-empty"
+    data-caption-size="standard"
+    data-transcribing="false"
+  >
+    <svg class="symbol-library" aria-hidden="true">
+      <symbol id="icon-arrow-left" viewBox="0 0 24 24">
+        <path d="m14 6-6 6 6 6M8 12h10" />
+      </symbol>
+      <symbol id="icon-wave" viewBox="0 0 24 24">
+        <path d="M4 13v-2m4 6V7m4 13V4m4 13V7m4 6v-2" />
+      </symbol>
+      <symbol id="icon-user-plus" viewBox="0 0 24 24">
+        <path d="M15 19a6 6 0 0 0-12 0m6-8a4 4 0 1 0 0-8 4 4 0 0 0 0 8m9-3v6m3-3h-6" />
+      </symbol>
+      <symbol id="icon-mic" viewBox="0 0 24 24">
+        <rect x="8" y="3" width="8" height="12" rx="4" />
+        <path d="M5 11a7 7 0 0 0 14 0m-7 7v3m-4 0h8" />
+      </symbol>
+      <symbol id="icon-settings" viewBox="0 0 24 24">
+        <circle cx="12" cy="12" r="3" />
+        <path d="M19.4 15a1.7 1.7 0 0 0 .3 1.9l.1.1-2.8 2.8-.1-.1a1.7 1.7 0 0 0-1.9-.3 1.7 1.7 0 0 0-1 1.6v.2h-4V21a1.7 1.7 0 0 0-1-1.6 1.7 1.7 0 0 0-1.9.3l-.1.1L4.2 17l.1-.1a1.7 1.7 0 0 0 .3-1.9A1.7 1.7 0 0 0 3 14H2.8v-4H3a1.7 1.7 0 0 0 1.6-1 1.7 1.7 0 0 0-.3-1.9L4.2 7 7 4.2l.1.1a1.7 1.7 0 0 0 1.9.3A1.7 1.7 0 0 0 10 3v-.2h4V3a1.7 1.7 0 0 0 1 1.6 1.7 1.7 0 0 0 1.9-.3l.1-.1L19.8 7l-.1.1a1.7 1.7 0 0 0-.3 1.9 1.7 1.7 0 0 0 1.6 1h.2v4H21a1.7 1.7 0 0 0-1.6 1Z" />
+      </symbol>
+      <symbol id="icon-message" viewBox="0 0 24 24">
+        <path d="M5 18.5 3.5 21l.6-4A8 8 0 1 1 7 19Z" />
+      </symbol>
+      <symbol id="icon-people" viewBox="0 0 24 24">
+        <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8Zm7.5-1a3.5 3.5 0 1 0 0-7M2 21a6 6 0 0 1 12 0m1-6a6 6 0 0 1 7 6" />
+      </symbol>
+      <symbol id="icon-context" viewBox="0 0 24 24">
+        <path d="M4 4h16v16H4zM8 8h8M8 12h8M8 16h5" />
+      </symbol>
+      <symbol id="icon-hand" viewBox="0 0 24 24">
+        <path d="M7 11V5a2 2 0 0 1 4 0v5-7a2 2 0 0 1 4 0v7-5a2 2 0 0 1 4 0v8c0 5-3 8-8 8h-1c-2 0-3.5-.8-4.7-2.4L2.7 15A2 2 0 0 1 6 12.7L7 14" />
+      </symbol>
+      <symbol id="icon-more" viewBox="0 0 24 24">
+        <circle cx="5" cy="12" r="1" /><circle cx="12" cy="12" r="1" /><circle cx="19" cy="12" r="1" />
+      </symbol>
+      <symbol id="icon-close" viewBox="0 0 24 24">
+        <path d="m6 6 12 12M18 6 6 18" />
+      </symbol>
+      <symbol id="icon-check" viewBox="0 0 24 24">
+        <path d="m5 12 4 4L19 6" />
+      </symbol>
+      <symbol id="icon-alert" viewBox="0 0 24 24">
+        <path d="M12 3 2.8 20h18.4L12 3Zm0 6v5m0 3h.01" />
+      </symbol>
+      <symbol id="icon-copy" viewBox="0 0 24 24">
+        <rect x="8" y="8" width="12" height="12" rx="2" /><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2" />
+      </symbol>
+      <symbol id="icon-exit" viewBox="0 0 24 24">
+        <path d="M10 5H5v14h5m4-4 4-3-4-3m4 3H9" />
+      </symbol>
+      <symbol id="icon-stop" viewBox="0 0 24 24">
+        <rect x="5" y="5" width="14" height="14" rx="3" />
+      </symbol>
+    </svg>
+
+    <a class="skip-link" href="#captions">Ir para a legenda</a>
+
+    <details class="prototype-console" id="prototype-console">
+      <summary>Explorar cenários</summary>
+      <form class="prototype-console__form" aria-label="Configurar protótipo">
+        <label>
+          Variante
+          <select id="prototype-variant" name="variant">
+            <option value="stage">A · Palco central</option>
+            <option value="focus">B · Foco leitura</option>
+          </select>
+        </label>
+        <label>
+          Papel
+          <select id="prototype-role" name="role">
+            <option value="host">Anfitrião</option>
+            <option value="participant">Participante</option>
+          </select>
+        </label>
+        <label>
+          Estado
+          <select id="prototype-state" name="state"></select>
+        </label>
+        <p>Artefato navegável. Nenhum controle acessa microfone, rede ou dados reais.</p>
+      </form>
+    </details>
+
+    <section class="entrance-shell" id="entrance-shell" aria-labelledby="entrance-title" hidden>
+      <div class="entrance-brand" aria-label="Semantia">
+        <span class="brand-mark" aria-hidden="true"><i></i><i></i><i></i></span>
+        <span>Semantia</span>
+      </div>
+      <article class="entrance-card">
+        <div class="entrance-card__icon" id="entrance-icon" aria-hidden="true">
+          <svg><use href="#icon-wave"></use></svg>
+        </div>
+        <p class="eyebrow" id="entrance-kicker">Convite para sala ao vivo</p>
+        <h1 id="entrance-title">Validando convite…</h1>
+        <p id="entrance-message">Estamos conferindo o acesso antes de pedir seu nome.</p>
+        <div class="invite-progress" id="invite-progress" role="status">
+          <span class="progress-orbit" aria-hidden="true"></span>
+          Verificando acesso
+        </div>
+        <form class="join-form" id="join-form" hidden>
+          <div class="meeting-preview">
+            <span class="live-dot" aria-hidden="true"></span>
+            <span><strong>Reunião de produto</strong><small>Ao vivo agora · 3 pessoas</small></span>
+          </div>
+          <label for="guest-name">Como devemos chamar você?</label>
+          <input id="guest-name" name="guest-name" autocomplete="name" placeholder="Seu nome" />
+          <button class="button button--primary button--wide" type="submit">Entrar na reunião</button>
+          <p class="privacy-note">Você entra sem criar conta. O microfone não é solicitado.</p>
+        </form>
+        <button class="button button--secondary" id="entrance-primary-action" type="button" hidden></button>
+      </article>
+    </section>
+
+    <main class="meeting-shell" id="meeting-shell" aria-labelledby="meeting-title">
+      <header class="meeting-header">
+        <button class="header-action header-action--leave" id="leave-button" type="button" aria-label="Sair da reunião">
+          <svg aria-hidden="true"><use href="#icon-arrow-left"></use></svg>
+          <span>Sair</span>
+        </button>
+
+        <div class="meeting-identity">
+          <div class="meeting-presence" id="meeting-presence">
+            <span class="presence-dot" aria-hidden="true"></span>
+            <span id="meeting-presence-label">Ao vivo</span>
+          </div>
+          <h1 id="meeting-title">Reunião de produto</h1>
+          <p id="meeting-subtitle">Sala instantânea · 3 pessoas</p>
+        </div>
+
+        <div class="meeting-header__actions">
+          <button class="header-action header-action--invite host-only" id="invite-button" type="button" data-mutation-control>
+            <svg aria-hidden="true"><use href="#icon-user-plus"></use></svg>
+            <span>Convidar</span>
+          </button>
+          <button
+            class="header-action header-action--danger host-only"
+            id="end-meeting-button"
+            type="button"
+            data-mutation-control
+          >
+            <svg aria-hidden="true"><use href="#icon-stop"></use></svg>
+            <span>Encerrar para todos</span>
+          </button>
+        </div>
+      </header>
+
+      <div class="meeting-workspace" id="meeting-workspace">
+        <section id="captions" class="caption-stage" role="region" aria-label="Legenda ao vivo" tabindex="-1">
+          <div class="caption-stage__aurora" aria-hidden="true"></div>
+          <header class="caption-toolbar">
+            <div class="caption-status" id="caption-status">
+              <span class="caption-status__glyph" aria-hidden="true"><i></i><i></i><i></i></span>
+              <span>
+                <small>Legenda</small>
+                <strong id="caption-status-label">Disponível</strong>
+              </span>
+            </div>
+
+            <div class="caption-preferences" aria-label="Preferências de legenda">
+              <div class="mode-switch" id="mode-switch" role="group" aria-label="Modo de leitura">
+                <button type="button" data-caption-mode="literal" aria-pressed="true">Literal</button>
+                <button type="button" data-caption-mode="adapted" aria-pressed="false">
+                  Adaptada <span class="proposal-badge">Proposta</span>
+                </button>
+              </div>
+              <div class="text-size-controls" role="group" aria-label="Tamanho da legenda">
+                <button type="button" id="caption-smaller" aria-label="Diminuir legenda">A−</button>
+                <button type="button" id="caption-larger" aria-label="Aumentar legenda">A+</button>
+              </div>
+            </div>
+          </header>
+
+          <div class="state-notice" id="state-notice" data-tone="neutral" role="status">
+            <div class="state-notice__icon" aria-hidden="true">
+              <svg><use id="state-icon-use" href="#icon-wave"></use></svg>
+            </div>
+            <div class="state-notice__copy">
+              <p class="eyebrow" id="state-kicker">Sala ao vivo</p>
+              <h2 id="state-heading">Aguardando a primeira fala</h2>
+              <p id="state-message">A reunião está ao vivo; a transcrição ainda não publicou texto.</p>
+            </div>
+            <button class="button button--quiet" id="state-primary-action" type="button" hidden></button>
+          </div>
+
+          <div class="caption-flow" id="caption-flow">
+            <div class="caption-flow__meta">
+              <span id="caption-mode-label">Transcrição literal</span>
+              <span aria-hidden="true">·</span>
+              <span>Português (Brasil)</span>
+            </div>
+            <div class="caption-lines" id="caption-lines">
+              <p class="caption-line caption-line--older">
+                <span class="speaker">Carla · 10:41</span>
+                <span>A legenda precisa chegar antes de qualquer configuração.</span>
+              </p>
+              <p class="caption-line caption-line--previous">
+                <span class="speaker">Rafael · 10:42</span>
+                <span>Quando eu volto para revisar um trecho, a conversa pode continuar.</span>
+              </p>
+              <p class="caption-line caption-line--current" aria-label="Fala atual">
+                <span class="speaker">Carla · agora</span>
+                <span id="current-caption">O texto permanece no centro da experiência.</span>
+              </p>
+              <p class="caption-line caption-line--partial" id="partial-caption">
+                <span class="speaker">Reconhecendo agora</span>
+                <span>e os controles ficam ao alcance sem disputar atenção…</span>
+              </p>
+            </div>
+          </div>
+
+          <button class="return-live" id="return-live-button" type="button" hidden>
+            <span class="live-dot" aria-hidden="true"></span>
+            Voltar ao vivo
+            <span class="return-live__count">2 novas</span>
+          </button>
+
+          <p class="sr-only" id="caption-announcer" aria-live="polite" aria-atomic="false"></p>
+        </section>
+
+        <dialog class="meeting-panel" id="meeting-panel" aria-labelledby="panel-title" data-open="false">
+          <header class="panel-header">
+            <div>
+              <p class="eyebrow" id="panel-kicker">Durante a reunião</p>
+              <h2 id="panel-title" tabindex="-1">Chat da reunião</h2>
+            </div>
+            <button class="icon-button" id="panel-close" type="button" aria-label="Fechar painel">
+              <svg aria-hidden="true"><use href="#icon-close"></use></svg>
+            </button>
+          </header>
+          <div class="panel-content" id="panel-content"></div>
+        </dialog>
+      </div>
+
+      <nav class="control-bar" aria-label="Controles da reunião">
+        <div class="control-bar__group control-bar__group--primary">
+          <button
+            class="meeting-control meeting-control--primary host-only"
+            id="transcription-button"
+            type="button"
+            aria-label="Iniciar transcrição"
+            data-mutation-control
+          >
+            <span class="meeting-control__icon">
+              <svg aria-hidden="true"><use href="#icon-mic"></use></svg>
+            </span>
+            <span class="meeting-control__copy"><strong>Iniciar transcrição</strong><small>Microfone pausado</small></span>
+          </button>
+
+          <button
+            class="meeting-control meeting-control--device host-only control--optional"
+            id="audio-help-button"
+            type="button"
+            aria-label="Abrir entrada de áudio"
+          >
+            <span class="meeting-control__icon">
+              <svg aria-hidden="true"><use href="#icon-settings"></use></svg>
+            </span>
+            <span class="meeting-control__copy"><strong>Entrada de áudio</strong><small>Raptor Lake-P/U/H cAVS</small></span>
+          </button>
+
+          <button
+            class="meeting-control meeting-control--primary meeting-control--reading participant-only"
+            id="reading-preferences-button"
+            type="button"
+            aria-label="Abrir preferências de legenda"
+            aria-expanded="false"
+            aria-controls="meeting-panel"
+          >
+            <span class="meeting-control__icon">
+              <svg aria-hidden="true"><use href="#icon-wave"></use></svg>
+            </span>
+            <span class="meeting-control__copy"><strong>Leitura literal</strong><small>Preferência individual</small></span>
+          </button>
+        </div>
+
+        <div class="control-bar__group control-bar__group--secondary">
+          <button class="meeting-control meeting-control--compact" id="chat-button" type="button" aria-label="Abrir chat" aria-expanded="false" aria-controls="meeting-panel">
+            <span class="meeting-control__icon"><svg aria-hidden="true"><use href="#icon-message"></use></svg></span>
+            <span class="meeting-control__copy"><strong>Chat</strong><small>2 novas</small></span>
+          </button>
+          <button class="meeting-control meeting-control--compact" id="people-button" type="button" aria-label="Abrir pessoas" aria-expanded="false" aria-controls="meeting-panel">
+            <span class="meeting-control__icon"><svg aria-hidden="true"><use href="#icon-people"></use></svg></span>
+            <span class="meeting-control__copy"><strong>Pessoas</strong><small>3 na sala</small></span>
+          </button>
+          <button class="meeting-control meeting-control--compact host-only control--optional" id="context-button" type="button" aria-label="Abrir contexto" aria-expanded="false" aria-controls="meeting-panel">
+            <span class="meeting-control__icon"><svg aria-hidden="true"><use href="#icon-context"></use></svg></span>
+            <span class="meeting-control__copy"><strong>Contexto</strong><small>Opcional</small></span>
+          </button>
+          <button class="meeting-control meeting-control--compact participant-only" id="raise-hand-button" type="button" aria-pressed="false" data-mutation-control>
+            <span class="meeting-control__icon"><svg aria-hidden="true"><use href="#icon-hand"></use></svg></span>
+            <span class="meeting-control__copy"><strong>Levantar mão</strong><small id="raise-hand-state">Disponível</small></span>
+          </button>
+          <button class="meeting-control meeting-control--icon" id="more-button" type="button" aria-label="Abrir mais ações" aria-expanded="false" aria-controls="meeting-panel">
+            <span class="meeting-control__icon"><svg aria-hidden="true"><use href="#icon-more"></use></svg></span>
+            <span class="meeting-control__copy"><strong>Mais</strong></span>
+          </button>
+        </div>
+      </nav>
+
+      <div class="meeting-status-region" id="meeting-status-region" role="status" aria-live="polite">
+        <span class="status-spark" aria-hidden="true"></span>
+        <span id="meeting-status-text">Reunião ao vivo. A transcrição está pausada.</span>
+      </div>
+    </main>
+
+    <dialog class="action-dialog" id="invite-dialog" aria-labelledby="invite-dialog-title">
+      <div class="dialog-icon dialog-icon--brand" aria-hidden="true">
+        <svg><use href="#icon-user-plus"></use></svg>
+      </div>
+      <p class="eyebrow">Convite da reunião</p>
+      <h2 id="invite-dialog-title">Traga pessoas para a conversa</h2>
+      <p>Qualquer pessoa com este link entra informando apenas o nome.</p>
+      <label class="copy-field" for="invite-link">
+        Link de convite
+        <span>
+          <input id="invite-link" value="https://semantia.app/entrar/ABC-123" readonly />
+          <button class="icon-button" id="copy-invite-button" type="button" aria-label="Copiar link">
+            <svg aria-hidden="true"><use href="#icon-copy"></use></svg>
+          </button>
+        </span>
+      </label>
+      <p class="dialog-feedback" id="copy-feedback" role="status"></p>
+      <div class="dialog-actions">
+        <button class="button button--primary" id="invite-done-button" type="button">Concluir</button>
+      </div>
+    </dialog>
+
+    <dialog class="action-dialog" id="leave-dialog" aria-labelledby="leave-dialog-title">
+      <div class="dialog-icon" aria-hidden="true"><svg><use href="#icon-exit"></use></svg></div>
+      <p class="eyebrow">Ação individual</p>
+      <h2 id="leave-dialog-title">Sair da reunião?</h2>
+      <p>A reunião continua para as outras pessoas. Você poderá entrar novamente pelo convite.</p>
+      <div class="dialog-actions">
+        <button class="button button--secondary" id="leave-cancel-button" type="button">Cancelar</button>
+        <button class="button button--danger" id="leave-confirm-button" type="button">Sair da reunião</button>
+      </div>
+    </dialog>
+
+    <dialog class="action-dialog action-dialog--danger" id="end-dialog" aria-labelledby="end-dialog-title">
+      <div class="dialog-icon dialog-icon--danger" aria-hidden="true"><svg><use href="#icon-stop"></use></svg></div>
+      <p class="eyebrow">Ação para todas as pessoas</p>
+      <h2 id="end-dialog-title">Encerrar reunião para todos?</h2>
+      <p>Novas mensagens e transcrições serão bloqueadas. O conteúdo continuará disponível para leitura.</p>
+      <div class="dialog-actions">
+        <button class="button button--secondary" id="end-cancel-button" type="button">Cancelar</button>
+        <button class="button button--danger" id="end-confirm-button" type="button">Encerrar para todos</button>
+      </div>
+    </dialog>
+
+    <script type="module" src="./prototype.js"></script>
+  </body>
+</html>
