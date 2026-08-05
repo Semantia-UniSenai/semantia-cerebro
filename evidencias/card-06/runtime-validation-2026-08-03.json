@@ -1,0 +1,147 @@
+{
+  "generatedAt": "2026-08-04T12:34:20.706972+00:00",
+  "scope": "Card 06 — captura de fala local e transporte textual em tempo real",
+  "privacyContract": {
+    "audioLeavesBrowser": false,
+    "binaryWebSocketFramesAllowed": false,
+    "persistedPayload": "one canonical final text segment",
+    "publisherRole": "HOST"
+  },
+  "braveBuildRuntime": {
+    "browser": "Brave 150.1.92.144 / Chromium CDP",
+    "build": "Vite preview 127.0.0.1:4175",
+    "passed": true,
+    "checks": {
+      "partialTextFramesObserved": true,
+      "canonicalFinalTextObserved": true,
+      "noBinaryWebSocketFrames": true,
+      "noAudioOrBinaryRequestBodies": true,
+      "allCapturedTracksStopped": true,
+      "noTranscriptAfterStop": true
+    },
+    "counts": {
+      "requestsAfterCaptureStart": 3,
+      "requestBodiesAfterCaptureStart": 0,
+      "audioOrBinaryRequestBodies": 0,
+      "webSocketTextFrames": 50,
+      "webSocketBinaryFrames": 0,
+      "partialTextFrames": 48,
+      "finalTextFrames": 1,
+      "capturedTracks": 1,
+      "liveTracksAfterStop": 0
+    },
+    "destinationsAfterCaptureStart": [
+      "http://127.0.0.1:4175"
+    ],
+    "methodology": "CDP Network events were collected only after clicking Iniciar transcrição; payload contents, tokens and session identifiers were not persisted."
+  },
+  "firefoxBuildRuntime": {
+    "browser": "Mozilla Firefox 153.0",
+    "passed": true,
+    "checks": {
+      "hostMicControlVisible": true,
+      "gatewayRoleEnvelopeHydrated": true,
+      "captureStarted": true,
+      "localFallbackVisible": true,
+      "qualityWorkerOperational": true,
+      "qualityWorkerNoError": true,
+      "captureStopped": true
+    },
+    "capabilities": {
+      "audioWorklet": true,
+      "mediaDevices": true,
+      "onDeviceAvailable": false,
+      "onDeviceInstall": false,
+      "speechRecognition": false,
+      "webAssembly": true,
+      "worker": true
+    },
+    "activeStatus": [
+      "Microfone 1",
+      "Microfone autorizado. Conectando o processamento de áudio…",
+      "Aprimorando a precisão local — 99%"
+    ],
+    "qualityStatus": [
+      "Precisão local aprimorada pronta"
+    ],
+    "methodology": "Firefox on Vite preview 127.0.0.1:4175 with a local PulseAudio virtual source fed by the versioned clean WAV fixture; no fake Web Speech API."
+  },
+  "realtimeTransport": {
+    "passed": true,
+    "checks": {
+      "hostJoin": true,
+      "guestJoin": true,
+      "guestForbidden": true,
+      "idempotentRetry": true,
+      "reconnectNoDuplicate": true,
+      "persistedOnce": true
+    },
+    "counts": {
+      "guestBroadcasts": 1,
+      "persistedMatches": 1
+    },
+    "methodology": "HOST and GUEST Socket.IO clients against the compiled API; identifiers removed from this artifact."
+  },
+  "migration": {
+    "backup": {
+      "sha256": "92ce85b2160efa78ef8765e4f836369a297201ddc4eb23c9575544b1d0affe1e",
+      "bytes": 25330,
+      "storedTemporarilyOutsideGit": true
+    },
+    "prisma": "4 migrations found; database schema is up to date",
+    "clientSegmentIdNullable": "NO",
+    "nullClientIds": 0,
+    "duplicateClientIds": 0,
+    "uniqueIndexCount": 1,
+    "card06MigrationApplied": 1,
+    "scratchGate": "The executor blocked DROP DATABASE even after explicit authorization; validation was completed read-only against the backed-up QA database."
+  },
+  "finalGates": {
+    "web": {
+      "testFilesPassed": 22,
+      "testsPassed": 155,
+      "build": "passed",
+      "productionAuditModerateOrHigher": 0,
+      "gitDiffCheck": "passed"
+    },
+    "api": {
+      "testSuitesPassed": 15,
+      "testsPassed": 64,
+      "lint": "passed",
+      "build": "passed",
+      "prismaValidate": "passed",
+      "productionAuditModerateOrHigher": 0,
+      "gitDiffCheck": "passed"
+    },
+    "documentation": {
+      "jsonFilesValidated": 2,
+      "markdownFilesValidated": 18,
+      "validationErrors": 0
+    }
+  },
+  "dependencySecurity": {
+    "pnpmVersionsVerified": [
+      "10.22.0",
+      "11.16.0"
+    ],
+    "webOverrides": {
+      "brace-expansion": "5.0.9",
+      "postcss": "8.5.23",
+      "sharp": "0.35.3",
+      "socket.io-parser": "4.2.7",
+      "uuid": "11.1.1"
+    },
+    "apiOverrides": {
+      "fast-uri": "3.1.5",
+      "js-yaml": "4.3.0",
+      "multer": "2.2.0",
+      "socket.io-parser": "4.2.7"
+    },
+    "prisma": "7.9.1"
+  },
+  "limitations": [
+    "Whisper small downloads approximately 237.5 MiB of quantized ONNX artifacts on first use.",
+    "Measured Whisper finalization latency is approximately 12.6 seconds for about 21 seconds of speech.",
+    "Firefox uses the Vosk capability fallback because native on-device SpeechRecognition is unavailable in the tested build."
+  ]
+}

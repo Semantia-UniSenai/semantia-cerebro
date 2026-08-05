@@ -1,7 +1,7 @@
 ---
 tags: [tcc, senai, semantia, libras, acessibilidade]
 status: histórico-vivo
-atualizado: 2026-07-31
+atualizado: 2026-08-03
 ---
 
 # Semantia 🤟
@@ -333,7 +333,51 @@ navegador” por “diretamente para o vendedor”. A amostra e os critérios de
 no Card 06; o Card 11 permanece como gate full-stack. Áudio deve continuar local e erros não podem ser
 mascarados por correção textual que invente conteúdo.
 
-## Lacunas / perguntas em aberto (revisado 2026-07-31)
+## 23. Captura local robusta e transporte idempotente (2026-08-03)
+
+O Card 06 substituiu o “Vosk como fallback final” por um pipeline híbrido inteiramente no navegador:
+Vosk pt-BR mantém parciais rápidas e produz um final preliminar; Whisper Small q8/WASM via
+Transformers.js refina esse final. Vazio, erro ou deadline de 20 s conserva o Vosk, e somente o texto
+escolhido entra no pipeline canônico. Web Speech só é aceito quando o browser comprova execução
+on-device pt-BR; Firefox/Zen usa o fallback por capacidade, nunca por user-agent.
+
+A privacidade passou de intenção a gate observado: a auditoria do artefato em Brave/Chromium capturou
+92 frames WebSocket, todos textuais, com zero frame binário e zero corpo HTTP de áudio. Firefox 153
+executou captura real com Vosk, Worker Whisper e stop completo. Pesos do modelo podem ser baixados,
+mas PCM circula somente entre `AudioWorklet`, thread principal e Worker local; nenhum áudio vai para
+API, Socket.IO ou provedor STT.
+
+O transporte agora limita/deduplica parciais, enfileira até 50 finais por 120 s, usa ACK de 5 s, retry
+e reentrada confirmada antes do flush. Cada final recebe `clientSegmentId`; a API exige `HOST` e uma
+migration cria unicidade por sessão. Retry/reconexão retorna replay sem novo broadcast ou segmento.
+Stop, saída, encerramento, disconnect e unmount invalidam modelos carregando, terminam recognizers e
+Workers, zeram buffers, param tracks e cancelam timers/ACKs/envios. Um teste específico provou que um
+load Vosk antigo não desmonta uma captura reiniciada.
+
+No benchmark sintético controlado de 45 palavras, o Whisper teve WER de 0%, 0%, 0%, 2,2% e 4,4% em
+fala limpa, ruído leve, ruído forte, fala concorrente e reverberação; Vosk teve 2,2%, 4,4%, 17,8%,
+33,3% e 28,9%. Whisper levou aproximadamente 12,6 s para cerca de 21 s de áudio neste hardware. Isso
+não apaga o WER humano anterior de 24,4% nem promete precisão universal; Card 11 continua como gate
+com pessoas, sotaques, microfones e salas reais.
+
+A implementação está nas branches `feat/captura-fala-robusta` e `feat/protocolo-transcricao`,
+empilhadas sobre `feat/salas-comunicacao`, e permanece `EM REVISÃO` até os PRs serem revisados, sem
+merge automático. O relatório técnico e as evidências reproduzíveis estão em
+[`../arquitetura/captura-fala-transporte-card-06.md`](../arquitetura/captura-fala-transporte-card-06.md).
+
+## 24. Final exclusivo no backend, sem ASR/VAD no frontend (2026-08-04)
+
+Foyth decidiu remover Vosk e não adicionar VAD. O cenário prioritário é presencial; o controle humano
+de iniciar/parar a captura substitui heurísticas de endpointing e a interface aceita pequeno atraso para
+mostrar somente o final canônico do backend.
+
+A implementação do Card 06 passou a usar janelas PCM fixas de 5 s e residual no stop. O frontend não
+contém reconhecedor nem publica texto; o gateway recebe somente `transcription:audio`; o serviço
+FastAPI/faster-whisper small CPU/int8, sem `vad_filter`, é a única origem textual. Resultado vazio é
+no-speech sem persistência. A ADR-002 registra detalhes, riscos e guardas. A decisão anterior local-first
+permanece nas seções 22–23 somente como histórico.
+
+## Lacunas / perguntas em aberto (revisado 2026-08-04)
 
 - ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: limpeza conservadora + agente LLM).
 - ~~**Motor de adaptação semântica**~~ → **especificado** (§17 + contrato canônico); falta

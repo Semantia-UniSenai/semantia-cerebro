@@ -1,0 +1,174 @@
+{
+  "card": "Card 06 — Robustecer a captura de fala e o transporte em tempo real",
+  "executedAt": "2026-08-03",
+  "fixture": {
+    "language": "pt-BR",
+    "referenceWords": 45,
+    "kind": "synthetic controlled speech",
+    "sampleRate": 16000,
+    "scenarios": [
+      "clean",
+      "pink-noise-light",
+      "pink-noise-strong",
+      "competing-speech",
+      "reverberant"
+    ]
+  },
+  "environment": {
+    "brave": "150.1.92.144",
+    "chromiumEngine": "150.0.7871.186",
+    "node": "v22.23.1",
+    "pnpm": "11.16.0"
+  },
+  "notes": [
+    "modelLoadMs reflects a warmed browser cache and is not a cold-download guarantee",
+    "inferenceMs is local browser execution on this machine, not a universal latency promise",
+    "controlled synthetic WER does not replace real-user validation across accents, microphones and rooms"
+  ],
+  "vosk": {
+    "engine": "vosk-small-pt-0.3",
+    "reference": "Olá, este é um teste de transcrição em português. Hoje vamos conversar sobre acessibilidade e comunicação. O sistema transforma a fala em texto diretamente no navegador. A legenda deve aparecer com clareza durante toda a reunião. Agora vou fazer uma pausa e terminar o teste.",
+    "modelLoadMs": 512.6999999992549,
+    "results": [
+      {
+        "name": "clean",
+        "bytes": 667470,
+        "sampleRate": 16000,
+        "durationSeconds": 20.856,
+        "observationWindowMs": 8000,
+        "inferenceMs": 4294.4000000003725,
+        "realtimeFactor": 0.20590717299579844,
+        "text": "olá este é um teste de transcrição em português hoje vamos conversar sobre acessibilidade e comunicação o sistema transforma fala em texto diretamente no navegador a legenda deve aparecer com clareza durante toda a reunião agora vou fazer uma pausa e terminar o teste",
+        "errors": 1,
+        "referenceWords": 45,
+        "hypothesisWords": 44,
+        "wer": 0.022222222222222223
+      },
+      {
+        "name": "pink-noise-light",
+        "bytes": 667470,
+        "sampleRate": 16000,
+        "durationSeconds": 20.856,
+        "observationWindowMs": 8000,
+        "inferenceMs": 4394,
+        "realtimeFactor": 0.21068277713847333,
+        "text": "olá este é um teste de transcrição em português hoje vamos conversar sobre acessibilidade e comunicação um sistema transforma fala em texto diretamente no navegador a legenda deve aparecer com clareza durante toda a reunião agora vou fazer uma pausa e terminar o teste",
+        "errors": 2,
+        "referenceWords": 45,
+        "hypothesisWords": 44,
+        "wer": 0.044444444444444446
+      },
+      {
+        "name": "pink-noise-strong",
+        "bytes": 667470,
+        "sampleRate": 16000,
+        "durationSeconds": 20.856,
+        "observationWindowMs": 8000,
+        "inferenceMs": 5375,
+        "realtimeFactor": 0.2577196010740314,
+        "text": "olá este um teste transcrição em português hoje vamos conversar sobre acessibilidade comunicação um sistema transforma fala diretamente no navegador a legenda até aparecer com clareza durante toda a reunião agora vou fazer uma pausa e terminar o teste",
+        "errors": 8,
+        "referenceWords": 45,
+        "hypothesisWords": 39,
+        "wer": 0.17777777777777778
+      },
+      {
+        "name": "competing-speech",
+        "bytes": 667470,
+        "sampleRate": 16000,
+        "durationSeconds": 20.856,
+        "observationWindowMs": 8000,
+        "inferenceMs": 5891.299999999814,
+        "realtimeFactor": 0.2824750671269569,
+        "text": "olá este é um teste de transcrição em português sódio final hoje vamos conversar sobre a sensibilidade e comunicação as devem confiar o sistema transforma fala diretamente no navegador temos uma legenda deve aparecer com clareza durante toda a reunião até agora vou fazer uma pausa de terminar o teste história",
+        "errors": 15,
+        "referenceWords": 45,
+        "hypothesisWords": 51,
+        "wer": 0.3333333333333333
+      },
+      {
+        "name": "reverberant",
+        "bytes": 673230,
+        "sampleRate": 16000,
+        "durationSeconds": 21.036,
+        "observationWindowMs": 8000,
+        "inferenceMs": 6956.0999999996275,
+        "realtimeFactor": 0.33067598402736387,
+        "text": "olá este teste transcrição em português hoje vamos conversar sobre a sensibilidade de comunicação o sistema transforma fala diretamente navegador a legenda aparecer com clareza durante toda a reunião agora vou fazer uma pausa e terminar",
+        "errors": 13,
+        "referenceWords": 45,
+        "hypothesisWords": 36,
+        "wer": 0.28888888888888886
+      }
+    ]
+  },
+  "whisper": {
+    "engine": "whisper-small-pt-onnx-q8-wasm",
+    "modelId": "onnx-community/whisper-small",
+    "reference": "Olá, este é um teste de transcrição em português. Hoje vamos conversar sobre acessibilidade e comunicação. O sistema transforma a fala em texto diretamente no navegador. A legenda deve aparecer com clareza durante toda a reunião. Agora vou fazer uma pausa e terminar o teste.",
+    "modelLoadMs": 2011.800000000745,
+    "progressSamples": 167,
+    "results": [
+      {
+        "name": "clean",
+        "sampleRate": 16000,
+        "durationSeconds": 20.856,
+        "inferenceMs": 12684.599999999627,
+        "realtimeFactor": 0.6081990794015931,
+        "text": "Olá, este é um teste de transcrição em português. Hoje vamos conversar sobre acessibilidade e comunicação. O sistema transforma a fala em texto diretamente no navegador. A legenda deve aparecer com clareza durante toda a reunião. Agora vou fazer uma pausa e terminar o teste.",
+        "errors": 0,
+        "referenceWords": 45,
+        "hypothesisWords": 45,
+        "wer": 0
+      },
+      {
+        "name": "pink-noise-light",
+        "sampleRate": 16000,
+        "durationSeconds": 20.856,
+        "inferenceMs": 12662.5,
+        "realtimeFactor": 0.6071394322976601,
+        "text": "Olá, este é um teste de transcrição em português. Hoje vamos conversar sobre acessibilidade e comunicação. O sistema transforma a fala em texto diretamente no navegador. A legenda deve aparecer com clareza durante toda a reunião. Agora vou fazer uma pausa e terminar o teste.",
+        "errors": 0,
+        "referenceWords": 45,
+        "hypothesisWords": 45,
+        "wer": 0
+      },
+      {
+        "name": "pink-noise-strong",
+        "sampleRate": 16000,
+        "durationSeconds": 20.856,
+        "inferenceMs": 12634.800000000745,
+        "realtimeFactor": 0.6058112773303003,
+        "text": "Olá, este é um teste de transcrição em português. Hoje vamos conversar sobre acessibilidade e comunicação. O sistema transforma a fala em texto diretamente no navegador. A legenda deve aparecer com clareza durante toda a reunião. Agora vou fazer uma pausa e terminar o teste.",
+        "errors": 0,
+        "referenceWords": 45,
+        "hypothesisWords": 45,
+        "wer": 0
+      },
+      {
+        "name": "competing-speech",
+        "sampleRate": 16000,
+        "durationSeconds": 20.856,
+        "inferenceMs": 12599.400000000373,
+        "realtimeFactor": 0.6041139240506507,
+        "text": "Olá, este é um teste de transcrição em português. Hoje vamos conversar sobre acessibilidade e comunicação. O sistema transforma fala em texto diretamente no navegador. A legenda deve aparecer com clareza durante toda a reunião. Agora vou fazer uma pausa e terminar o teste.",
+        "errors": 1,
+        "referenceWords": 45,
+        "hypothesisWords": 44,
+        "wer": 0.022222222222222223
+      },
+      {
+        "name": "reverberant",
+        "sampleRate": 16000,
+        "durationSeconds": 21.036,
+        "inferenceMs": 12591.300000000745,
+        "realtimeFactor": 0.5985596120935893,
+        "text": "Olá, este é um teste de transcrição em português. Hoje vamos conversar sobre acessibilidade e comunicação. O sistema transforma a fala e texto diretamente no navegador. A legenda deve aparecer com clareza durante toda reunião. Agora vou fazer uma pausa e terminar o teste.",
+        "errors": 2,
+        "referenceWords": 45,
+        "hypothesisWords": 44,
+        "wer": 0.044444444444444446
+      }
+    ]
+  }
+}

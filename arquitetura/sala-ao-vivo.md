@@ -1,9 +1,10 @@
 # Sala ao vivo — arquitetura do domínio genérico
 
-> **Status em 2026-07-31:** o contrato genérico foi implementado e validado na branch
+> **Status em 2026-08-03:** o contrato genérico foi implementado e validado na branch
 > `feat/salas-comunicacao`; a experiência caption-first e a adaptação dos envelopes reais do gateway
-> foram validadas em `feat/ux-sala-acessivel`, empilhada sobre ela. Ambas ainda dependem de revisão e
-> merge dos PRs para serem consideradas integradas em `dev`.
+> foram validadas em `feat/ux-sala-acessivel`; a captura robusta foi validada nas branches
+> `feat/captura-fala-robusta` e `feat/protocolo-transcricao`, todas empilhadas sobre ela. As entregas
+> ainda dependem de revisão e merge dos PRs para serem consideradas integradas em `dev`.
 >
 > Use este documento junto ao
 > [contrato canônico](../produto/contrato-mvp-transcricao-tempo-real.md), ao
@@ -17,7 +18,7 @@
 | Papéis | `HOST`, `MODERATOR`, `PARTICIPANT` e `GUEST`, todos contextuais | separar comunicador do anfitrião quando houver necessidade comprovada |
 | Agregado | `Room` como reunião do produto; `RoomSession` e `SessionParticipant` como persistência interna | contexto detalhado e versionado da plateia |
 | Entrada | JWT para conta; `joinToken` + token efêmero para convidado, inclusive com conta já autenticada | revogação administrativa antes do encerramento e rate limit |
-| Transcript | uma versão literal limpa e persistida | literal + adaptada por segmento |
+| Transcript | literal limpo, final idempotente e persistido | literal + adaptada por segmento |
 | Retenção | reunião encerrada somente leitura, sem expiração automática | exclusão antecipada e automática em 30 dias |
 | Capacidade | jornada multiator funcional | carga e reconexão comprovadas para 25/50 conexões |
 | Duração | ciclo explícito sem limite automático | limite de até 4 horas |
@@ -49,7 +50,7 @@ anteriores sem reintroduzir esse modelo na interface.
 - `RoomMember`: associação persistente com papel `MODERATOR` ou `PARTICIPANT`.
 - `RoomSession`: ocorrência interna obrigatória, criada já `LIVE`, com `joinToken`, estado e horários.
 - `SessionParticipant`: identidade autenticada ou convidada restrita à reunião.
-- `TranscriptSegment`: `sessionId`, sequência estável, texto literal e data.
+- `TranscriptSegment`: `sessionId`, `clientSegmentId`, sequência estável, texto literal e data.
 - `ChatMessage`: sessão, identidade contextual, texto e data.
 - `Score`: datilologia/ranking, fora do núcleo atual.
 
@@ -74,6 +75,7 @@ sem ampliar acesso: token de convidado, identidade e permissões continuam restr
 | consultar conteúdo após `ENDED` | sim | sim | sim, se associado | sim, enquanto o token for válido |
 | enviar chat/transcript após `ENDED` | não | não | não | não |
 | receber `joinToken` reutilizável | sim | sim | não | não |
+| publicar transcript durante `LIVE` | sim | não | não | não |
 
 Detalhes, listagens e snapshots removem o `joinToken` para quem não possui `canManage`. O token
 efêmero do convidado carrega identidade e reunião específicas e não funciona em outra reunião.
@@ -118,10 +120,11 @@ A prova foi executada em PostgreSQL 16 por dois caminhos:
 ## API REST e OpenAPI
 
 O contrato público usa `POST /api/rooms` para abrir a reunião instantânea e `/api/sessions`
-internamente para convite, snapshot, transcript e encerramento. Não existe endpoint REST de upload ou
-transcrição de áudio: a API recebe somente texto pelos eventos Socket.IO. As rotas públicas de
-criar/listar ocorrências e iniciar manualmente foram removidas. Swagger e cliente Orval devem ser
-recapturados pelo fluxo `pnpm api:sync` sempre que o contrato mudar.
+internamente para convite, snapshot, transcript e encerramento. Não existe endpoint REST público de
+upload/transcrição: áudio PCM entra apenas pelo evento Socket.IO autenticado `transcription:audio` e
+segue da API ao serviço ASR em rede privada. As rotas públicas de criar/listar ocorrências e iniciar
+manualmente foram removidas. Swagger e cliente Orval devem ser recapturados pelo fluxo `pnpm api:sync`
+sempre que o contrato mudar.
 
 As jornadas ativas não expõem `/classes`, `/turmas` ou `/aula`. Compatibilidade com o domínio
 escolar acontece pela migration dos dados, não pela manutenção indefinida de dois contratos
@@ -137,7 +140,7 @@ Namespace `/live`, room `session:<id>` e handshake por uma das identidades:
 Eventos cliente → servidor:
 
 - `session:join/leave/end`;
-- `transcript:partial/final`;
+- `transcription:audio` com PCM16 binário, somente `HOST` em sessão `LIVE`;
 - `chat:send`;
 - `hand:raise/lower`.
 
@@ -145,7 +148,7 @@ Eventos servidor → cliente:
 
 - snapshot de sessão, presença e permissões contextuais;
 - atualizações de participantes;
-- parciais e finais de transcript;
+- `transcription:status` e transcript final canônico;
 - chat e fila de mãos;
 - encerramento e falhas reconhecidas.
 
@@ -160,40 +163,42 @@ REST.
 
 ## Fluxo atual da transcrição
 
+A captura local-first anterior permanece documentada como baseline histórico no
+[relatório do Card 06](./captura-fala-transporte-card-06.md). O contrato vigente é definido pelas
+[ADR-001](./decisoes/ADR-001-asr-backend-cpu-first.md) e
+[ADR-002](./decisoes/ADR-002-captura-pcm-janelas-fixas.md):
+
 ```text
-caminho rápido
-SpeechRecognition ─ parcial/final ─▶ Socket.IO ─▶ limpeza + persistência + broadcast
-        │ ausente ou erro network/service-not-allowed/start-failed
-        ▼
-fallback local cross-browser
-getUserMedia + AudioContext + AudioWorklet ─▶ Vosk português em WebAssembly/Web Worker
-                                           ─▶ texto parcial/final ─▶ mesmo Socket.IO canônico
+controle explícito iniciar/parar
+  → getUserMedia + AudioWorklet
+  → frames PCM contíguos, sem ASR/VAD/classificação no frontend
+  → janela fixa de 5 s; residual ≥ 250 ms no stop
+  → resample 16 kHz mono + PCM16 little-endian
+  → fila cliente: 8 itens, TTL 60 s, mesmo clientSegmentId no retry
+  → Socket.IO transcription:audio (HOST-only)
+  → API: validação + idempotência + fila serial por sessão
+  → ASR privado: faster-whisper small/int8 CPU, sem vad_filter
+  → vazio: ACK/no-speech; texto: limpeza → PostgreSQL/broadcast
 ```
 
-- captura de microfone funciona em navegadores modernos por `getUserMedia`; gravar ou transmitir
-  áudio não implica que o navegador ofereça conversão de fala em texto;
-- o caminho rápido usa a implementação de `SpeechRecognition` fornecida pelo navegador, que pode
-  depender do serviço do próprio fornecedor;
-- Firefox/Zen, um microfone específico selecionado ou o caminho nativo bloqueado carregam sob
-  demanda `/models/vosk-model-small-pt-0.3.model` e processam os samples no próprio navegador;
-- o modelo padrão tem 32.440.432 bytes, licença Apache-2.0, tamanho e SHA-256 verificados na
-  preparação. A extensão pública neutra `.model` evita `Content-Encoding: gzip` e descompactação
-  dupla; o binário é servido same-origin e permanece fora do Git;
-- no fallback local, a API Semantia e terceiros não recebem áudio; somente texto parcial/final
-  atravessa Socket.IO;
-- não existe chave, custo por minuto, endpoint de upload ou dependência de provedor STT no backend;
-- Vosk/Web Speech são ASR, não a futura IA generativa de adaptação. O literal não recebe correção
-  inventada por LLM;
-- todo texto final usa o mesmo `AppendTranscriptSegmentUseCase`, limpeza conservadora, sequência e
-  broadcast;
-- falhas distinguem permissão/captura, download do modelo e reconhecimento local sem recomendar
-  troca de navegador;
-- após a carga longa, o `AudioContext` é retomado novamente antes do estado ativo. O worklet é um
-  asset JavaScript same-origin, e um watchdog encerra a captura quando nenhum frame chega em quatro
-  segundos, evitando o falso estado “transcrevendo”;
-- a interface permite cancelar a preparação, diferencia conexão/silêncio/áudio recebido e mantém o
-  controle visível em altura reduzida. Esses sinais são derivados localmente e não enviam áudio,
-  samples ou nível sonoro à API.
+- Firefox/Zen e demais navegadores são tratados por capacidade, sem user-agent nem recomendação de
+  troca;
+- o navegador não carrega modelo, reconhecedor, engine ou worker de ASR e não emite texto;
+- cada janela normal tem 5000 ms; o residual no stop tem 250–5000 ms; o contrato defensivo aceita até
+  30000 ms, PCM16 mono/16 kHz e no máximo 960000 bytes;
+- Socket.IO limita o envelope a 1,1 MB; cliente e API limitam a oito segmentos por sessão;
+- somente `HOST` presente em sessão `LIVE` envia áudio; moderador, participante e convidado são
+  recusados antes da inferência;
+- a API consulta `(sessionId, clientSegmentId)` antes do ASR, coalesce duplicata concorrente e serializa
+  segmentos da mesma sessão;
+- o serviço ASR executa uma inferência concorrente por padrão e possui fila interna limitada;
+- áudio existe apenas em memória e é descartado em sucesso, falha definitiva, expiração, saída, stop
+  ou encerramento; não há WAV/PCM em storage, banco, volume ou logs;
+- o gateway não possui handlers cliente→servidor para transcript parcial ou final textual;
+- estados `processing`, `complete` e `failed` expõem motor/modelo/latência sem logar áudio ou texto;
+- nenhum fallback cloud ocorre sem nova decisão, configuração e consentimento.
+
+O teste isolado de microfone continua estritamente local: calcula somente nível e nunca envia samples.
 
 ### Seleção e teste da entrada de áudio
 
@@ -208,44 +213,43 @@ primária de transcrição, cápsula com a entrada atual e popover de configura�
   primeira disponível quando o dispositivo desaparece;
 - testa a entrada selecionada com `getUserMedia` + `AnalyserNode`, mostra nível e confirmação local e
   encerra track, source, analyser, animation frame e `AudioContext` ao parar, trocar ou desmontar;
-- usa constraint exata de `deviceId` tanto no teste quanto na captura Vosk. Como a API
-  `SpeechRecognition` não permite escolher entrada, uma seleção específica ativa o Vosk local em vez
-  de fingir que o ASR nativo está usando o microfone escolhido;
-- troca somente captura/grafo/reconhecedor quando a transcrição está ativa. Reunião, presença e chat
-  continuam conectados;
-- não conecta o teste ao Socket.IO, não grava áudio e não transmite samples ou nível. Somente texto
-  parcial/final produzido pelo ASR segue para o contrato canônico.
+- usa constraint exata de `deviceId` tanto no teste quanto na captura PCM;
+- troca somente captura/grafo quando a transcrição está ativa. Reunião, presença e chat continuam
+  conectados;
+- não conecta o teste isolado ao Socket.IO, não grava áudio e não transmite samples ou nível;
+- a captura da reunião envia janelas efêmeras ao backend e nunca gera texto localmente.
 
-No Vosk, frames de áudio não são tratados como prova de transcrição. O transporte rápido por porta do
-worker recebe um watchdog de áudio audível sem hipótese; após oito segundos ele fecha a porta e troca
-para o transporte compatível por PCM local. A interface só confirma transcrição depois de texto não
-vazio e torna observável uma falha também no segundo transporte.
+Não existe watchdog de hipótese, classificação de silêncio ou segmentação por conteúdo. A janela fecha
+por contagem de frames e o residual fecha quando o anfitrião pausa, sai ou encerra.
 
-### Limites medidos do fallback local
+### Limites medidos do reconhecimento local
 
-No spike automatizado Firefox de 2026-07-30, o modelo carregou em 43,643 s a frio e processou um
-áudio pt-BR de 8,064 s sem chamadas de transcrição externas. A frase esperada continha “projeto
-Semantia” e “navegador Firefox”; a saída reconheceu “projeto ser mantinha” e “navegador falha fox”.
-Isso prova viabilidade técnica no Firefox, mas também evidencia carga inicial e precisão inferiores
-às de modelos maiores. Cache, progresso visível, dispositivos reais, ruído, sotaques e nomes próprios
-precisam de QA antes de tratar o fallback como legenda de acessibilidade confiável.
+O benchmark controlado de 2026-08-03 mediu cinco cenários com o mesmo roteiro de 45 palavras. O
+Whisper Small q8/WASM produziu WER de 0%, 0%, 0%, 2,2% e 4,4%; o Vosk, usado para resposta rápida,
+produziu 2,2%, 4,4%, 17,8%, 33,3% e 28,9% em fala limpa, ruído leve, ruído forte, fala concorrente e
+reverberação. O refinamento Whisper levou aproximadamente 12,6 s para cerca de 21 s de áudio neste
+hardware, enquanto Vosk manteve as hipóteses parciais.
+
+Esses números são de fixtures sintéticas controladas e não são promessa universal. A leitura humana
+anterior teve WER aproximado de 24,4% no Vosk. Cold start, hardware, sotaques, nomes próprios,
+microfones e salas reais continuam exigindo QA no Card 11. Metodologia, textos reconhecidos, runtime,
+privacidade e limitações estão no
+[relatório do Card 06](./captura-fala-transporte-card-06.md).
 
 ## Arquitetura-alvo do pipeline
 
 ```text
-captura no navegador
-  → ASR nativo ou Vosk local: parcial efêmero
-  → ASR nativo ou Vosk local: final
-  → limpeza conservadora no backend
-  → transcript literal canônico + persistência
-  → fila de adaptação contextual por IA generativa
+captura PCM no navegador, sem ASR/VAD
+  → janelas efêmeras → provider ASR backend → transcript literal canônico
+  → persistência/broadcast idempotente
+  → fila separada de adaptação contextual por agente/LLM
   → transcript adaptado OU fallback literal
-  → preferência individual + legenda karaokê
 ```
 
-A adaptação, o contexto da plateia e a preferência literal/adaptada permanecem planejados. A IA
-generativa será acionada somente depois do literal final. Falha nessa etapa nunca poderá bloquear o
-literal; credenciais futuras de adaptação deverão existir somente no backend por variável de
+ASR e agente são serviços distintos. A LLM recebe texto final, nunca substitui o reconhecimento de
+fala e não pode reescrever silenciosamente nomes, números ou códigos. A adaptação, o contexto da
+plateia e a preferência literal/adaptada permanecem planejados. Falha nessa etapa nunca poderá
+bloquear o literal; credenciais futuras de STT/LLM deverão existir somente no backend por variável de
 ambiente.
 
 ## Evidências de validação
