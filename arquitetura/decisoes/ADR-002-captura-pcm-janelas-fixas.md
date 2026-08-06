@@ -2,6 +2,7 @@
 id: ADR-002
 status: aceita
 data: 2026-08-04
+validado: 2026-08-06
 decisores: [Foyth]
 supersede-parcialmente: ADR-001
 ---
@@ -23,10 +24,17 @@ A arquitetura do Card 06 usava Vosk no navegador para prévias textuais e para f
 7. Resultado vazio é um sucesso sem fala: recebe ACK, não persiste segmento e não faz broadcast final; um cache efêmero de 120 s preserva replay idempotente acima do TTL de 60 s do navegador.
 8. O único componente áudio→texto é o serviço ASR Python privado.
 9. Remover o rollback `ASR_MODE=browser`; final textual enviado pelo cliente permanece proibido.
+10. Manter hotwords vazias por padrão e `condition_on_previous_text=False`; qualquer viés de decoder
+    exige corpus comparável e não pode injetar vocabulário técnico no texto literal.
 
 ## Por que 5 segundos
 
 Com RTF local p95 de 0,505 no perfil KVM 2 emulado, uma janela de 5 segundos tende a acrescentar cerca de 2,5 segundos de inferência além do tempo de coleta. Isso mantém a ordem de grandeza em segundos, reduz o número de chamadas quando comparado a janelas menores e será reavaliado com fala humana antes de produção.
+
+Em 2026-08-06, Foyth validou humanamente a versão de 5 segundos como estável e suficiente para a
+continuidade do projeto. A decisão foi congelada nas tags `card06-transcription-stable-2026-08-06` da
+web (`613f813`) e da API (`e642319`). Nenhum experimento posterior superou esse checkpoint; portanto,
+nenhuma alteração de janela, overlap, resampler, perfil de microfone ou decoder foi promovida.
 
 ## Consequências positivas
 
@@ -62,3 +70,7 @@ Com RTF local p95 de 0,505 no perfil KVM 2 emulado, uma janela de 5 segundos ten
 ## Reavaliação
 
 Reavaliar janela, overlap e eventual streaming somente com o mesmo corpus humano pt-BR, medindo WER, perdas em fronteiras, latência ponta a ponta, RTF, CPU/RSS e rejeições de fila. Nenhum VAD ou ASR frontend entra sem nova decisão explícita.
+
+Um residual curto com fala pode acionar fallback caro do decoder; por isso, medir blocos completos e
+residuais separadamente é obrigatório em qualquer futura proposta de janela. Esse risco conhecido não
+autoriza alterar o residual mínimo ou o checkpoint sem novo teste humano e nova decisão.

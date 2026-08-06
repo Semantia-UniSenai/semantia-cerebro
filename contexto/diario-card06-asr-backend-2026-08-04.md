@@ -1,7 +1,7 @@
 ---
 title: Diário de execução — evolução Card 06 para ASR backend
 data: 2026-08-04
-status: concluido-aguardando-leitura-humana
+status: concluido-em-revisao
 ---
 
 # Diário do Card 06 — ASR backend CPU-first
@@ -145,9 +145,30 @@ Gates não-runtime executados após a mudança:
 A stack permaneceu parada. Docker/E2E com PostgreSQL e smoke real navegador→ASR→banco→broadcast só
 podem ser registrados depois de executados; não são inferidos dos testes unitários.
 
-### Pendências da integração final
+### Pendências registradas antes da integração — resolvidas abaixo
 
-- atualizar os PRs #7 (web), #6 (API) e #4 (cérebro);
-- executar os gates que dependem de runtime quando a stack puder ser ligada;
-- integrar a pilha `feat/salas-comunicacao` em `dev`/`main`;
-- atualizar o ClickUp com links/SHAs efetivamente mesclados.
+As quatro ações abaixo eram o checklist pré-integração e foram concluídas em 2026-08-05/06:
+
+- PRs #7 (web), #6 (API) e #4 (cérebro) atualizados e integrados por suas branches-pai;
+- gates dependentes de runtime executados e registrados;
+- pilhas `feat/salas-comunicacao` promovidas para `dev`/`main`;
+- ClickUp mantido em `EM REVISÃO`, com links e SHAs finais registrados neste fechamento.
+
+## Fechamento integrado — 2026-08-05 e 2026-08-06
+
+- Em 2026-08-05, as branches empilhadas foram promovidas: web #7 → #8 para `dev`, API #6 → #7
+  para `dev` e cérebro #4 → #5 para `main`.
+- Foyth executou nova leitura e considerou o comportamento estável e bom para continuidade. Foram
+  criadas as tags imutáveis `card06-transcription-stable-2026-08-06` na web (`613f813`) e API
+  (`e642319`).
+- A investigação identificou que hotwords técnicas padrão induziam palavras não faladas. O PR API #9
+  removeu o valor padrão, preservou somente opt-in explícito e foi mergeado em `dev` no commit
+  `8c1ba5449ac98f0399e90e6bc3820d9214b6d711` em 2026-08-06.
+- Gate fresco do PR #9: NestJS 19/19 suítes e 86/86 testes, build/lint, Prisma generate/validate e
+  audit aprovados; Python 15/15, Ruff check/format e `pip check` aprovados; imagem ASR reconstruída.
+- No runtime, `ASR_HOTWORDS` estava vazio ou ausente, 5 s de silêncio retornaram texto vazio, a API
+  confirmou banco saudável, o ASR estava ready e não havia artefato de áudio em `/app` ou `/tmp`.
+- Experimentos sem ganho comprovado não foram promovidos e suas branches foram removidas local e
+  remotamente. O runtime permanece no checkpoint de 5 s, sem overlap, VAD ou ASR no frontend.
+- O Card 06 permanece `EM REVISÃO`: implementação e documentação estão integradas, mas a conclusão
+  terminal segue o workflow de revisão do ClickUp.
