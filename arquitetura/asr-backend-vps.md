@@ -1,7 +1,7 @@
 ---
 title: ASR backend CPU-first — operação em VPS
-status: validado-localmente-aguardando-leitura-humana
-atualizado: 2026-08-04
+status: validado-humanamente-estavel-com-experimentos-isolados
+atualizado: 2026-08-06
 adr: ./decisoes/ADR-001-asr-backend-cpu-first.md
 ---
 
@@ -37,6 +37,7 @@ O navegador nunca acessa a porta Python diretamente. A API recebe PCM no Socket.
 | segmentação | controle explícito + contagem de frames, sem ASR/VAD no cliente |
 | PCM máximo | 960000 bytes |
 | Socket.IO máximo | 1100000 bytes |
+| hotwords do decoder | vazias por padrão; opt-in somente após benchmark |
 | retenção de áudio | zero |
 
 ## KVM 2 — 2 vCPU / 8 GB RAM
@@ -142,6 +143,20 @@ Nunca registrar samples, base64, texto reconhecido, hotwords sensíveis ou paths
 - sessão encerrada limpa fila e impede novas inferências.
 
 A coordenação é em memória e atende uma instância de API. Escala horizontal futura exige fila/lock distribuído ou job persistido sem persistir o áudio bruto.
+
+## Validação humana e checkpoint estável — 2026-08-06
+
+Foyth executou duas leituras humanas do roteiro fonético no runtime KVM 4 equivalente. A primeira
+confirmou boa inteligibilidade geral, mas exibiu inserções repetidas de vocabulário técnico não
+falado. A causa era o default `ASR_HOTWORDS="Semantia Socket.IO WebSocket TypeScript PostgreSQL"`;
+o default foi removido e a imagem ASR recriada sem VAD ou filtro posterior. O segundo resultado não
+repetiu o padrão técnico e permaneceu suficientemente bom para a continuidade do projeto, embora
+ainda apresente erros de fronteira, fonemas/letras isoladas e nomes próprios.
+
+O ponto estável foi marcado nas tags `card06-transcription-stable-2026-08-06` da API (`e642319`) e
+web (`613f813`). Melhorias de reamostragem, captura, decoder, overlap e janela de 4 s serão avaliadas
+em branches isoladas contra o mesmo corpus. A janela de 8 s não será testada por aumentar o atraso
+percebido; 5 s permanece o default até evidência contrária.
 
 ## Privacidade e LGPD
 

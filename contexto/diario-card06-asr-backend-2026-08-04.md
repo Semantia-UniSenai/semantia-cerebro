@@ -151,3 +151,28 @@ podem ser registrados depois de executados; não são inferidos dos testes unit�
 - executar os gates que dependem de runtime quando a stack puder ser ligada;
 - integrar a pilha `feat/salas-comunicacao` em `dev`/`main`;
 - atualizar o ClickUp com links/SHAs efetivamente mesclados.
+
+## 2026-08-06 — leitura humana, hotwords e checkpoint estável
+
+- A aplicação foi executada no perfil local equivalente a KVM 4 com ASR `small`, CPU/int8, três
+  threads e uma inferência concorrente.
+- O smoke vertical host → Socket.IO → Nest → ASR → PostgreSQL → broadcast persistiu um único final,
+  e o replay do mesmo `clientSegmentId` não duplicou linha nem evento.
+- Na primeira leitura humana, Foyth observou inserções repetidas de `WebSocket`, `TypeScript`,
+  `PostgreSQL`, `Semantia` e `Socket` sem ter pronunciado esses termos.
+- O teste RED mostrou exatamente `Semantia Socket.IO WebSocket TypeScript PostgreSQL` no default de
+  `ASR_HOTWORDS`; a correção tornou o default vazio, preservando opt-in explícito.
+- A imagem foi recriada sem VAD, blacklist ou correção textual. Três janelas de silêncio e três de
+  ruído baixo retornaram texto vazio; uma fala sintética permaneceu correta em 1.854 ms.
+- Gates da correção: Python 15 testes + Ruff/pip check; NestJS 19 suítes/86 testes. PR API #9 aberto,
+  limpo e sem merge automático.
+- A segunda leitura não repetiu o vocabulário técnico espúrio. Persistiram erros esperados de
+  fronteira de 5 s, letras/fonemas isolados, palavras raras e nomes próprios; nenhum WER foi
+  inventado porque o áudio humano não é retido.
+- Foyth aceitou esta versão como estável o bastante para continuar o produto e autorizou tentar as
+  melhorias propostas desde que o retorno exato permaneça possível.
+- Tags publicadas: API `card06-transcription-stable-2026-08-06` em `e642319`; web com o mesmo nome em
+  `613f813`.
+- Experimentos serão independentes, uma variável por vez, com resultado promover/rejeitar/
+  inconclusivo. Janela de 8 s foi descartada por latência; comparar somente 4 s e 5 s.
+- Plano: `planejamento/2026-08-06-experimentos-qualidade-transcricao-card06.md`.

@@ -59,6 +59,30 @@ Com RTF local p95 de 0,505 no perfil KVM 2 emulado, uma janela de 5 segundos ten
 - estado offline, desconexão abrupta, unmount, expiração ou falha definitiva descartam bytes conforme
   retenção zero.
 
+## Checkpoint estável e regime experimental — 2026-08-06
+
+A validação humana de Foyth confirmou que a versão atual já é suficientemente estável para a
+continuidade do produto. A primeira leitura revelou inserções repetidas de `WebSocket`, `TypeScript`,
+`PostgreSQL`, `Semantia` e `Socket`; a causa comprovada eram hotwords técnicas injetadas por default
+no decoder. O default passou a vazio, sem VAD, blacklist ou correção textual. Depois da mudança,
+três janelas de silêncio e três de ruído baixo retornaram vazias, enquanto a fala sintética de
+regressão continuou correta.
+
+Checkpoints imutáveis publicados:
+
+- API/ASR: tag `card06-transcription-stable-2026-08-06` no commit `e642319`;
+- web: tag `card06-transcription-stable-2026-08-06` no commit `613f813`.
+
+Foyth autorizou experimentar as melhorias propostas desde que o baseline permaneça recuperável.
+Cada hipótese deve partir dessas tags, mudar uma variável por vez e receber resultado
+`promover`, `rejeitar` ou `inconclusivo`. Não resetar `dev`/`main`, que contêm trabalhos posteriores.
+A janela de 5 s permanece como default; 8 s foi rejeitada antes do experimento porque aumentaria a
+latência percebida. Comparações permitidas: reamostragem, perfis do microfone, decoder
+determinístico/thresholds, overlap pequeno e janela de 4 s versus 5 s.
+
+Plano executável:
+[`2026-08-06-experimentos-qualidade-transcricao-card06.md`](../../planejamento/2026-08-06-experimentos-qualidade-transcricao-card06.md).
+
 ## Reavaliação
 
 Reavaliar janela, overlap e eventual streaming somente com o mesmo corpus humano pt-BR, medindo WER, perdas em fronteiras, latência ponta a ponta, RTF, CPU/RSS e rejeições de fila. Nenhum VAD ou ASR frontend entra sem nova decisão explícita.
