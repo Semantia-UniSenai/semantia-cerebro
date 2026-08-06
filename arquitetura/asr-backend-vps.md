@@ -1,7 +1,7 @@
 ---
 title: ASR backend CPU-first — operação em VPS
-status: validado-localmente-aguardando-leitura-humana
-atualizado: 2026-08-04
+status: validado-humanamente-estavel-em-revisao
+atualizado: 2026-08-06
 adr: ./decisoes/ADR-001-asr-backend-cpu-first.md
 ---
 
@@ -35,6 +35,7 @@ O navegador nunca acessa a porta Python diretamente. A API recebe PCM no Socket.
 | fila no navegador | 8 segmentos, TTL 60 s |
 | segmento recebido | janela fixa de 5000 ms; residual de 250–5000 ms no stop |
 | segmentação | controle explícito + contagem de frames, sem ASR/VAD no cliente |
+| decoder | hotwords vazias; `condition_on_previous_text=False`; `beam_size=5` |
 | PCM máximo | 960000 bytes |
 | Socket.IO máximo | 1100000 bytes |
 | retenção de áudio | zero |
@@ -50,6 +51,7 @@ ASR_COMPUTE_TYPE=int8
 ASR_CPU_THREADS=2
 ASR_MAX_CONCURRENCY=1
 ASR_MAX_QUEUE=2
+ASR_HOTWORDS=
 ```
 
 API, PostgreSQL e ASR podem compartilhar o host apenas no MVP de baixo volume. Não prometer mais de uma reunião com fala ativa sem medir RTF, p95 e memória no plano real da Hostinger.
@@ -65,6 +67,7 @@ ASR_COMPUTE_TYPE=int8
 ASR_CPU_THREADS=3
 ASR_MAX_CONCURRENCY=1
 ASR_MAX_QUEUE=4
+ASR_HOTWORDS=
 ```
 
 Manter uma inferência concorrente até o benchmark provar que duas não pioram p95, RTF e disponibilidade da API. O quarto vCPU fica como margem para Node/PostgreSQL/sistema.
@@ -86,6 +89,22 @@ O benchmark abaixo usa uma fala pt-BR sintética controlada de 5,112 s e o mesmo
 - evidência: `../evidencias/card-06/asr-backend-benchmark-2026-08-04.json`.
 
 O rollout KVM 2 continua com fila recomendada `2`, mais conservadora que a fila `4` usada para testar o limite. KVM 4 pode iniciar com fila `4`. Em ambos, manter uma inferência por processo.
+
+## Decoder neutro e checkpoint estável — 2026-08-06
+
+`ASR_HOTWORDS` é vazio por padrão. Hotwords são viés de decoder, não dicionário inofensivo: o valor
+técnico antigo podia transformar silêncio, ruído ou fala ambígua em termos do projeto que não foram
+ditos. O PR API #9 removeu esse default e preservou o opt-in exclusivamente para benchmark com áudio
+alvo. O runtime verificado retornou vazio para silêncio com hotwords vazias.
+
+O checkpoint operacional imutável é a tag `card06-transcription-stable-2026-08-06`:
+
+- API/ASR: `e64231989fc90e1134a6304114b8909cae8b372d`;
+- web: `613f81382df35349f0fdf48a813da522a385c2bb`.
+
+Rollback significa recriar cada componente pela própria tag, nunca resetar branches canônicas. Após
+recriar, verificar `/ready`, `/api/health`, frontend HTTP, autorização `HOST`/`LIVE`, uma persistência e
+um broadcast para o mesmo `clientSegmentId`, replay sem duplicação e zero áudio no filesystem/banco.
 
 ## Deploy
 

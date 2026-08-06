@@ -1,17 +1,22 @@
 ---
 title: Card 06 — captura de fala robusta e transporte em tempo real
 status: em-revisao
-atualizado: 2026-08-04
+atualizado: 2026-08-06
 clickup: 86e2j4w0k
 ---
 
 # Card 06 — captura de fala robusta e transporte em tempo real
 
-> Implementado nas branches `feat/captura-fala-robusta` (web) e
-> `feat/protocolo-transcricao` (API), empilhadas sobre `feat/salas-comunicacao`.
-> Revisão aberta no [semantia-web #7](https://github.com/Semantia-UniSenai/semantia-web/pull/7),
-> [semantia-api #6](https://github.com/Semantia-UniSenai/semantia-api/pull/6) e no PR documental desta
-> branch. A entrega não está integrada em `dev` e não possui merge automático.
+> Implementado inicialmente nas branches `feat/captura-fala-robusta` (web) e
+> `feat/protocolo-transcricao` (API), empilhadas sobre `feat/salas-comunicacao`. A cadeia foi integrada
+> em 2026-08-05: web [#7](https://github.com/Semantia-UniSenai/semantia-web/pull/7) →
+> [#8](https://github.com/Semantia-UniSenai/semantia-web/pull/8), API
+> [#6](https://github.com/Semantia-UniSenai/semantia-api/pull/6) →
+> [#7](https://github.com/Semantia-UniSenai/semantia-api/pull/7) e cérebro
+> [#4](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/4) →
+> [#5](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/5). A neutralização das hotwords
+> padrão foi integrada em `dev` pelo [PR API #9](https://github.com/Semantia-UniSenai/semantia-api/pull/9)
+> em 2026-08-06. O card permanece `EM REVISÃO` pelo workflow do ClickUp.
 
 ## Situação após a evolução de 2026-08-04
 
@@ -33,7 +38,7 @@ iniciar captura explicitamente
   → fila efêmera (8 itens, TTL 60 s, 3 tentativas, mesmo clientSegmentId)
   → Socket.IO transcription:audio
   → NestJS: HOST + LIVE + limites + idempotência + serialização
-  → FastAPI/faster-whisper small CPU/int8, sem vad_filter
+  → FastAPI/faster-whisper small CPU/int8, sem vad_filter e sem hotwords padrão
   → texto vazio: ACK/no-speech sem persistência
   → texto final: limpeza conservadora + PostgreSQL + broadcast
 ```
@@ -41,6 +46,35 @@ iniciar captura explicitamente
 Não existem eventos cliente→servidor para transcript parcial ou final textual. Áudio não entra em
 arquivo, volume, banco, storage do navegador ou logs. O botão explícito de captura é o limite humano
 da interação presencial; a implementação não infere início/fim por silêncio ou conteúdo.
+
+## Estado integrado, checkpoint e rollback
+
+| Repositório | Branch canônica | SHA após integração | Checkpoint estável |
+|---|---|---|---|
+| `semantia-web` | `dev` | `6dfd4e428289a75df3eb25aafd55de4f94757f9e` | tag `card06-transcription-stable-2026-08-06` em `613f81382df35349f0fdf48a813da522a385c2bb` |
+| `semantia-api` | `dev` | `8c1ba5449ac98f0399e90e6bc3820d9214b6d711` | tag `card06-transcription-stable-2026-08-06` em `e64231989fc90e1134a6304114b8909cae8b372d` |
+| `semantia-cerebro` | `main` | `9c7852d3d27450ec27ab4566c0adc56515a202da` antes deste fechamento | documentação do Card 06 integrada pelos PRs #4/#5 |
+
+As tags imutáveis foram criadas depois da validação humana de Foyth de que a versão estava estável e
+boa para continuidade. Para rollback, recriar web e API/ASR pelas tags correspondentes, aguardar
+frontend HTTP, API `/api/health` com banco, ASR `/ready` e executar o smoke host → áudio → ASR → uma
+persistência/broadcast. Nunca resetar `dev`/`main`, reintroduzir ASR no navegador ou persistir áudio.
+
+## Fechamento verificado em 2026-08-06
+
+- web integrado: captura PCM16 little-endian, mono/16 kHz, janelas de 5 s e residual mínimo de 250 ms;
+- API/NestJS: 19 suítes e 86 testes; lint, build, Prisma generate/validate e audit de produção aprovados;
+- ASR Python: 15 testes, Ruff check/format e `pip check` aprovados;
+- imagem ASR non-root reconstruída a partir do commit revisado;
+- `ASR_HOTWORDS` vazio ou ausente no runtime; janela real de silêncio retornou texto vazio;
+- frontend respondeu HTTP 200, API respondeu `status=ok` com `db=true` e ASR respondeu `ready`;
+- inspeção de `/app` e `/tmp` no worker encontrou zero PCM/WAV/MP3/FLAC/OGG;
+- replay idempotente, autorização `HOST`/`LIVE`, backpressure e drenagem por ACK continuam cobertos
+  pelos testes e pelo smoke E2E registrado no diário/evidência de runtime.
+
+Nenhuma variante experimental foi promovida. O default permanece exatamente o checkpoint aprovado:
+5 s, residual ≥ 250 ms, `small`, CPU/int8, uma inferência, sem VAD, sem overlap, hotwords vazias e
+`condition_on_previous_text=False`.
 
 ## Resultado histórico local-first
 

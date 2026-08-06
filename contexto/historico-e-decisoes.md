@@ -1,7 +1,7 @@
 ---
 tags: [tcc, senai, semantia, libras, acessibilidade]
 status: histórico-vivo
-atualizado: 2026-08-03
+atualizado: 2026-08-06
 ---
 
 # Semantia 🤟
@@ -376,6 +376,23 @@ contém reconhecedor nem publica texto; o gateway recebe somente `transcription:
 FastAPI/faster-whisper small CPU/int8, sem `vad_filter`, é a única origem textual. Resultado vazio é
 no-speech sem persistência. A ADR-002 registra detalhes, riscos e guardas. A decisão anterior local-first
 permanece nas seções 22–23 somente como histórico.
+
+## 25. Card 06 integrado e checkpoint estável (2026-08-06)
+
+As cadeias empilhadas do Card 06 foram integradas em 2026-08-05: web #7 → #8, API #6 → #7 e
+cérebro #4 → #5. Após nova leitura, Foyth considerou a versão estável e apta à continuidade. As tags
+imutáveis `card06-transcription-stable-2026-08-06` fixam web em `613f813` e API/ASR em `e642319`.
+
+O último defeito confirmado vinha de hotwords técnicas configuradas como default no faster-whisper:
+em silêncio, ruído e fala ambígua, elas podiam induzir palavras que não haviam sido ditas. O PR API #9
+removeu esse viés padrão e foi integrado em `dev` no commit `8c1ba54`. Hotwords continuam disponíveis
+somente como opt-in medido; o runtime padrão permanece sem hotwords, sem VAD e sem contexto textual
+anterior.
+
+Os gates finais passaram com 86 testes NestJS e 15 testes Python, além de lint, builds, Prisma,
+audits, Ruff, imagem Docker e smoke de silêncio. O frontend, a API com banco e o ASR permaneceram
+saudáveis; nenhuma mídia de áudio apareceu no filesystem inspecionado. Alternativas sem melhoria
+comprovada não foram promovidas. O Card 06 fica `EM REVISÃO` conforme o workflow do ClickUp.
 
 ## Lacunas / perguntas em aberto (revisado 2026-08-04)
 
