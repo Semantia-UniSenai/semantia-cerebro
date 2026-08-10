@@ -1,0 +1,123 @@
+{
+  "card": {
+    "id": "86e2j4w4k",
+    "name": "Consolidar a limpeza de disfluências e o transcript canônico",
+    "date": "2026-08-10",
+    "status": "em-revisao"
+  },
+  "contract": {
+    "currentStrategy": "pt-br-conservative-v1",
+    "legacyStrategy": "legacy-unversioned",
+    "rawAsrPersisted": false,
+    "audioPersisted": false,
+    "networkAddedByCleaner": false,
+    "cleanerAsync": false,
+    "discardedResultPersistsSegment": false,
+    "discardedResultEmitsFinal": false,
+    "discardedResultCompletesAck": true,
+    "noSpeechReplayTtlMs": 120000,
+    "noSpeechReplayMaxEntries": 512
+  },
+  "review": {
+    "passes": [
+      "specification-semantics-idempotency-concurrency-lifecycle",
+      "adversarial-diff-security-privacy-performance"
+    ],
+    "findingsResolved": [
+      "stacked-initial-markers-were-consumed-once",
+      "no-speech-cache-had-ttl-without-cardinality-limit",
+      "e2e-absence-proof-used-fixed-100ms-wait",
+      "orval-contained-unrelated-audience-context-drift",
+      "transitive-js-yaml-high-severity-advisory"
+    ],
+    "addedLineScans": {
+      "hardcodedSecret": 0,
+      "unexpectedNetwork": 0,
+      "contentDebugLog": 0,
+      "audioOrPcmRetention": 0,
+      "unboundedLoop": 0,
+      "dynamicCodeExecution": 0
+    }
+  },
+  "gates": {
+    "apiUnit": {
+      "suites": 21,
+      "passed": 120,
+      "failed": 0,
+      "noCache": true
+    },
+    "apiE2e": {
+      "suites": 1,
+      "passed": 1,
+      "failed": 0,
+      "postgresql": true,
+      "socketIo": true
+    },
+    "web": {
+      "files": 18,
+      "passed": 94,
+      "failed": 0,
+      "typecheck": "passed",
+      "build": "passed"
+    },
+    "asr": {
+      "passed": 15,
+      "failed": 0,
+      "ruff": "passed"
+    },
+    "apiBuild": "passed",
+    "prismaValidate": "passed",
+    "apiProductionAudit": "no-known-vulnerabilities",
+    "webProductionAudit": "no-known-vulnerabilities",
+    "diffCheck": "passed"
+  },
+  "benchmark": {
+    "budgetP95Ms": 1,
+    "environmentLabel": "local-development-host",
+    "results": [
+      {
+        "name": "normal",
+        "inputLength": 54,
+        "iterations": 50000,
+        "p95Ms": 0.002458
+      },
+      {
+        "name": "max-5000-removal",
+        "inputLength": 5000,
+        "iterations": 5000,
+        "p95Ms": 0.065897
+      },
+      {
+        "name": "max-5000-preservation",
+        "inputLength": 5000,
+        "iterations": 5000,
+        "p95Ms": 0.049767
+      }
+    ]
+  },
+  "migration": {
+    "name": "20260806190000_version_transcript_cleaning",
+    "freshChain": "passed",
+    "nMinusOneChain": "passed",
+    "legacyBackfill": "legacy-unversioned",
+    "explicitCurrentInsert": "passed",
+    "oldContractInsertWithDefault": "passed",
+    "notNullEnforced": true,
+    "relationshipsPreserved": true,
+    "scratchDatabasesRemaining": 0,
+    "temporaryHarnessRemaining": false
+  },
+  "privacy": {
+    "corpusType": "synthetic-only",
+    "realHumanSampleUsed": false,
+    "reason": "no-anonymized-explicitly-authorized-corpus-available",
+    "privateTranscriptInEvidence": false,
+    "audioInEvidence": false
+  },
+  "limitations": [
+    "real-human-speech-validation-remains-for-cards-11-and-17",
+    "no-speech-cache-is-process-local",
+    "cleaner-does-not-correct-asr-linguistic-errors",
+    "card-does-not-implement-semantic-adaptation-or-retention-policy"
+  ]
+}

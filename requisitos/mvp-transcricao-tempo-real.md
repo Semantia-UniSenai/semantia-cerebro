@@ -1,7 +1,7 @@
 ---
 title: Requisitos do MVP de transcrição em tempo real
 status: canônico
-atualizado: 2026-08-04
+atualizado: 2026-08-10
 ---
 
 # Requisitos do MVP de transcrição em tempo real
@@ -9,8 +9,8 @@ atualizado: 2026-08-04
 ## Legenda de estado
 
 - **IMPLEMENTADO:** comprovado no código integrado em `dev` em 2026-07-29.
-- **VALIDADO NA BRANCH:** implementado e comprovado em `feat/salas-comunicacao`, mas ainda depende
-  de revisão e merge dos PRs empilhados.
+- **VALIDADO NA BRANCH:** implementado e comprovado em branch dedicada, mas ainda depende de revisão
+  e merge do PR.
 - **PARCIAL:** existe uma fundação reutilizável, mas o contrato atual ainda não está completo.
 - **PLANEJADO:** requisito ativo ainda não implementado.
 - **LEGADO:** existe no sistema ou em documentos antigos, mas será migrado ou mantido fora do
@@ -20,15 +20,15 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 
 ## Requisitos funcionais
 
-| ID | Requisito | Prioridade | Estado em 2026-07-30 | Evidência ou lacuna |
+| ID | Requisito | Prioridade | Estado em 2026-08-10 | Evidência ou lacuna |
 |---|---|---|---|---|
 | RF01 | Anfitrião cria conta, autentica-se e administra reuniões próprias. | P0 | VALIDADO NA BRANCH | Auth sem papel global e permissão contextual `HOST`/`MODERATOR`. |
 | RF02 | Anfitrião abre uma reunião instantânea em um clique e recebe link/token de convite. | P0 | VALIDADO NA BRANCH | Criação transacional já `LIVE`; não há preparação nem início manual. |
 | RF03 | Convidado entra pelo link com nome de exibição, sem conta. | P0 | VALIDADO NA BRANCH | REST e Socket.IO usam token efêmero limitado à reunião. |
 | RF04 | Anfitrião configura durante a reunião tipo do encontro, faixa etária, familiaridade com português, domínio e simplificação. | P0 | PLANEJADO | Não há modelo nem tela de contexto; essa configuração não bloqueia a abertura. |
 | RF05 | Navegador do comunicador captura PCM em janelas fixas e backend publica o único final canônico. | P0 | VALIDADO NA BRANCH | Controle explícito on/off, 5 s + residual; sem ASR/VAD/prévia no cliente; `faster-whisper small` no backend. |
-| RF06 | Backend limpa disfluências inequívocas apenas nos segmentos finais. | P0 | IMPLEMENTADO | `AppendTranscriptSegmentUseCase` e `stripDisfluencies`. |
-| RF07 | Backend persiste o transcript literal com sequência estável. | P0 | IMPLEMENTADO | `TranscriptSegment(sessionId, seq, text)`. |
+| RF06 | Backend limpa disfluências inequívocas apenas nos segmentos finais. | P0 | VALIDADO NA BRANCH | `cleanCanonicalTranscript`, corpus sintético e estratégia imutável `pt-br-conservative-v1`; ambiguidade permanece. |
+| RF07 | Backend persiste o transcript literal com sequência estável. | P0 | VALIDADO NA BRANCH | `text`, `seq`, `clientSegmentId` e `cleaningStrategyVersion`; vazio não persiste e replay não reinfere no TTL. |
 | RF08 | Agente produz versão adaptada contextual sem alterar fatos ou intenção. | P0 | PLANEJADO | Camada de IA ainda não existe. |
 | RF09 | Falha/timeout da IA mantém a versão literal sem interromper a sala. | P0 | PLANEJADO | Deve ser implementado junto ao agente. |
 | RF10 | Participante escolhe literal ou adaptada e alterna durante a reunião. | P0 | PLANEJADO | Hoje existe somente o transcript literal. |
@@ -47,12 +47,12 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 |---|---|---|---|
 | RNF01 | Acessibilidade e responsividade | PARCIAL | Teclado, foco, contraste, `aria-live`, movimento reduzido e QA mobile/desktop na sala. |
 | RNF02 | Continuidade da legenda | VALIDADO NA BRANCH | Fila PCM limitada/TTL/ACK/retry, reentrada antes do flush e idempotência por `clientSegmentId`; no-speech recebe ACK sem persistência. A futura IA adaptadora ainda deve preservar o literal. |
-| RNF03 | Latência observável | PARCIAL | Janela fixa de 5 s e benchmark local do backend registrados; falta medir p95 ponta a ponta na VPS real e a futura adaptação. |
+| RNF03 | Latência observável | PARCIAL | Janela fixa de 5 s e benchmark local registrados; limpeza de até 5.000 caracteres ficou abaixo de 0,07 ms p95 no Card 07. Falta medir p95 ponta a ponta na VPS real e a futura adaptação. |
 | RNF04 | Capacidade | PLANEJADO | Provar 25 participantes concorrentes; só anunciar alvo de 50 após teste de carga/reconexão. |
 | RNF05 | Duração da reunião | PLANEJADO | Suportar até 4 h sem reiniciar sequência nem perder ordem. |
 | RNF06 | Privacidade | PARCIAL | PCM efêmero é enviado ao backend protegido e descartado; testes cobrem ausência de arquivo/banco/storage/log. Aviso e expiração de 30/90 dias ainda não foram implementados. |
 | RNF07 | Segurança | PARCIAL | Somente `HOST`/`LIVE`, gateway sem entrada textual do cliente, limites, JWT e guest token contextual validados; rate limit ainda falta. |
-| RNF08 | Auditabilidade da IA | PLANEJADO | Registrar versão, latência e status da adaptação sem logar segredo ou transcript fora da política. |
+| RNF08 | Auditabilidade da IA | PARCIAL | Transcript literal registra `cleaningStrategyVersion`; a futura adaptação ainda deve registrar versão, latência e status sem logar segredo ou conteúdo fora da política. |
 | RNF09 | Compatibilidade | VALIDADO NA BRANCH | Captura Web Audio por capacidades, com `AudioWorklet` e fallback técnico; sem recomendar troca de browser. |
 | RNF10 | Observabilidade | PARCIAL | UX expõe captura, fila, processamento e erro; benchmark/E2Es preservam métricas sem áudio/texto. Falta telemetria agregada de produção. |
 
@@ -114,7 +114,8 @@ preparação ou início manual.
    `clientSegmentId`, ACK/retry/TTL e reconexão idempotente.
 4. Backend autoriza somente `HOST` em sessão `LIVE`, executa `faster-whisper small` e trata vazio como
    no-speech sem persistência.
-5. O texto reconhecido é limpo e persistido uma única vez; somente esse final é transmitido.
+5. O texto reconhecido é limpo uma única vez; vazio recebe ACK sem linha/evento e conteúdo é persistido
+   com `pt-br-conservative-v1`. Replay do mesmo descarte não reinfere durante o TTL.
 6. O futuro agente de adaptação tenta produzir o adaptado sem bloquear o literal.
 
 **Resultado:** legenda final consistente entre navegadores, com pequeno atraso deliberado e sem prévia textual local.
@@ -165,8 +166,11 @@ Links individuais estão em
 - `PROFESSOR`/`ALUNO`, turmas e rotas `/aula` continuam integrados em `dev`, mas foram removidos do
   contrato ativo na branch de generalização e cobertos por migration preservadora.
 - Não existe agente de IA nem preferência adaptada.
-- A robustez de captura/transporte do Card 06 está validada nas branches empilhadas, mas não integrada
-  em `dev` até revisão e merge dos PRs.
+- A robustez de captura/transporte do Card 06 está integrada em `dev`; o Card 07 permanece validado
+  em branches dedicadas até revisão e merge dos PRs.
 - Não existe expiração de transcript/chat/metadados nem política automática de 90 dias para logs técnicos.
 - Documentos do Desafio Interdisciplinar de junho são snapshots históricos e não descrevem o
   backend atual nem o MVP vigente.
+
+Detalhes do contrato literal versionado, migration, limites e gates estão em
+[`../arquitetura/transcript-canonico-card-07.md`](../arquitetura/transcript-canonico-card-07.md).

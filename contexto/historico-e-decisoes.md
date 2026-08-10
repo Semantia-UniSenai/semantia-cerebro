@@ -1,7 +1,7 @@
 ---
 tags: [tcc, senai, semantia, libras, acessibilidade]
 status: histórico-vivo
-atualizado: 2026-08-06
+atualizado: 2026-08-10
 ---
 
 # Semantia 🤟
@@ -394,7 +394,29 @@ audits, Ruff, imagem Docker e smoke de silêncio. O frontend, a API com banco e 
 saudáveis; nenhuma mídia de áudio apareceu no filesystem inspecionado. Alternativas sem melhoria
 comprovada não foram promovidas. O Card 06 fica `EM REVISÃO` conforme o workflow do ClickUp.
 
-## Lacunas / perguntas em aberto (revisado 2026-08-04)
+## 26. Transcript literal canônico e versionado (2026-08-10)
+
+O Card 07 consolidou a limpeza pós-ASR como contrato determinístico e conservador. Novos segmentos
+registram `pt-br-conservative-v1`; registros e eventos sem origem versionada usam
+`legacy-unversioned`. O banco, REST, snapshot Socket.IO, `transcript:final` e frontend carregam a mesma
+versão, sem mudança visual e sem persistir o bruto reconhecido.
+
+Ruído puro continua sem linha e sem broadcast, mas recebe ACK conclusivo. O replay efêmero evita nova
+inferência por 120 segundos e agora tem limite de 512 entradas, além do TTL. A migration aditiva foi
+comprovada em cadeia vazia e N−1 com transcript legado, insert novo, insert pelo contrato antigo e
+restrição `NOT NULL`; os bancos scratch foram removidos depois das asserções.
+
+A revisão final corrigiu marcadores empilhados, cardinalidade do cache, um timeout fixo no E2E, drift
+Orval fora do escopo e uma vulnerabilidade alta transitiva de `js-yaml`. Os gates terminaram com 120
+testes API, E2E PostgreSQL/Socket.IO, 94 testes web, 15 testes ASR, builds, audits, Prisma e benchmark de
+5.000 caracteres abaixo de 0,07 ms p95. O corpus versionado é sintético; fala humana real continua como
+gate dos Cards 11/17. Detalhes em
+[`../arquitetura/transcript-canonico-card-07.md`](../arquitetura/transcript-canonico-card-07.md) e na
+[ADR-003](../arquitetura/decisoes/ADR-003-transcript-canonico-versionado.md).
+
+O card permanece `EM REVISÃO` enquanto os PRs estiverem abertos, sem merge automático.
+
+## Lacunas / perguntas em aberto (revisado 2026-08-10)
 
 - ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: limpeza conservadora + agente LLM).
 - ~~**Motor de adaptação semântica**~~ → **especificado** (§17 + contrato canônico); falta
