@@ -777,7 +777,7 @@ git diff --check
 - [x] Migration foi comprovada em PostgreSQL descartável.
 - [ ] Revisão humana com amostra real: não executada porque não há corpus anonimizado e explicitamente autorizado; permanece nos Cards 11/17.
 - [x] Áudio, bruto e corpus privado continuam efêmeros.
-- [ ] Documentação/ClickUp refletem estado real e PRs permanecem para revisão.
+- [x] Documentação/ClickUp refletem estado real e PRs permanecem para revisão.
 
 ## Rollback
 

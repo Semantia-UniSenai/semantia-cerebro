@@ -16,6 +16,16 @@ A decisão normativa está na
 [ADR-003](./decisoes/ADR-003-transcript-canonico-versionado.md). A evidência sanitizada dos gates está
 em [`../evidencias/card-07/validation-2026-08-10.json`](../evidencias/card-07/validation-2026-08-10.json).
 
+PRs abertos para revisão humana:
+
+- [API #10](https://github.com/Semantia-UniSenai/semantia-api/pull/10);
+- [web #10](https://github.com/Semantia-UniSenai/semantia-web/pull/10);
+- [cérebro #8](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/8).
+
+Os três PRs estavam `OPEN`, `CLEAN` e `MERGEABLE` após a publicação. Nenhum repositório tinha checks
+de CI configurados (`statusCheckRollup=[]`); os gates locais versionados abaixo são a evidência
+executável disponível. Nenhum merge automático foi realizado.
+
 ## Contrato vigente
 
 ```text

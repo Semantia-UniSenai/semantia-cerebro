@@ -18,7 +18,7 @@ alterar o pipeline PCM/ASR do Card 06 e sem persistir texto bruto ou áudio.
 - web: `chore/card07-sync-transcript-contract`, base `origin/dev` em `6dfd4e4`;
 - cérebro: `docs/card07-transcript-canonico`, base `origin/main`.
 
-## Commits antes da publicação
+## Commits e publicação
 
 ### API
 
@@ -33,6 +33,19 @@ alterar o pipeline PCM/ASR do Card 06 e sem persistir texto bruto ou áudio.
 
 - `90420fd` — sincroniza contrato canônico;
 - `12a436b` — remove drift Orval fora do Card 07.
+
+### Cérebro
+
+- `e743450` — arquitetura, ADR, plano, requisitos e evidência inicial.
+
+### PRs
+
+- [API #10](https://github.com/Semantia-UniSenai/semantia-api/pull/10);
+- [web #10](https://github.com/Semantia-UniSenai/semantia-web/pull/10);
+- [cérebro #8](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/8).
+
+Após a publicação, os três estavam `OPEN`, `CLEAN` e `MERGEABLE`. `statusCheckRollup=[]` nos três,
+portanto não há CI remoto configurado; nenhum merge automático foi realizado.
 
 ## Revisão final
 

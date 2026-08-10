@@ -18,6 +18,7 @@
 - **Total exibido em PENDENTE após o cadastro:** 24 (6 tarefas anteriores + 18 do novo backlog).
 - **Verificação final:** 2026-07-29T14:46:37-03:00.
 - **Última auditoria do Card 01:** 2026-07-29T21:23:00-03:00.
+- **Última auditoria do Card 07:** 2026-08-10, status `EM REVISÃO` e três PRs abertos.
 
 ## Convenção usada no ClickUp
 
@@ -38,7 +39,7 @@
 | 04 | Implementar a configuração de contexto e nível da plateia | Urgente | nova funcionalidade | PENDENTE | [86e2j4vuj](https://app.clickup.com/t/90171419563/86e2j4vuj) |
 | 05 | Implementar preferências individuais de transcrição | Urgente | nova funcionalidade | PENDENTE | [86e2j4vxe](https://app.clickup.com/t/90171419563/86e2j4vxe) |
 | 06 | Robustecer a captura de fala e o transporte em tempo real | Urgente | refatoração | PENDENTE | [86e2j4w0k](https://app.clickup.com/t/90171419563/86e2j4w0k) |
-| 07 | Consolidar a limpeza de disfluências e o transcript canônico | Urgente | refatoração | PENDENTE | [86e2j4w4k](https://app.clickup.com/t/90171419563/86e2j4w4k) |
+| 07 | Consolidar a limpeza de disfluências e o transcript canônico | Urgente | refatoração | EM REVISÃO | [86e2j4w4k](https://app.clickup.com/t/90171419563/86e2j4w4k) |
 | 08 | Construir o agente especializado de adaptação para pessoas surdas | Urgente | nova funcionalidade | PENDENTE | [86e2j4w7h](https://app.clickup.com/t/90171419563/86e2j4w7h) |
 | 09 | Finalizar a legenda karaokê literal e adaptada | Urgente | melhoria | PENDENTE | [86e2j4wad](https://app.clickup.com/t/90171419563/86e2j4wad) |
 | 10 | Proteger privacidade, acesso e dados das transcrições | Urgente | débito técnico | PENDENTE | [86e2j4wd1](https://app.clickup.com/t/90171419563/86e2j4wd1) |
@@ -76,6 +77,8 @@ reaberto diretamente pelo URL e confirmado em `EM REVISÃO`. A evidência de bai
 local foi registrada no Card 06, mantido em `PENDENTE`, e vinculada ao gate do Card 11 para não
 misturar qualidade do reconhecedor com aceite visual.
 
+Em **2026-08-10**, o Card 07 foi recarregado após a publicação e confirmou status `EM REVISÃO`,
+descrição única com branches, migration, limites e gates, além d...[truncated]
 Branches e revisão do Card 01:
 
 - `docs/novo-escopo-transcricao`;

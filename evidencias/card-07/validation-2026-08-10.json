@@ -5,6 +5,22 @@
     "date": "2026-08-10",
     "status": "em-revisao"
   },
+  "delivery": {
+    "clickupStatus": "EM REVISÃO",
+    "pullRequests": {
+      "api": "https://github.com/Semantia-UniSenai/semantia-api/pull/10",
+      "web": "https://github.com/Semantia-UniSenai/semantia-web/pull/10",
+      "brain": "https://github.com/Semantia-UniSenai/semantia-cerebro/pull/8"
+    },
+    "githubState": {
+      "open": true,
+      "clean": true,
+      "mergeable": true,
+      "ciConfigured": false,
+      "statusCheckRollupCount": 0,
+      "autoMerge": false
+    }
+  },
   "contract": {
     "currentStrategy": "pt-br-conservative-v1",
     "legacyStrategy": "legacy-unversioned",
