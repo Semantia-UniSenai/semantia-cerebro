@@ -55,3 +55,38 @@ as seis migrations existentes. A execução foi encerrada sem gerar arquivo. O g
 
 Nenhuma chave Groq foi lida, persistida ou publicada. Dados reais não serão enviados durante o
 desenvolvimento inicial.
+
+## Slice 1 — contexto versionado
+
+### RED
+
+- o teste unitário que passou a exigir atualização em `LIVE` falhou com
+  `Context cannot be changed after the session has started`;
+- o teste de repositório falhou porque o update Prisma não enviava `audienceContextVersion: { increment: 1 }`;
+- o E2E falhou com `P2022` porque a coluna ainda não existia no banco scratch;
+- mutação controlada trocando incremento por atribuição fixa fez o E2E concorrente retornar `[1,1]`
+  em vez de `[2,3]`.
+
+### GREEN
+
+- contexto pode ser atualizado pelo host em `PREPARING` e `LIVE`; `ENDED` continua rejeitado;
+- `audienceContextVersion` inicia em zero e é incrementado atomicamente junto do JSON;
+- DTO, entidade, repositório, snapshot e E2E carregam a versão;
+- duas atualizações concorrentes reais retornaram versões distintas `2` e `3`;
+- unitários: 22 suítes, 121/121;
+- E2E real PostgreSQL/Socket.IO: 1/1;
+- build, Prisma validate e ESLint check-only aprovados.
+
+### Migration
+
+- fresh: sete migrations aplicadas; coluna `NOT NULL DEFAULT 0`;
+- uma primeira tentativa chamada N-1 foi descartada porque o Prisma resolveu as sete migrations pelo
+  cwd novo, apesar do `--schema` antigo;
+- N-1 válido: banco separado criado pela worktree Card 07 com exatamente seis migrations, coluna ausente,
+  fixture sintética inserida, migration candidata aplicada isoladamente;
+- resultado N-1: mesmo `id`, mesmo JSON e versão `0`.
+
+### Privacidade e escopo
+
+A fixture usa conteúdo sintético e domínio `.invalid`. Nenhum serviço de outro projeto foi interrompido e
+nenhum provider externo foi chamado.
