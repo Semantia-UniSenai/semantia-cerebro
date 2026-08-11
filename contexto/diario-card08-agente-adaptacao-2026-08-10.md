@@ -287,3 +287,29 @@ nenhum provider externo foi chamado.
 
 O corpus automatizado é gate defensivo, não prova qualidade linguística. A aceitação final continua
 pendente de pessoa surda, intérprete ou especialista, sem alegar tradução para Libras.
+
+## Gates finais e revisão adversarial
+
+Executados após os commits funcionais, sem alterações posteriores nos worktrees de código:
+
+- API: 44 suítes, 222/222 testes;
+- API: ESLint check-only, build Nest, Prisma validate e audit de produção aprovados;
+- web: 18 arquivos, 97/97 testes, `vue-tsc`, build Vite e audit aprovados;
+- ASR inalterado: 15/15 testes e Ruff aprovados via `uv --extra test`;
+- E2E real: oito migrations aplicadas em banco PostgreSQL descartável, 1/1 fluxo multiator aprovado;
+- o E2E provou literal antes do adaptado, mesmo `segmentId/seq`, fallback disabled persistido, replay REST
+  e health seguro; o database descartável foi removido após GREEN;
+- corpus/harness: 100 casos, 20 categorias, zero divergências; fake com 90 aceitos, 10 bypasses e zero
+  erro/fallback semântico;
+- scans linha a linha: nenhum segredo, log textual, áudio/PCM/partial/identidade no módulo de adaptação,
+  endpoint alternativo ou sobrescrita do literal;
+- revisão frontend: nenhuma rede nova, cópia de áudio, segredo ou substituição de `entry.text`;
+- dependências: audits de produção sem vulnerabilidades conhecidas;
+- worktrees API/web limpos; arquivo `uv.lock` gerado apenas pela validação foi removido do escopo.
+
+### Limites honestos
+
+- smoke Groq real não foi executado porque `GROQ_API_KEY` não está configurada localmente;
+- limites reais RPM/TPM/concurrency dependem da conta e não foram medidos;
+- qualidade linguística não recebeu aceite humano especializado;
+- nenhum merge automático será realizado.
