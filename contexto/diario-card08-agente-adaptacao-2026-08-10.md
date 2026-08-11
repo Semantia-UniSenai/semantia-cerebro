@@ -121,3 +121,32 @@ nenhum provider externo foi chamado.
 - unitários: 23 suítes, 124/124;
 - build, Prisma validate, `git diff --check` e ESLint check-only aprovados;
 - nenhuma API externa foi chamada.
+
+## Slice 3 — contrato, prompt, fake e guardas semânticas
+
+### RED
+
+- schema começou ausente e os testes exigiram objeto estrito, enums fechados e limite de 5.000 caracteres;
+- prompt começou ausente e os testes exigiram byte-estabilidade, isolamento de prompt injection e minimização;
+- providers offline começaram ausentes e os testes exigiram modos determinísticos e timeout abortável;
+- três suítes de preservação começaram ausentes e cobriram invariantes, modalidade, negação e alto risco.
+
+### GREEN
+
+- `zod` é dependência runtime e valida saída estrita `{ adaptedText, decision, risk }`;
+- JSON Schema correspondente usa `additionalProperties: false` e três campos obrigatórios;
+- prompt `pt-br-accessible-v1` põe instruções estáticas antes do JSON não confiável e não recebe IDs,
+  tokens, histórico, áudio ou timestamp;
+- fake suporta `success`, `timeout`, `error` e `invalid-response`, conta chamadas e não usa rede;
+- disabled falha localmente com código explícito;
+- extração preserva multiconjuntos de dinheiro, percentual, data, horário, unidade, telefone, URL, e-mail,
+  identificador, nome capitalizado, sigla, termo citado, negação, modalidade e números;
+- validator aceita mudança de pontuação/segmentação, mas rejeita alteração ou item protegido novo;
+- `decision=literal` exige igualdade byte a byte;
+- detector conservador identifica fogo/evacuação, emergência médica, violência/ameaça e ordem urgente.
+
+### Gates
+
+- testes do módulo: sete suítes, 39/39;
+- suíte API completa, build, ESLint check-only, audit de produção e varredura de segredo aprovados;
+- nenhum provider externo foi chamado e nenhum conteúdo real foi usado.
