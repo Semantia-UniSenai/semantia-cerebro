@@ -150,3 +150,39 @@ nenhum provider externo foi chamado.
 - testes do módulo: sete suítes, 39/39;
 - suíte API completa, build, ESLint check-only, audit de produção e varredura de segredo aprovados;
 - nenhum provider externo foi chamado e nenhum conteúdo real foi usado.
+
+## Slice 4 — Groq isolada e resiliência limitada
+
+### RED
+
+- configuração começou ausente e os testes exigiram não ler chave quando disabled, estado misconfigured e
+  serialização pública sem segredo;
+- adapter e mapper começaram ausentes e os testes cobriram request estrita, JSON inválido e HTTP
+  400/401/403/422/429/498/5xx;
+- factory começou ausente e os testes impediram construção do SDK em disabled/fake/misconfigured;
+- retry, circuito e fila começaram ausentes e os testes fixaram deadline, uma repetição, half-open e capacidade.
+
+### GREEN
+
+- `groq-sdk` está confinado ao factory/adapter; retries internos do SDK ficam em zero;
+- request usa modelo configurável, `stream=false`, `n=1`, temperatura 0,1, limite de 512 tokens,
+  `include_reasoning=false`, `reasoning_effort=low`, sem tools e JSON Schema estrito;
+- resposta passa por JSON parse e Zod antes de sair do adapter; somente contagens normalizadas são retornadas;
+- 401/403 viram misconfigured sem retry; 400/422 viram invalid-response; 429/498/5xx são transitórios tipados;
+- deadline total aborta a chamada; apenas erro retryable recebe no máximo uma repetição dentro do orçamento;
+- circuito abre por falhas transitórias consecutivas, rejeita rápido e permite uma probe half-open;
+- fila limita concorrência/espera, rejeita excesso com `QUEUE_FULL` e compartilha Promise por segmento;
+- disabled/fake não leem nem recebem chave; Groq sem chave falha localmente.
+
+### Configuração e segurança
+
+- `.env.example` mantém `GROQ_API_KEY=` vazio e documenta apenas defaults não secretos;
+- README registra minimização, literal soberano e ausência de fallback entre fornecedores;
+- a primeira regex de secret scan produziu falso positivo porque `\\s*` atravessou newline após a chave vazia;
+- a varredura válida foi repetida com espaços horizontais e retornou `secret-patterns=none`.
+
+### Gates
+
+- API: 36 suítes, 198/198;
+- build, ESLint check-only e audit de produção aprovados;
+- nenhum request Groq real foi executado.
