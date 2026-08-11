@@ -230,3 +230,29 @@ nenhum provider externo foi chamado.
   replay REST e health sem segredo;
 - ESLint check-only, build, Prisma validate e audit de produção aprovados;
 - nenhum request Groq real foi executado e nenhum conteúdo real foi usado.
+
+## Slice 6 — consumo mínimo no frontend
+
+### RED
+
+- três testes falharam porque `useLiveSession` descartava `id/adaptation`, não escutava
+  `transcript:adapted` e não preservava ordem fora do caminho nominal;
+- o caso adversarial adicional provou que uma versão menor recebida antes do literal sobrescrevia a
+  versão maior no buffer.
+
+### GREEN
+
+- `TranscriptEntry` mantém `text` literal e uma projeção `adaptation` opcional separada;
+- snapshot persistido hidrata adaptação sem alterar o literal;
+- `transcript:adapted` atualiza o mesmo segmento por `segmentId` ou `seq`, sem criar linha duplicada;
+- evento recebido antes do literal fica somente em buffer efêmero por `segmentId`;
+- eventos de outra sessão e versões/contextos anteriores são ignorados antes e depois do literal;
+- eventos legados continuam sem propriedades opcionais artificiais, preservando compatibilidade;
+- o buffer é limpo ao trocar/desconectar a sessão;
+- nenhum seletor visual foi criado; a escolha literal/adaptado permanece no Card 05.
+
+### Gates
+
+- web: 18 arquivos, 97/97 testes;
+- `vue-tsc`, build Vite e audit de produção aprovados;
+- scan de segredo aprovado e nenhuma nova chamada de rede/áudio foi adicionada.
