@@ -186,3 +186,47 @@ nenhum provider externo foi chamado.
 - API: 36 suítes, 198/198;
 - build, ESLint check-only e audit de produção aprovados;
 - nenhum request Groq real foi executado.
+
+## Slice 5 — orquestração, realtime, replay e health seguro
+
+### RED
+
+- o caso de uso começou ausente; seis testes fixaram bypass sem contexto, alto risco, sucesso,
+  preservação semântica, erro do provider e idempotência terminal;
+- o coordenador começou ausente; testes exigiram contexto/versionamento atual, Promise compartilhada e
+  fallback persistido para fila cheia;
+- o gateway ainda não emitia `transcript:adapted` nem carregava adaptação no snapshot;
+- o serviço de recuperação, o módulo Nest e o health operacional começaram ausentes;
+- novos REDs impediram chamada ao provider quando disabled e conservaram literal para `risk: urgent`.
+
+### GREEN
+
+- `AdaptTranscriptSegmentUseCase` reserva uma linha derivada, faz bypass/fallback auditável, executa
+  provider sob circuito/deadline/retry, valida preservação e materializa literal somente no evento;
+- `TranscriptAdaptationCoordinator` busca apenas contexto/versionamento da sessão, deduplica por
+  `segment.id`, limita fila global e materializa `QUEUE_FULL` sem inferência;
+- o gateway transmite/persiste `transcript:final` antes de agendar IA, não espera adaptação no ACK e
+  agenda somente quando `created=true`;
+- `transcript:adapted` usa o mesmo `segmentId`, `sessionId` e `seq`; replay de Socket/REST inclui a
+  projeção persistida e nunca dispara inferência;
+- sucesso retorna texto derivado; fallback/bypass usam o literal na projeção sem duplicá-lo no banco;
+- pendências anteriores ao bootstrap viram `PROCESS_INTERRUPTED` sem reinferência;
+- módulo Nest compõe config, provider, repository, circuito, fila, coordinator e recovery;
+- health expõe somente enabled/provider/state/model/promptVersion, sem razão de segredo ou chave.
+
+### Revisão de segurança
+
+- input do provider continua limitado a literal final, `pt-BR`, contexto/versionamento e prompt;
+- não há áudio, ASR bruto, histórico, usuário, token ou `joinToken` na camada de adaptação;
+- erro assíncrono do gateway registra apenas nome da classe do erro, nunca texto/prompt/payload;
+- varredura adversarial encontrou somente `audio` no teste/gateway literal e o nome de modelo
+  `openai/gpt-oss-20b`; nenhum endpoint extra, fallback de provider ou segredo foi adicionado.
+
+### Gates
+
+- unidade/API: 42 suítes, 217/217;
+- E2E PostgreSQL real: 1/1, cadeia de oito migrations, host e guest via Socket.IO;
+- E2E provou `transcript:final → transcript:adapted`, mesmo id/seq, fallback disabled persistido,
+  replay REST e health sem segredo;
+- ESLint check-only, build, Prisma validate e audit de produção aprovados;
+- nenhum request Groq real foi executado e nenhum conteúdo real foi usado.
