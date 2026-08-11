@@ -90,3 +90,34 @@ desenvolvimento inicial.
 
 A fixture usa conteúdo sintético e domínio `.invalid`. Nenhum serviço de outro projeto foi interrompido e
 nenhum provider externo foi chamado.
+
+## Slice 2 — persistência separada da adaptação
+
+### RED
+
+- a suíte começou falhando por inexistência da entidade e do repositório de adaptação;
+- o contrato de teste exigiu `upsert` idempotente, transição terminal condicionada a `PENDING` e recuperação
+  explícita de pendências interrompidas.
+
+### GREEN
+
+- entidade e repositório de domínio não dependem de Groq;
+- `TranscriptAdaptation` é one-to-one com `TranscriptSegment` e não altera o literal;
+- estados: `PENDING`, `SUCCEEDED`, `FALLBACK` e `BYPASSED`;
+- motivos auditáveis incluem disabled, misconfigured, no-context, high-risk, queue-full, circuit-open,
+  timeout, rate-limit, capacity, provider-error, invalid-response, preservation-failed e process-interrupted;
+- update terminal usa guarda `status = PENDING`, preservando idempotência;
+- recuperação de restart transforma pendências antigas em fallback explícito, sem reinferência.
+
+### Migration
+
+- N-1 real começou com sete migrations e um segmento literal sintético existente;
+- após a migration, o literal, `seq` e `cleaningStrategyVersion` permaneceram intactos e a nova tabela vazia;
+- banco vazio recebeu oito migrations e confirmou PK, unique one-to-one, índice `(status, createdAt)` e FK;
+- a FK usa cascade apenas da exclusão do segmento para o derivado; o derivado nunca substitui o canônico.
+
+### Gates
+
+- unitários: 23 suítes, 124/124;
+- build, Prisma validate, `git diff --check` e ESLint check-only aprovados;
+- nenhuma API externa foi chamada.
