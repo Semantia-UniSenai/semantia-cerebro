@@ -256,3 +256,34 @@ nenhum provider externo foi chamado.
 - web: 18 arquivos, 97/97 testes;
 - `vue-tsc`, build Vite e audit de produção aprovados;
 - scan de segredo aprovado e nenhuma nova chamada de rede/áudio foi adicionada.
+
+## Slice 7 — corpus e harness de avaliação sintética
+
+### RED
+
+- o carregador tipado começou ausente;
+- a colisão de basename entre `.ts` e `.json` fez o resolvedor Jest carregar o JSON diretamente e foi
+  eliminada com o nome `transcript-adaptation-corpus.synthetic.json`;
+- quatro candidatos de instrução introduziam o span capitalizado `Depois` e foram recusados corretamente
+  pelo guarda; o corpus foi corrigido sem afrouxar a validação;
+- o avaliador de provider começou ausente e o teste exigiu bypass local dos casos urgentes.
+
+### GREEN
+
+- corpus estático `synthetic-pt-br-v1` com 100 casos, 20 categorias e cinco perfis válidos do domínio;
+- Zod estrito valida idioma, versão, marca `syntheticOnly`, contexto, candidato e outcome;
+- categorias incluem nomes, números, percentuais, dinheiro, datas, horários, negações, condições,
+  instruções, comandos, alertas, urgência, termos técnicos, ambiguidades e manter literal;
+- harness `guards`: 39 aceitos adaptados, 41 literais aceitos, 10 bypasses de alto risco, 10 fallbacks
+  semânticos esperados e zero divergências;
+- harness `provider=fake`: 10 bypasses locais, 90 chamadas seguras, 90 aceitas, zero fallback semântico e
+  zero erro de provider;
+- o resumo contém somente contadores, latências e tokens agregados; nenhum texto é emitido;
+- provider desabilitado recusou a execução antes de chamadas com exit 2 e health público seguro;
+- `GROQ_API_KEY_CONFIGURED=no`: smoke Groq real não executado, sem bloqueio para os gates offline;
+- README documenta guards, fake e smoke Groq limitado, sempre com chave já presente no ambiente local.
+
+### Aceitação humana
+
+O corpus automatizado é gate defensivo, não prova qualidade linguística. A aceitação final continua
+pendente de pessoa surda, intérprete ou especialista, sem alegar tradução para Libras.
