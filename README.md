@@ -29,7 +29,12 @@ qualquer agente de IA (ou pessoa nova) trabalhar no Semantia, o contexto vem **d
    — janelas fixas, controle explícito e final exclusivo no backend.
 9. [Captura de fala e transporte — Card 06](arquitetura/captura-fala-transporte-card-06.md)
    — contrato vigente e baseline local-first preservado como evidência histórica.
-10. [Evidências runtime do ASR backend](evidencias/card-06/asr-backend-runtime-2026-08-04.json)
+10. [Transcript canônico — Card 07](arquitetura/transcript-canonico-card-07.md)
+    — limpeza conservadora, versionamento, replay de descarte, migration e gates finais.
+11. [ADR-003 — transcript canônico versionado](arquitetura/decisoes/ADR-003-transcript-canonico-versionado.md)
+    — decisão normativa sobre `pt-br-conservative-v1`, legado e privacidade.
+12. [Evidência sanitizada do Card 07](evidencias/card-07/validation-2026-08-10.json).
+13. [Evidências runtime do ASR backend](evidencias/card-06/asr-backend-runtime-2026-08-04.json)
    e [benchmark CPU](evidencias/card-06/asr-backend-benchmark-2026-08-04.json).
 
 Documentos de junho em `projeto/` e as seções antigas do histórico continuam preservados como

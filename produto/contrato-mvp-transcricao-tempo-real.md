@@ -1,7 +1,7 @@
 ---
 title: Contrato canônico do MVP de transcrição em tempo real
 status: canônico
-atualizado: 2026-08-04
+atualizado: 2026-08-10
 substitui: escopo educacional de adaptação de materiais estáticos
 ---
 
@@ -155,14 +155,14 @@ Datilologia, ranking, dicionário, ferramentas gratuitas e demais funcionalidade
 - Não aplicar mudanças destrutivas às tabelas educacionais antes de uma migração de dados
   separada e validada.
 
-## Verdade validada em 2026-07-30
+## Verdade validada em 2026-08-10
 
 ### Implementado e reutilizável em `dev`
 
 - autenticação JWT e PostgreSQL/Prisma;
 - reuniões ao vivo com token, transcript e chat persistidos;
 - Socket.IO com presença, mãos levantadas e encerramento;
-- Web Speech API com parciais/finais;
+- captura PCM no navegador e `faster-whisper small` no backend como única origem textual;
 - limpeza conservadora de disfluências no backend;
 - palco de legenda karaokê literal;
 - datilologia/ranking e integração global do VLibras.
@@ -193,6 +193,16 @@ Datilologia, ranking, dicionário, ferramentas gratuitas e demais funcionalidade
 - detalhes e limitações em
   [Card 06 — captura de fala robusta e transporte](../arquitetura/captura-fala-transporte-card-06.md).
 
+### Validado na branch do Card 07, pendente de revisão
+
+- transcript literal canônico com estratégia `pt-br-conservative-v1` por segmento;
+- histórico e eventos sem versão normalizados como `legacy-unversioned`;
+- descarte vazio com ACK conclusivo, sem INSERT/final e replay sem nova inferência durante o TTL;
+- versão propagada no banco, REST, Socket.IO, OpenAPI e frontend sem alteração visual;
+- migration aditiva e compatível com rollback comprovada em PostgreSQL fresh e N−1;
+- detalhes e limites em
+  [Card 07 — transcript canônico](../arquitetura/transcript-canonico-card-07.md).
+
 ### Planejado para o contrato atual após a generalização
 
 - contexto da plateia;
@@ -215,5 +225,7 @@ backlog vigente.
 - [Requisitos, regras e casos de uso](../requisitos/mvp-transcricao-tempo-real.md)
 - [Arquitetura da sala ao vivo](../arquitetura/sala-ao-vivo.md)
 - [Captura de fala robusta e transporte — Card 06](../arquitetura/captura-fala-transporte-card-06.md)
+- [Transcript canônico conservador — Card 07](../arquitetura/transcript-canonico-card-07.md)
+- [ADR-003 — transcript canônico versionado](../arquitetura/decisoes/ADR-003-transcript-canonico-versionado.md)
 - [Backlog atual](../planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md)
 - [Auditoria do backlog legado](../planejamento/2026-07-29-auditoria-backlog-legado-trello.md)
