@@ -313,3 +313,45 @@ Executados após os commits funcionais, sem alterações posteriores nos worktre
 - limites reais RPM/TPM/concurrency dependem da conta e não foram medidos;
 - qualidade linguística não recebeu aceite humano especializado;
 - nenhum merge automático será realizado.
+
+## QA manual e relatório científico — 2026-08-12
+
+### Runtime real
+
+- stack do Card 08 iniciada em portas isoladas: web `5188`, API `3108`, ASR `8108` e PostgreSQL `55438`;
+- oito migrations aplicadas; banco e ASR permaneceram saudáveis sem restart;
+- health confirmou Groq `ready`, modelo `openai/gpt-oss-20b` e prompt `pt-br-accessible-v1`;
+- smoke sintético vertical comprovou PCM → ASR → literal → Groq → adaptação/fallback persistido e eventos
+  com mesmo segmento/seq;
+- o runtime exigiu um mirror local `generated/prisma → dist/generated/prisma` após `prisma generate`, pois
+  o build exclui `generated` e o import emitido falha em runtime; nenhuma alteração de código foi publicada.
+
+### Incidente de aula de Python
+
+- reunião real: 16 segmentos canônicos em cerca de 80 s;
+- o arquivo exportado pelo usuário e o literal do PostgreSQL tiveram similaridade normalizada `1,0000`;
+- 10 adaptações `SUCCEEDED`, seis idênticas ao literal e quatro com alteração; seis fallbacks
+  `PRESERVATION_FAILED`;
+- o palco exibiu somente `entry.text`, portanto o usuário viu o literal do ASR, não a adaptação;
+- um segmento nominal de 5 s produziu 51 palavras/257 caracteres, densidade equivalente a 612 palavras/min,
+  incompatível com fala normal e indicativa de alucinação;
+- o contrato ASR não fornece sinal de qualidade além de engine/modelo/latência; a adaptação não possui gate
+  de entrada suspeita;
+- áudio ausente por retenção zero: WER e causa acústica não podem ser inferidos retrospectivamente.
+
+### Documento recebido
+
+- PDF de 28 páginas preservado em `referencias/`, SHA-256
+  `1a83440560da40603691b68676b8630d3684881280a01a649e98052e2cd7c8f5`;
+- camada textual completa; bibliografia nuclear normalizada resolvida via Crossref;
+- o documento declara corretamente ser mapeamento profundo, não revisão sistemática PRISMA;
+- decisões incorporadas: idade fora da intensidade automática, preferência individual, níveis por operações,
+  glossário aprovado, guardas relacionais, fallback para qualquer risco e validação com pessoas surdas;
+- síntese auditável em
+  `referencias/2026-08-12-relatorio-surdez-acessibilidade-adaptacao-portugues-tempo-real.md`.
+
+### Decisão
+
+Não alterar modelo, janela, decoder ou hotwords com base neste único incidente. Construir reprodução humana
+pareada e experimentar uma variável por vez. Até então, entrada ASR suspeita deve bloquear adaptação fluente,
+e nenhuma alegação de benefício linguístico é permitida.
