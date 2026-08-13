@@ -36,6 +36,10 @@ qualquer agente de IA (ou pessoa nova) trabalhar no Semantia, o contexto vem **d
 12. [Evidência sanitizada do Card 07](evidencias/card-07/validation-2026-08-10.json).
 13. [Evidências runtime do ASR backend](evidencias/card-06/asr-backend-runtime-2026-08-04.json)
    e [benchmark CPU](evidencias/card-06/asr-backend-benchmark-2026-08-04.json).
+14. [ADR-005 — qualidade de entrada ASR e promoção de modelo](arquitetura/decisoes/ADR-005-qualidade-entrada-asr-e-promocao-modelo.md)
+    — política de medição, sinais `usable | suspect | unknown` e resultado do Medium.
+15. [Plano de melhoria Whisper + agente v2](planejamento/2026-08-12-melhoria-transcricao-whisper-agente-v2.md)
+    e [diário de execução](contexto/diario-qualidade-transcricao-2026-08-12.md).
 
 Documentos de junho em `projeto/` e as seções antigas do histórico continuam preservados como
 evidência do TCC, mas **não substituem** os documentos canônicos acima.
@@ -73,6 +77,7 @@ evidencias/      Resultados sanitizados, fixtures e harnesses reproduzíveis
 - [Backlog do MVP de transcrição em tempo real](planejamento/2026-07-29-backlog-mvp-transcricao-tempo-real.md).
 - [Registro das 18 tasks cadastradas no ClickUp](planejamento/2026-07-29-registro-tasks-clickup-mvp-transcricao.md).
 - [Auditoria documental dos 38 cards do Trello descontinuado](planejamento/2026-07-29-auditoria-backlog-legado-trello.md).
+- [Melhoria da transcrição Whisper e do agente de adaptação v2](planejamento/2026-08-12-melhoria-transcricao-whisper-agente-v2.md).
 
 ## Repositórios do Semantia (org `Semantia-UniSenai`)
 

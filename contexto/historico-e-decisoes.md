@@ -439,6 +439,25 @@ corretivo. O próximo passo é um experimento pareado com fala humana consentida
 congelados e uma variável por vez. A entrada ASR suspeita deve bloquear adaptação fluente e aparecer como
 estado explícito até validação.
 
+## 28. Medium medido e rejeitado no envelope KVM 2 (2026-08-13)
+
+O `faster-whisper medium/int8` foi implementado como candidato configurável, carregado em container
+isolado e comparado ao Small com os mesmos bytes sintéticos pt-BR, decoder, endpoint, duas CPUs, duas
+threads e uma inferência concorrente. Cada modelo teve um warm-up descartado e três rodadas medidas.
+
+Os dois modelos empataram em WER agregado de `15,79%`. O Small ficou em RTF p95 `0,729`; o Medium,
+em `2,477`, com pico de memória observado de `2,615 GiB` e as duas CPUs saturadas. O Medium também
+falhou em tempo real nas janelas completas (`1,668`) e no residual de 2.384 ms (`2,477`). A decisão
+pré-registrada foi `REJECT_OPERATIONAL`: nenhum ganho lexical sintético compensou a fila inevitável.
+
+O Medium não foi promovido nem deixado no runtime. O candidato foi parado e o Small voltou saudável
+ao endpoint `8108`. Nenhuma branch experimental, tag, credencial, áudio ou hipótese reconhecida foi
+publicada. O tooling local produz WER S/D/I, warm-up, p50/p95 e RTF sem embutir PCM. A promoção de
+qualquer modelo maior continua dependente de corpus humano consentido, matriz degradada e KVM 4.
+Detalhes: [ADR-005](../arquitetura/decisoes/ADR-005-qualidade-entrada-asr-e-promocao-modelo.md),
+[diário](diario-qualidade-transcricao-2026-08-12.md) e
+[evidência](../evidencias/card-08/asr-small-vs-medium-2026-08-13.json).
+
 ## Lacunas / perguntas em aberto (revisado 2026-08-12)
 
 - ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: limpeza conservadora + agente LLM).

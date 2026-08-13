@@ -1,7 +1,7 @@
 ---
 title: ASR backend CPU-first — operação em VPS
 status: validado-humanamente-estavel-em-revisao
-atualizado: 2026-08-06
+atualizado: 2026-08-13
 adr: ./decisoes/ADR-001-asr-backend-cpu-first.md
 ---
 
@@ -89,6 +89,24 @@ O benchmark abaixo usa uma fala pt-BR sintética controlada de 5,112 s e o mesmo
 - evidência: `../evidencias/card-06/asr-backend-benchmark-2026-08-04.json`.
 
 O rollout KVM 2 continua com fila recomendada `2`, mais conservadora que a fila `4` usada para testar o limite. KVM 4 pode iniciar com fila `4`. Em ambos, manter uma inferência por processo.
+
+## Challenger Medium no KVM 2 emulado — 2026-08-13
+
+O `medium/int8` foi baixado, carregado e medido no mesmo endpoint, com duas CPUs, duas threads,
+uma inferência concorrente, `beam_size=5`, janelas de 5 s, sem hotwords e sem VAD. O teste usou dois
+fixtures sintéticos pt-BR controlados, um warm-up descartado e três rodadas medidas. TTS é somente
+regressão; não substitui o corpus humano pareado.
+
+| Modelo | WER sintético | RTF p50 | RTF p95 | Pico observado |
+|---|---:|---:|---:|---:|
+| `small` | 15,79% | 0,374 | 0,729 | não medido nesta rodada |
+| `medium` | 15,79% | 1,123 | 2,477 | 2,615 GiB |
+
+O Medium não reduziu WER e excedeu tempo real. Em janelas completas, o RTF p95 foi `1,668`; no
+residual de 2.384 ms, `2,477`. A decisão foi `REJECT_OPERATIONAL`: o container candidato foi parado,
+o Small voltou a `/ready` e o default não mudou. Detalhes e limites estão na
+[ADR-005](decisoes/ADR-005-qualidade-entrada-asr-e-promocao-modelo.md) e na
+[evidência sanitizada](../evidencias/card-08/asr-small-vs-medium-2026-08-13.json).
 
 ## Decoder neutro e checkpoint estável — 2026-08-06
 

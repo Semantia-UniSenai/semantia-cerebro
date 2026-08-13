@@ -1,0 +1,79 @@
+{
+  "schemaVersion": "semantia-asr-model-comparison-v1",
+  "evaluatedAt": "2026-08-13T08:12:06-03:00",
+  "scope": "synthetic-regression-only",
+  "hardwareEnvelope": {
+    "cpuLimit": 2,
+    "baselineMemoryLimitGiB": 3,
+    "candidateMemoryLimitGiB": 5,
+    "cpuThreads": 2,
+    "maxConcurrency": 1
+  },
+  "commonConfiguration": {
+    "provider": "faster-whisper",
+    "device": "cpu",
+    "computeType": "int8",
+    "beamSize": 5,
+    "windowMs": 5000,
+    "minimumResidualMs": 250,
+    "hotwords": false,
+    "vad": false,
+    "conditionOnPreviousText": false,
+    "warmupRuns": 1,
+    "measuredRuns": 3,
+    "controlledFixtureCount": 2,
+    "referenceWordsPerRun": 57
+  },
+  "baseline": {
+    "model": "small",
+    "wer": 0.15789473684210525,
+    "substitutions": 15,
+    "deletions": 6,
+    "insertions": 6,
+    "rtfP50": 0.3738,
+    "rtfP95": 0.7286073825503355,
+    "reportSha256": "84743c50ce857c872fa02bfe72d30e1bf9adb8b2deb2c48cc3115fa4a7cda8df"
+  },
+  "candidate": {
+    "model": "medium",
+    "wer": 0.15789473684210525,
+    "substitutions": 9,
+    "deletions": 9,
+    "insertions": 9,
+    "rtfP50": 1.1234,
+    "rtfP95": 2.4773489932885906,
+    "fullWindowRtfP95": 1.6682,
+    "residualDurationMs": 2384,
+    "residualRtfP95": 2.4773489932885906,
+    "observedPeakMemoryGiB": 2.615,
+    "observedCpuPercentApprox": 200,
+    "oomKilled": false,
+    "restartCount": 0,
+    "reportSha256": "703b040bc2ec878e1dcc5f2d51245288118b750ff708cc4f7feb55a9a8c80d60"
+  },
+  "comparison": {
+    "relativeWerChange": 0.0,
+    "qualityNonRegression": true,
+    "realTimeCapable": false,
+    "decision": "REJECT_OPERATIONAL",
+    "comparisonSha256": "e5df064f00fe86526930564ac064c60e3be9310c32bab36253df0e78dadf7579"
+  },
+  "runtimeAfterExperiment": {
+    "model": "small",
+    "readyEndpoint": "ready",
+    "readyStatus": 200,
+    "mediumContainerRunning": false
+  },
+  "publication": {
+    "experimentalCodeBranchPushed": false,
+    "audioPublished": false,
+    "credentialsPublished": false,
+    "recognizedHypothesesIncluded": false
+  },
+  "limitations": [
+    "Synthetic TTS is only a regression fixture.",
+    "No human pt-BR paired corpus was evaluated.",
+    "No degraded acoustic matrix or two-session soak was executed.",
+    "The large-v3-turbo challenger remains unmeasured."
+  ]
+}
