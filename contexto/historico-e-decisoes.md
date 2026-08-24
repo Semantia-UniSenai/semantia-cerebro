@@ -1,7 +1,7 @@
 ---
 tags: [tcc, senai, semantia, libras, acessibilidade]
 status: histórico-vivo
-atualizado: 2026-08-10
+atualizado: 2026-08-24
 ---
 
 # Semantia 🤟
@@ -416,7 +416,25 @@ gate dos Cards 11/17. Detalhes em
 
 O card permanece `EM REVISÃO` enquanto os PRs estiverem abertos, sem merge automático.
 
-## Lacunas / perguntas em aberto (revisado 2026-08-10)
+## 27. Deck do pitch INOVA 2026 criado e validado (2026-08-24)
+
+O roteiro atualizado do pitch foi transformado em uma apresentação 16:9 de seis slides, com fala
+cronometrada para aproximadamente 2min55s e notas completas do apresentador. O deck percorre dor,
+solução, demonstração, mercado/modelo, viabilidade e fechamento; usa a identidade oficial do Semantia
+e frames reais do vídeo de demonstração do produto. Após feedback de Foyth, todas as imagens em que o
+grupo aparecia foram removidas; capa, dor e fechamento passaram a destacar interface e linguagem visual
+da marca.
+
+O posicionamento foi reconciliado com o contrato atual: texto acessível literal ou adaptado, sem
+prometer tradução completa para Libras ou substituição de intérprete; sala ao vivo e legenda aparecem
+como núcleo funcional, enquanto adaptação contextual por IA permanece explicitamente em implementação.
+Os números de aproximadamente 10 milhões de brasileiros e 180 mil+ instituições vieram do roteiro e
+continuam condicionados à referência final de IBGE/INEP antes da submissão.
+
+PPTX, PDF, prévia, frames usados, tempos e gates de validação estão registrados em
+[`../projeto/inova-2026/pitch-semantia-inova-2026.md`](../projeto/inova-2026/pitch-semantia-inova-2026.md).
+
+## Lacunas / perguntas em aberto (revisado 2026-08-24)
 
 - ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: limpeza conservadora + agente LLM).
 - ~~**Motor de adaptação semântica**~~ → **especificado** (§17 + contrato canônico); falta
@@ -427,7 +445,8 @@ O card permanece `EM REVISÃO` enquanto os PRs estiverem abertos, sem merge auto
 - **Integrantes da equipe:** nomes não informados ainda.
 - **Adaptação de material estático:** preservada como possibilidade futura, fora do núcleo atual.
 - **Biblioteca de sinais:** fontes candidatas mapeadas, integração ainda não desenhada.
-- **INOVA SENAI:** pitch, vídeo do protótipo e canvas continuam pendentes no fluxo acadêmico.
+- **INOVA SENAI:** deck do pitch criado e em revisão; vídeo final, fontes estatísticas e canvas
+  continuam pendentes no fluxo acadêmico.
 
 ---
 
