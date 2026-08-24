@@ -421,7 +421,9 @@ O card permanece `EM REVISÃO` enquanto os PRs estiverem abertos, sem merge auto
 O roteiro atualizado do pitch foi transformado em uma apresentação 16:9 de seis slides, com fala
 cronometrada para aproximadamente 2min55s e notas completas do apresentador. O deck percorre dor,
 solução, demonstração, mercado/modelo, viabilidade e fechamento; usa a identidade oficial do Semantia
-e frames reais dos dois vídeos enviados pela equipe.
+e frames reais do vídeo de demonstração do produto. Após feedback de Foyth, todas as imagens em que o
+grupo aparecia foram removidas; capa, dor e fechamento passaram a destacar interface e linguagem visual
+da marca.
 
 O posicionamento foi reconciliado com o contrato atual: texto acessível literal ou adaptado, sem
 prometer tradução completa para Libras ou substituição de intérprete; sala ao vivo e legenda aparecem

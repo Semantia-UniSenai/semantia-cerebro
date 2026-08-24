@@ -7,7 +7,7 @@ tags: [inova-senai, pitch, apresentacao, acessibilidade, semantia]
 
 # Pitch Semantia — INOVA 2026
 
-Deck enxuto de **6 slides**, planejado para uma fala total de aproximadamente **2min55s**. O material usa frames reais dos vídeos enviados pela equipe e mantém o roteiro completo nas notas do apresentador.
+Deck enxuto de **6 slides**, planejado para uma fala total de aproximadamente **2min55s**. O material usa frames reais da demonstração do produto e mantém o roteiro completo nas notas do apresentador.
 
 ## Artefatos
 
@@ -35,8 +35,8 @@ Os vídeos-fonte não foram versionados. Permanecem publicados nos links enviado
 
 ### Vídeo horizontal — `Semantia INOVA pitch`
 
-- `00:00:20` — equipe apresentando com legenda e janela de intérprete; usado no slide de dor.
-- `00:02:15` — equipe no fechamento; usado na capa e no último slide.
+O vídeo foi revisado, mas nenhum frame dele permanece no deck final. Após feedback de Foyth em
+2026-08-24, todas as imagens em que o grupo aparecia foram removidas.
 
 ### Vídeo vertical — `Semantia INOVA sistema`
 
@@ -44,7 +44,7 @@ Os vídeos-fonte não foram versionados. Permanecem publicados nos links enviado
 - `00:00:41` — formulário de contexto da plateia.
 - `00:01:41` — legenda exibida na sala ao vivo.
 
-Foram descartados frames com tela intermediária do zrok, estados de espera, blur excessivo ou infraestrutura técnica que desviaria a atenção do produto.
+Foram descartados frames com o grupo, tela intermediária do zrok, estados de espera, blur excessivo ou infraestrutura técnica que desviaria a atenção do produto.
 
 ## Guardas de posicionamento
 
@@ -72,6 +72,7 @@ As notas do apresentador repetem esses alertas para evitar que a versão de banc
 - cores da marca: azul, roxo, ciano e rosa;
 - logo oficial sem redesenho;
 - pouco texto em tela, hierarquia tipográfica forte e notas completas;
+- foco visual no produto, sem fotos do grupo;
 - frames verticais tratados como evidência de protótipo real, sem fingir screenshots nativos.
 
 ## Validação executada
@@ -79,6 +80,7 @@ As notas do apresentador repetem esses alertas para evitar que a versão de banc
 - leitura estrutural confirmou **6 slides** e **6 notas**;
 - renderização completa em PNG com LibreOffice/Poppler;
 - revisão visual slide a slide e da sequência 3×2;
+- ausência de imagens do grupo confirmada nos seis slides;
 - verificação geométrica encontrou **zero elementos fora da área do slide**;
 - PDF exportado com sucesso;
 - revisão foi uma **autoverificação determinística**, não aprovação independente;
