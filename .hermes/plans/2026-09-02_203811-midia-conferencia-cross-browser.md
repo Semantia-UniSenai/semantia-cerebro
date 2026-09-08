@@ -246,15 +246,15 @@ git commit -m "feat(media): emite credenciais LiveKit efemeras"
 - Consome: `IssueMediaCredentialsUseCase.execute(input)`.
 - Produz: `media:credentials` → `Ack<MediaCredentials>`.
 
-- [ ] **Etapa 1:** adicionar specs falhando para os casos:
+- [x] **Etapa 1:** adicionar specs falhando para os casos:
   - host, participante e guest admitidos recebem credencial;
   - socket não autenticado recebe `UNAUTHORIZED`;
   - autenticado mas ainda aguardando aprovação recebe `NOT_JOINED`;
   - sessão encerrada recebe `SESSION_READ_ONLY`;
   - erro de configuração recebe `MEDIA_UNAVAILABLE` sem stack/segredo;
   - resposta nunca aparece dentro de `session:state` nem em broadcast.
-- [ ] **Etapa 2:** executar `pnpm test -- --runInBand src/modules/live/live.gateway.spec.ts`; esperado: falha por ausência do handler.
-- [ ] **Etapa 3:** injetar os usecases do módulo de mídia no gateway e implementar:
+- [x] **Etapa 2:** executar `pnpm test -- --runInBand src/modules/live/live.gateway.spec.ts`; esperado: falha por ausência do handler.
+- [x] **Etapa 3:** injetar os usecases do módulo de mídia no gateway e implementar:
 
 ```ts
 @SubscribeMessage('media:credentials')
@@ -270,9 +270,9 @@ async onMediaCredentials(socket: LiveSocket): Promise<Ack<MediaCredentials>> {
 
 A implementação final deve manter `try/catch` e `toErrorAck` no padrão do gateway.
 
-- [ ] **Etapa 4:** mapear erros de mídia em `toErrorAck` sem logar `participantToken`.
-- [ ] **Etapa 5:** executar specs do gateway e módulo de mídia; esperado: PASS.
-- [ ] **Etapa 6:** commit:
+- [x] **Etapa 4:** mapear erros de mídia em `toErrorAck` sem logar `participantToken`.
+- [x] **Etapa 5:** executar specs do gateway e módulo de mídia; esperado: PASS.
+- [x] **Etapa 6:** commit:
 
 ```bash
 git add src/modules/live src/modules/media
@@ -294,12 +294,12 @@ git commit -m "feat(live): autoriza midia somente apos ingresso"
 - Consome: `CloseMediaRoomUseCase.execute(sessionId)`.
 - Produz: sala LiveKit removida após `EndSessionUseCase` confirmar o estado `ENDED`.
 
-- [ ] **Etapa 1:** escrever specs falhando para encerramento: delete chamado uma vez; repetição idempotente; falha do provider não reabre a sessão nem vaza segredo; `session:ended` ainda é emitido.
-- [ ] **Etapa 2:** executar spec; esperado: FAIL por ausência do cleanup.
-- [ ] **Etapa 3:** chamar `closeMediaRoom.execute(sessionId)` depois da transição persistida e antes da remoção local; registrar somente código técnico e `sessionId` sanitizado se a limpeza falhar.
-- [ ] **Etapa 4:** configurar `emptyTimeout=60` segundos na criação da room LiveKit como defesa adicional; isso não substitui `deleteRoom`.
-- [ ] **Etapa 5:** executar `pnpm test -- --runInBand src/modules/live src/modules/media`; esperado: PASS.
-- [ ] **Etapa 6:** commit:
+- [x] **Etapa 1:** escrever specs falhando para encerramento: delete chamado uma vez; repetição idempotente; falha do provider não reabre a sessão nem vaza segredo; `session:ended` ainda é emitido.
+- [x] **Etapa 2:** executar spec; esperado: FAIL por ausência do cleanup.
+- [x] **Etapa 3:** chamar `closeMediaRoom.execute(sessionId)` depois da transição persistida e antes da remoção local; registrar somente código técnico e `sessionId` sanitizado se a limpeza falhar.
+- [x] **Etapa 4:** configurar `emptyTimeout=60` segundos na criação da room LiveKit como defesa adicional; isso não substitui `deleteRoom`.
+- [x] **Etapa 5:** executar `pnpm test -- --runInBand src/modules/live src/modules/media`; esperado: PASS.
+- [x] **Etapa 6:** commit:
 
 ```bash
 git add src/modules/live src/modules/media

@@ -84,3 +84,25 @@ Criado `arquitetura/midia-conferencia.md` com:
 ### Desvio e risco
 
 O `pnpm build` falhou em arquivo não alterado, `src/modules/sessions/repositories/prisma-live-session.repository.ts:107`, porque `AudienceContext` não satisfaz `Prisma.InputJsonValue`. A suíte base não revelava esse typecheck. O defeito precisa de correção regressiva antes do gate final; ele não foi mascarado nem atribuído à camada de mídia.
+
+## 2026-09-02 — autorização e encerramento no gateway
+
+### RED/GREEN
+
+- RED: sete cenários de `media:credentials` falharam com `onMediaCredentials is not a function`.
+- GREEN: host, participante e guest admitidos recebem credencial; socket sem identidade ou sem admissão é recusado; sessão encerrada e provider indisponível preservam erros canônicos.
+- RED: `LiveModule` não importava `MediaModule`.
+- GREEN: o wiring Nest passou sem expor o provider fora do módulo.
+- RED: encerramento não invocava `CloseMediaRoomUseCase`.
+- GREEN: cleanup ocorre depois de `EndSessionUseCase` e antes de `session:ended`; falha do provider não reabre nem bloqueia o encerramento canônico.
+- RED adversarial: quebra de linha em `sessionId` permitia log forging.
+- GREEN: somente o identificador de log é sanitizado e limitado; o provider e o evento continuam recebendo o ID canônico sem alteração.
+
+### Evidência
+
+- `pnpm test --runInBand src/modules/live/live.gateway.spec.ts src/modules/live/live.module.spec.ts src/modules/media`: **PASS — 6 suites, 33 testes**.
+- `pnpm test --runInBand`: **PASS — 26 suites, 144 testes**.
+- `pnpm exec eslint "{src,test}/**/*.ts"`: **PASS — 0 erros**.
+- Commit API: `2d77bfb feat(live): integra midia ao ciclo da sessao`.
+- A resposta de credenciais não entra em `session:state` nem em broadcast.
+- A causa do provider não entra no ACK nem no warning de cleanup.
