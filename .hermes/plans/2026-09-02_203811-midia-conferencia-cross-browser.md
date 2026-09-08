@@ -330,12 +330,12 @@ export interface MediaCredentials {
 requestMediaCredentials(): Promise<Ack<MediaCredentials>>
 ```
 
-- [ ] **Etapa 1:** escrever testes falhando para emissão somente quando `joinedSocket=true`, propagação de `MEDIA_UNAVAILABLE`, cancelamento no disconnect e ausência do token em refs persistentes.
-- [ ] **Etapa 2:** executar `pnpm test -- src/live/useLiveSession.spec.ts`; esperado: FAIL.
-- [ ] **Etapa 3:** implementar `requestMediaCredentials` por `emitAck('media:credentials')` e retorná-la no composable.
-- [ ] **Etapa 4:** não adicionar credencial a `SessionState`, `localStorage`, `sessionStorage` ou query string.
-- [ ] **Etapa 5:** executar o teste novamente; esperado: PASS.
-- [ ] **Etapa 6:** commit:
+- [x] **Etapa 1:** escrever testes falhando para emissão somente quando `joinedSocket=true`, propagação de `MEDIA_UNAVAILABLE`, cancelamento no disconnect e ausência do token em refs persistentes.
+- [x] **Etapa 2:** executar `pnpm test -- src/live/useLiveSession.spec.ts`; esperado: FAIL.
+- [x] **Etapa 3:** implementar `requestMediaCredentials` por `emitAck('media:credentials')` e retorná-la no composable.
+- [x] **Etapa 4:** não adicionar credencial a `SessionState`, `localStorage`, `sessionStorage` ou query string.
+- [x] **Etapa 5:** executar o teste novamente; esperado: PASS.
+- [x] **Etapa 6:** commit:
 
 ```bash
 git add src/live/types.ts src/live/useLiveSession.ts src/live/useLiveSession.spec.ts
@@ -379,15 +379,15 @@ export interface ConferenceClient {
 }
 ```
 
-- [ ] **Etapa 1:** adicionar `livekit-client@2.22.2`.
-- [ ] **Etapa 2:** escrever specs falhando para mapeamento de participantes/tracks, mute, unsubscribe, reconexão, erro de dispositivo e autoplay bloqueado.
-- [ ] **Etapa 3:** executar `pnpm test -- src/live/media`; esperado: FAIL.
-- [ ] **Etapa 4:** implementar `Room` com `adaptiveStream` e `dynacast` somente quando os helpers do SDK disserem que o browser suporta; usar vídeo ideal 1280×720 e 24 fps, nunca constraint `exact`.
-- [ ] **Etapa 5:** mapear `RoomEvent.TrackSubscribed`, `TrackUnsubscribed`, `TrackMuted`, `TrackUnmuted`, `ParticipantConnected`, `ParticipantDisconnected`, `Reconnecting`, `Reconnected`, `Disconnected`, `MediaDevicesError` e `AudioPlaybackStatusChanged` para eventos próprios.
-- [ ] **Etapa 6:** usar `isBrowserSupported()` antes de conectar. Browser incompatível mantém a sala textual e gera `MEDIA_BROWSER_UNSUPPORTED`.
-- [ ] **Etapa 7:** `disconnect()` deve remover todos os listeners, destacar elementos e parar/publicar zero tracks locais.
-- [ ] **Etapa 8:** executar specs; esperado: PASS.
-- [ ] **Etapa 9:** commit:
+- [x] **Etapa 1:** adicionar `livekit-client@2.22.2`.
+- [x] **Etapa 2:** escrever specs falhando para mapeamento de participantes/tracks, mute, unsubscribe, reconexão, erro de dispositivo e autoplay bloqueado.
+- [x] **Etapa 3:** executar `pnpm test -- src/live/media`; esperado: FAIL.
+- [x] **Etapa 4:** implementar `Room` com `adaptiveStream` e `dynacast` somente quando os helpers do SDK disserem que o browser suporta; usar vídeo ideal 1280×720 e 24 fps, nunca constraint `exact`.
+- [x] **Etapa 5:** mapear `RoomEvent.TrackSubscribed`, `TrackUnsubscribed`, `TrackMuted`, `TrackUnmuted`, `ParticipantConnected`, `ParticipantDisconnected`, `Reconnecting`, `Reconnected`, `Disconnected`, `MediaDevicesError` e `AudioPlaybackStatusChanged` para eventos próprios.
+- [x] **Etapa 6:** usar `isBrowserSupported()` antes de conectar. Browser incompatível mantém a sala textual e gera `MEDIA_BROWSER_UNSUPPORTED`.
+- [x] **Etapa 7:** `disconnect()` deve remover todos os listeners, destacar elementos e parar/publicar zero tracks locais.
+- [x] **Etapa 8:** executar specs; esperado: PASS.
+- [x] **Etapa 9:** commit:
 
 ```bash
 git add src/live/media package.json pnpm-lock.yaml

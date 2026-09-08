@@ -106,3 +106,28 @@ O `pnpm build` falhou em arquivo não alterado, `src/modules/sessions/repositori
 - Commit API: `2d77bfb feat(live): integra midia ao ciclo da sessao`.
 - A resposta de credenciais não entra em `session:state` nem em broadcast.
 - A causa do provider não entra no ACK nem no warning de cleanup.
+
+## 2026-09-02 — credencial efêmera e adapter web
+
+### RED/GREEN
+
+- RED: quatro cenários de `requestMediaCredentials` falharam porque o composable não expunha a operação.
+- GREEN: emissão ocorre somente após `session:state`; erro do provider é recuperável; disconnect cancela ACK; token não entra em refs, storage ou query.
+- RED: cada comportamento do adapter falhou antes da implementação: suporte do browser, opções adaptativas, conexão, tracks, mute/unmute, presença, reconexão, autoplay, dispositivos e cleanup.
+- GREEN: `LiveKitConferenceClient` isola o SDK, usa `isBrowserSupported`, `supportsAdaptiveStream`, `supportsDynacast`, 720p/24 fps ideal e IDs estáveis `participantId:source`.
+- RED de autorrevisão: substituição da mesma track deixava a anterior anexada; rejeição de `room.disconnect()` interrompia o cleanup local.
+- GREEN: substituição destaca a track anterior; disconnect é idempotente, remove listeners/tracks e termina localmente mesmo com transporte já ausente.
+
+### Evidência
+
+- `pnpm exec vitest run src/live/useLiveSession.spec.ts`: **PASS — 18 testes**.
+- `pnpm exec vitest run src/live/media/livekit-conference-client.spec.ts`: **PASS — 21 testes**.
+- `pnpm test`: **PASS — 19 arquivos, 119 testes**.
+- `pnpm build`: **PASS**.
+- Commits web: `44e27cf feat(media): solicita credenciais efemeras da sala` e `d18ad5c feat(media): encapsula cliente LiveKit`.
+- `livekit-client` fixado em `2.22.2`.
+
+### Privacidade e limites
+
+- O token fica apenas na variável local retornada pelo ACK e passada a `Room.connect`; não é logado nem persistido.
+- O gate prova tipos e comportamento determinístico do adapter, não transporte com um servidor LiveKit real nem suporte Safari/mobile.
