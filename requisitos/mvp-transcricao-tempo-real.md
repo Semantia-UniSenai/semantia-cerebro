@@ -1,7 +1,7 @@
 ---
 title: Requisitos do MVP de transcrição em tempo real
 status: canônico
-atualizado: 2026-08-10
+atualizado: 2026-09-02
 ---
 
 # Requisitos do MVP de transcrição em tempo real
@@ -36,7 +36,7 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 | RF12 | Anfitrião encerra a reunião sem duplicar efeitos. | P0 | IMPLEMENTADO | REST/Socket.IO usam encerramento idempotente. |
 | RF13 | Anfitrião consulta e exclui transcript/chat dentro da política de 30 dias. | P0 | PLANEJADO | Consulta existe; exclusão e expiração automática não. |
 | RF14 | Participantes usam chat e mãos levantadas com moderação genérica. | P1 | VALIDADO NA BRANCH | Chat/mãos usam papéis contextuais; anfitrião e moderador gerenciam a sala. |
-| RF15 | Sala oferece áudio e vídeo de conferência sem confundir o microfone da transcrição. | P1 | PLANEJADO | Não há WebRTC/conferência. |
+| RF15 | Sala oferece áudio e vídeo de conferência sem confundir o microfone da transcrição. | P1 | EM IMPLEMENTAÇÃO NA BRANCH | Branches `feat/midia-sala` partem de `dev`; decisão SFU, autorização pós-admissão e gates cross-browser estão em `arquitetura/midia-conferencia.md`. Ainda não é entrega validada. |
 | RF16 | Participante aciona VLibras como camada opcional na sala. | P1 | PARCIAL | Widget existe globalmente; integração da experiência ao vivo não validada. |
 | RF17 | Análise sentimental, quando ativada, mostra incerteza e nunca diagnostica pessoas. | P1 | PLANEJADO | Não existe no produto atual. |
 | RF18 | Ferramentas secundárias continuam acessíveis sem bloquear o núcleo. | P2 | PARCIAL | Datilologia/ranking e ferramentas públicas existem; reorganização pendente. |
@@ -77,6 +77,7 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 | RN15 | O produto não promete tradução completa para Libras nem substituição de intérprete humano. |
 | RN16 | Estado implementado, planejado e legado deve permanecer explícito na documentação. |
 | RN17 | Sala e reunião são o mesmo conceito no MVP; `RoomSession` é detalhe interno e não pode gerar preparação, início manual ou histórico aninhado na UX. |
+| RN18 | Conferência usa mídia efêmera por SFU; câmera e áudio da chamada começam desligados, não são gravados e não podem interromper a sala textual. O microfone da chamada e a transcrição têm controles independentes. |
 
 ## Casos de uso canônicos
 
@@ -165,7 +166,8 @@ Links individuais estão em
 
 - `PROFESSOR`/`ALUNO`, turmas e rotas `/aula` continuam integrados em `dev`, mas foram removidos do
   contrato ativo na branch de generalização e cobertos por migration preservadora.
-- Não existe agente de IA nem preferência adaptada.
+- Não existe preferência individual integrada; o agente adaptador já possui implementação em `dev`, mas seus gates de acessibilidade continuam separados.
+- A mídia de conferência está em implementação nas branches do Card 13 e ainda não foi validada nem publicada.
 - A robustez de captura/transporte do Card 06 está integrada em `dev`; o Card 07 permanece validado
   em branches dedicadas até revisão e merge dos PRs.
 - Não existe expiração de transcript/chat/metadados nem política automática de 90 dias para logs técnicos.
