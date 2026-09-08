@@ -136,9 +136,9 @@
 - Consome: Card 13 e os estados integrados em `origin/dev`.
 - Produz: decisão LiveKit/SFU, fronteira Socket.IO × mídia, política de privacidade e eventos canônicos usados nas tarefas seguintes.
 
-- [ ] **Etapa 1:** carregar `using-git-worktrees`, executar `git fetch origin` nos três repositórios e comparar `git ls-remote` com `origin/dev`/`origin/main`.
-- [ ] **Etapa 2:** criar worktrees isoladas a partir das refs corretas; abortar se qualquer ref tiver avançado e revalidar os arquivos citados neste plano.
-- [ ] **Etapa 3:** escrever `arquitetura/midia-conferencia.md` com este contrato mínimo:
+- [x] **Etapa 1:** carregar `using-git-worktrees`, executar `git fetch origin` nos três repositórios e comparar `git ls-remote` com `origin/dev`/`origin/main`.
+- [x] **Etapa 2:** criar worktrees isoladas a partir das refs corretas; abortar se qualquer ref tiver avançado e revalidar os arquivos citados neste plano.
+- [x] **Etapa 3:** escrever `arquitetura/midia-conferencia.md` com este contrato mínimo:
 
 ```text
 Socket.IO /live: identidade, admissão, sessão, transcript, chat, mãos, encerramento.
@@ -150,9 +150,9 @@ Publicação inicial: nenhuma; microphone/camera por gesto explícito.
 Persistência: nenhuma mídia; egress/recording desabilitados.
 ```
 
-- [ ] **Etapa 4:** marcar RF15 como “EM IMPLEMENTAÇÃO NA BRANCH” somente na branch documental; não anunciar entrega.
-- [ ] **Etapa 5:** revisar termos para não chamar transporte via SFU de E2EE.
-- [ ] **Etapa 6:** commit no cérebro:
+- [x] **Etapa 4:** marcar RF15 como “EM IMPLEMENTAÇÃO NA BRANCH” somente na branch documental; não anunciar entrega.
+- [x] **Etapa 5:** revisar termos para não chamar transporte via SFU de E2EE.
+- [x] **Etapa 6:** commit no cérebro:
 
 ```bash
 git add arquitetura/midia-conferencia.md arquitetura/sala-ao-vivo.md requisitos/mvp-transcricao-tempo-real.md
@@ -200,9 +200,9 @@ export abstract class MediaRoomProvider {
 }
 ```
 
-- [ ] **Etapa 1:** adicionar `livekit-server-sdk@2.18.0` com `pnpm add livekit-server-sdk@2.18.0`.
-- [ ] **Etapa 2:** escrever specs que falham para: sessão não `LIVE`, provider ausente, identidade vazia, token TTL 600, sala `semantia:<sessionId>`, criação idempotente da room com `maxParticipants=50` e `emptyTimeout=60`, grants `roomJoin/canPublish/canSubscribe=true` e `canPublishData=false`.
-- [ ] **Etapa 3:** executar:
+- [x] **Etapa 1:** adicionar `livekit-server-sdk@2.18.0` com `pnpm add livekit-server-sdk@2.18.0`.
+- [x] **Etapa 2:** escrever specs que falham para: sessão não `LIVE`, provider ausente, identidade vazia, token TTL 600, sala `semantia:<sessionId>`, criação idempotente da room com `maxParticipants=50` e `emptyTimeout=60`, grants `roomJoin/canPublish/canSubscribe=true` e `canPublishData=false`.
+- [x] **Etapa 3:** executar:
 
 ```bash
 pnpm test -- --runInBand src/modules/media
@@ -210,11 +210,11 @@ pnpm test -- --runInBand src/modules/media
 
 Resultado esperado: falha porque contracts/usecases/provider ainda não existem.
 
-- [ ] **Etapa 4:** implementar contracts e usecases; `IssueMediaCredentialsUseCase` rejeita estado diferente de `LIVE` com código `SESSION_READ_ONLY`.
-- [ ] **Etapa 5:** implementar `LiveKitMediaRoomProvider`: garantir a room com `LiveKitAPI.room.createRoom({ name, maxParticipants: 50, emptyTimeout: 60 })`, tratar “already exists” como sucesso concorrente e só então emitir `AccessToken`; incluir `name` e metadata JSON contendo apenas `role`; nunca incluir e-mail, join token ou JWT Semantia.
-- [ ] **Etapa 6:** implementar `closeRoom` com `LiveKitAPI.room.deleteRoom('semantia:' + sessionId)`; tratar “room not found” como sucesso idempotente.
-- [ ] **Etapa 7:** manter a API inicializável sem configuração LiveKit, mas `issueCredentials` deve retornar erro canônico `MEDIA_UNAVAILABLE`; não usar chaves falsas.
-- [ ] **Etapa 8:** documentar somente nomes de variáveis em `.env.example`:
+- [x] **Etapa 4:** implementar contracts e usecases; `IssueMediaCredentialsUseCase` rejeita estado diferente de `LIVE` com código `SESSION_READ_ONLY`.
+- [x] **Etapa 5:** implementar `LiveKitMediaRoomProvider`: garantir a room com `LiveKitAPI.room.createRoom({ name, maxParticipants: 50, emptyTimeout: 60 })`, tratar “already exists” como sucesso concorrente e só então emitir `AccessToken`; incluir `name` e metadata JSON contendo apenas `role`; nunca incluir e-mail, join token ou JWT Semantia.
+- [x] **Etapa 6:** implementar `closeRoom` com `LiveKitAPI.room.deleteRoom('semantia:' + sessionId)`; tratar “room not found” como sucesso idempotente.
+- [x] **Etapa 7:** manter a API inicializável sem configuração LiveKit, mas `issueCredentials` deve retornar erro canônico `MEDIA_UNAVAILABLE`; não usar chaves falsas.
+- [x] **Etapa 8:** documentar somente nomes de variáveis em `.env.example`:
 
 ```dotenv
 LIVEKIT_URL="wss://seu-projeto.livekit.cloud"
@@ -223,8 +223,8 @@ LIVEKIT_API_SECRET=""
 LIVEKIT_TOKEN_TTL_SECONDS=600
 ```
 
-- [ ] **Etapa 9:** executar o spec novamente; esperado: PASS.
-- [ ] **Etapa 10:** commit:
+- [x] **Etapa 9:** executar o spec novamente; esperado: PASS.
+- [x] **Etapa 10:** commit:
 
 ```bash
 git add src/modules/media package.json pnpm-lock.yaml .env.example

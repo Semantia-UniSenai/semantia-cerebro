@@ -61,3 +61,26 @@ Criado `arquitetura/midia-conferencia.md` com:
 - Não há credenciais LiveKit de desenvolvimento/QA verificadas nesta etapa.
 - Safari macOS/iOS, Edge Windows e Chrome Android exigem ambiente/dispositivo real para alegação de suporte.
 - O limite de 50 pessoas permanece alvo não comprovado.
+
+## 2026-09-02 — provider LiveKit e casos de uso
+
+### RED/GREEN
+
+- RED: `pnpm test --runInBand src/modules/media/usecases` falhou porque os contratos e casos de uso ainda não existiam.
+- GREEN: `IssueMediaCredentialsUseCase` e `CloseMediaRoomUseCase` passaram; estado não `LIVE` retorna `SESSION_READ_ONLY` e identidade vazia retorna `BAD_REQUEST` antes do provider.
+- RED: o spec do provider falhou antes de `LiveKitMediaRoomProvider` existir.
+- GREEN: token curto, grants mínimos, room `semantia:<sessionId>`, limite 50, `emptyTimeout=60`, ausência de configuração e cleanup idempotente ficaram cobertos.
+- RED: o spec do `MediaModule` mostrou que `ConfigService` não estava resolvido isoladamente.
+- GREEN: `MediaModule` importa `ConfigModule` e inicia sem credenciais reais.
+
+### Evidência
+
+- `pnpm test --runInBand src/modules/media`: **PASS — 4 suites, 12 testes**.
+- `pnpm test --runInBand`: **PASS — 25 suites, 132 testes**.
+- `pnpm exec eslint "src/modules/media/**/*.ts"`: **PASS — 0 erros**.
+- Commits API: `9c64b38 feat(media): adiciona provider LiveKit` e `e2fbd5e docs(media): documenta configuracao LiveKit`.
+- Variáveis documentadas sem valor real: `LIVEKIT_URL`, `LIVEKIT_API_KEY`, `LIVEKIT_API_SECRET`, `LIVEKIT_TOKEN_TTL_SECONDS`.
+
+### Desvio e risco
+
+O `pnpm build` falhou em arquivo não alterado, `src/modules/sessions/repositories/prisma-live-session.repository.ts:107`, porque `AudienceContext` não satisfaz `Prisma.InputJsonValue`. A suíte base não revelava esse typecheck. O defeito precisa de correção regressiva antes do gate final; ele não foi mascarado nem atribuído à camada de mídia.
