@@ -1,7 +1,7 @@
 ---
 tags: [tcc, senai, semantia, libras, acessibilidade]
 status: histórico-vivo
-atualizado: 2026-08-10
+atualizado: 2026-09-02
 ---
 
 # Semantia 🤟
@@ -415,6 +415,25 @@ gate dos Cards 11/17. Detalhes em
 [ADR-003](../arquitetura/decisoes/ADR-003-transcript-canonico-versionado.md).
 
 O card permanece `EM REVISÃO` enquanto os PRs estiverem abertos, sem merge automático.
+
+## 27. Card 13 iniciado com SFU e compatibilidade cross-browser (2026-09-02)
+
+Após a retomada do desenvolvimento, Foyth autorizou iniciar o Card 13 antes dos Cards 10 e 11. A
+decisão não conclui os gates de privacidade/validação desses cards; inclui apenas os controles
+mínimos indispensáveis de autorização, token curto, ausência de gravação e cleanup.
+
+A conferência usará LiveKit como SFU, não uma malha WebRTC. O Socket.IO `/live` continua responsável
+por identidade, admissão, ciclo, transcript, chat e mãos. A API só emite credencial de mídia para um
+socket já admitido em sessão `LIVE`; `session:end` também encerra a room do provider. Câmera e áudio
+da chamada começam desligados e qualquer falha mantém a experiência caption-first.
+
+O microfone da chamada e a transcrição possuem controles independentes. Para evitar duas capturas
+concorrentes no Safari/iOS, uma origem física fornecerá clones por consumidor. O suporte será
+declarado somente com automação em Chromium/Firefox/WebKit e evidência real em
+Brave/Chrome, Edge, Firefox, Safari macOS/iOS e Chrome Android. Compartilhamento de tela permanece na
+task separada `86e33mk6m`.
+
+Plano e decisão: [`../arquitetura/midia-conferencia.md`](../arquitetura/midia-conferencia.md).
 
 ## Lacunas / perguntas em aberto (revisado 2026-08-10)
 

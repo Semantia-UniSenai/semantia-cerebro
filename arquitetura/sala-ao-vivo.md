@@ -26,6 +26,11 @@
 Código validado na branch não deve ser descrito como já integrado em `dev`; da mesma forma, itens
 planejados não devem ser anunciados como entregues.
 
+> **Atualização de 2026-09-02:** domínio genérico, sala caption-first, captura PCM, transcript
+> canônico, agente adaptador e sala de espera estão integrados em `dev`. A mídia de conferência do
+> Card 13 entrou em implementação nas branches `feat/midia-sala`; consulte
+> [`midia-conferencia.md`](./midia-conferencia.md). Ela ainda não é funcionalidade validada.
+
 ## Decisão de produto: reunião instantânea
 
 Para o MVP, **`Room` é a reunião percebida pelo usuário**. A jornada segue o modelo do Google Meet:
@@ -143,6 +148,8 @@ Eventos cliente → servidor:
 - `transcription:audio` com PCM16 binário, somente `HOST` em sessão `LIVE`;
 - `chat:send`;
 - `hand:raise/lower`.
+- `media:credentials`, somente para participante já admitido em sessão `LIVE`; a resposta contém
+  credencial efêmera e não é broadcast.
 
 Eventos servidor → cliente:
 
@@ -160,6 +167,18 @@ presença como `{ participant }`. O frontend normaliza esses envelopes na fronte
 Todo comando recebe `{ ok: true, ... }` ou `{ ok: false, error: { code, message } }`. O gateway
 permanece fino e delega autorização, persistência e transições aos mesmos serviços usados pelo
 REST.
+
+## Fronteira da conferência em implementação
+
+O Socket.IO permanece canônico para identidade, sala de espera, ciclo, transcrição, chat e mãos. Um
+SFU LiveKit transporta somente áudio/vídeo efêmero. O backend emite token curto depois de
+`session:state`; convidados aguardando aprovação e sessões encerradas não recebem mídia. Encerrar a
+sessão fecha a room `semantia:<sessionId>`.
+
+Câmera e **Áudio da chamada** começam desligados e não compartilham estado com **Transcrição**.
+Falha, permissão negada ou incompatibilidade do provider preserva toda a sala textual. O contrato,
+privacidade, alternativas e matriz de navegadores estão em
+[`midia-conferencia.md`](./midia-conferencia.md).
 
 ## Fluxo atual da transcrição
 

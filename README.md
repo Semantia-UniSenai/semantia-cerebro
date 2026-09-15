@@ -36,6 +36,8 @@ qualquer agente de IA (ou pessoa nova) trabalhar no Semantia, o contexto vem **d
 12. [Evidência sanitizada do Card 07](evidencias/card-07/validation-2026-08-10.json).
 13. [Evidências runtime do ASR backend](evidencias/card-06/asr-backend-runtime-2026-08-04.json)
    e [benchmark CPU](evidencias/card-06/asr-backend-benchmark-2026-08-04.json).
+14. [Mídia de conferência na sala caption-first](arquitetura/midia-conferencia.md) — decisão SFU,
+    autorização, privacidade, separação do ASR e matriz cross-browser do Card 13.
 
 Documentos de junho em `projeto/` e as seções antigas do histórico continuam preservados como
 evidência do TCC, mas **não substituem** os documentos canônicos acima.
