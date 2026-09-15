@@ -45,7 +45,7 @@
 | 10 | Proteger privacidade, acesso e dados das transcrições | Urgente | débito técnico | PENDENTE | [86e2j4wd1](https://app.clickup.com/t/90171419563/86e2j4wd1) |
 | 11 | Validar o núcleo full-stack de ponta a ponta | Urgente | melhoria | PENDENTE | [86e2j4whd](https://app.clickup.com/t/90171419563/86e2j4whd) |
 | 12 | Generalizar chat, mãos levantadas e moderação de participantes | Alta | melhoria | PENDENTE | [86e2j4wn4](https://app.clickup.com/t/90171419563/86e2j4wn4) |
-| 13 | Implementar áudio e vídeo de conferência | Alta | nova funcionalidade | EM REVISÃO | [86e2j4wqw](https://app.clickup.com/t/90171419563/86e2j4wqw) |
+| 13 | Implementar áudio e vídeo de conferência | Alta | nova funcionalidade | CONCLUÍDO | [86e2j4wqw](https://app.clickup.com/t/90171419563/86e2j4wqw) |
 | 14 | Integrar o intérprete digital VLibras à experiência da sala | Alta | nova funcionalidade | PENDENTE | [86e2j4wum](https://app.clickup.com/t/90171419563/86e2j4wum) |
 | 15 | Implementar análise sentimental acessível e opcional | Alta | nova funcionalidade | PENDENTE | [86e2j4wy4](https://app.clickup.com/t/90171419563/86e2j4wy4) |
 | 16 | Preparar produção, observabilidade e escala do tempo real | Alta | débito técnico | PENDENTE | [86e2j4x37](https://app.clickup.com/t/90171419563/86e2j4x37) |
