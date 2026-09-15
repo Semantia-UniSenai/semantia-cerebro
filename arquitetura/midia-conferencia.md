@@ -1,7 +1,7 @@
 ---
 title: Mídia de conferência na sala caption-first
-status: em-implementacao
-atualizado: 2026-09-02
+status: em-revisao
+atualizado: 2026-09-14
 card: 86e2j4wqw
 ---
 
@@ -52,9 +52,9 @@ Descartada como UX. Os controles e estados permanecem independentes. A implement
 2. A sala de espera, quando ativa, precisa aprovar a entrada.
 3. O cliente recebe `session:state` e passa a ser participante admitido.
 4. Somente então pode solicitar `media:credentials` no mesmo socket.
-5. A API verifica presença e sessão `LIVE` e emite token LiveKit com TTL de 600 segundos.
+5. A API relê e valida a sessão canônica antes e depois de emitir um token LiveKit com TTL máximo de 60 segundos.
 6. O token permite entrar apenas em `semantia:<sessionId>`, publicar microfone/câmera e assinar tracks.
-7. Convidado aguardando, socket não admitido e sessão encerrada não recebem credencial.
+7. Convidado aguardando, socket não admitido e sessão encerrada não recebem credencial; emissão é limitada por socket para reduzir abuso.
 
 `LIVEKIT_API_SECRET` existe somente no ambiente da API. O token de participante fica apenas em memória e não aparece em snapshot, broadcast, URL, storage, banco ou logs.
 
@@ -66,6 +66,8 @@ Descartada como UX. Os controles e estados permanecem independentes. A implement
 - gravação, egress, ingest e snapshots permanecem desabilitados;
 - não há schema nem persistência de mídia;
 - `session:end` encerra a sessão canônica e remove a room LiveKit;
+- o LiveKit self-hosted exige `room.auto_create: false`; assim, um token emitido antes do fim não recria uma room já removida;
+- o antigo endpoint REST de encerramento foi removido para não existir um caminho que atualiza o banco sem orquestrar Socket.IO e LiveKit;
 - sair, desmontar a view ou receber `session:ended` para e libera tracks/listeners;
 - falha de mídia degrada para a sala textual sem interromper legenda, chat ou mãos.
 
@@ -108,3 +110,13 @@ A web pode ocultar/desabilitar os controles de conferência e manter a sala text
 ## Reavaliação
 
 Reavaliar o provider se o piloto demonstrar incompatibilidade relevante, custo inviável, exigência formal de E2EE ou necessidade de hospedagem própria. A fronteira `MediaRoomProvider`/`ConferenceClient` deve permitir a troca sem reescrever o domínio da reunião.
+
+## Gate reaberto após uso funcional
+
+O uso manual de 2026-09-10 encontrou múltiplos defeitos em câmera e áudio. A arquitetura SFU permanece, mas a implementação não é considerada pronta enquanto o fluxo multiusuário não provar identidade acessível, preview local/remoto, mute, troca de dispositivos, permissões, autoplay, reconexão e cleanup. O layout também volta ao gate de UX: a legenda continua prioritária, porém a chamada precisa comunicar estado, progresso e recuperação sem sobrecarregar a barra inferior.
+
+## Resultado da estabilização
+
+Em 2026-09-14, o fluxo automatizado voltou a passar em Chromium, Firefox e WebKit, desktop e mobile emulados. O fechamento também provou transporte RTP, sinal de áudio reproduzido, cleanup terminal, restauração depois de testes de dispositivo, autoplay bloqueado com recuperação explícita e impossibilidade de reutilizar token após o encerramento.
+
+Esse resultado autoriza revisão dos PRs, não uma alegação universal de suporte. Safari macOS/iOS, Chrome Android e Edge em dispositivos reais continuam **não validados**. Capacidade para 25/50 participantes e qualidade em redes móveis também permanecem fora da evidência atual.

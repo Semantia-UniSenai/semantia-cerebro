@@ -18,7 +18,7 @@
 - Usar SFU. Não implementar mesh P2P: o custo cresce quadraticamente e conflita com o alvo futuro de até 50 conexões.
 - Mídia e sinalização de mídia não passam pelo Socket.IO; o Socket.IO só emite credenciais curtas e continua responsável pelo domínio da reunião.
 - `LIVEKIT_API_SECRET` existe somente no backend por variável de ambiente. Nunca entra no frontend, banco, token Semantia, logs, fixtures, screenshots ou documentação versionada.
-- O token LiveKit fica somente em memória, tem TTL de 10 minutos para ingresso e nunca é salvo em `localStorage`, `sessionStorage`, URL ou telemetria.
+- O token LiveKit fica somente em memória, tem TTL máximo de 60 segundos para ingresso e nunca é salvo em `localStorage`, `sessionStorage`, URL ou telemetria.
 - Câmera e microfone de chamada começam desligados. Nenhuma permissão é solicitada sem ação explícita.
 - “Microfone da chamada” e “Transcrição” são controles e estados diferentes. Mute da chamada não pausa a transcrição; pausar a transcrição não silencia a chamada.
 - Não habilitar gravação, egress, ingest ou snapshots. O áudio/vídeo atravessa o SFU, mas não é persistido.
@@ -747,3 +747,18 @@ A feature só pode ser declarada pronta quando:
 - nenhum segredo ou conteúdo de mídia é persistido;
 - legenda continua sendo o elemento principal;
 - PRs estão abertos para revisão, Card 13 está em `EM REVISÃO` e nenhum merge foi feito sem autorização.
+
+## Ciclo de estabilização reaberto em 2026-09-10
+
+O relato funcional do usuário tem precedência sobre os testes unitários verdes. A entrega volta a `NO-GO` até que o E2E multiusuário deixe de falhar e a UI/UX passe por nova auditoria desktop/mobile.
+
+- [ ] corrigir a identidade acessível do áudio remoto;
+- [ ] provar e corrigir preview local e vídeo remoto;
+- [ ] modelar operações de permissão/publicação em andamento e impedir estado enganoso;
+- [ ] tratar remoção física do microfone e sincronizar controles com tracks encerradas;
+- [ ] implementar seleção/refresh de câmera por feature detection;
+- [ ] reduzir densidade e ambiguidade da barra de controles;
+- [ ] substituir estados vazios contraditórios por orientação coerente com transcrição e mídia;
+- [ ] validar alvos ≥44 px, teclado, foco, 200% zoom, reduced motion e ausência de overflow;
+- [ ] concluir Chromium, Firefox, WebKit, Chromium mobile e WebKit mobile automatizados;
+- [ ] executar Brave real local com duas pessoas e registrar Safari/iOS/Android reais como não validados se não houver dispositivo.

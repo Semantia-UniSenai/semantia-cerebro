@@ -1,7 +1,7 @@
 ---
 title: Diário de execução — Card 13 mídia de conferência
-status: em-andamento
-atualizado: 2026-09-02
+status: em-revisao
+atualizado: 2026-09-14
 card: 86e2j4wqw
 ---
 
@@ -131,3 +131,66 @@ O `pnpm build` falhou em arquivo não alterado, `src/modules/sessions/repositori
 
 - O token fica apenas na variável local retornada pelo ACK e passada a `Room.connect`; não é logado nem persistido.
 - O gate prova tipos e comportamento determinístico do adapter, não transporte com um servidor LiveKit real nem suporte Safari/mobile.
+
+## 2026-09-10 — reabertura após QA funcional
+
+O relato de uso real classificou câmera e áudio como instáveis e invalidou qualquer leitura anterior de que a entrega estava pronta. O Card 13 voltou para diagnóstico, correção e QA integral; nenhum PR será mergeado automaticamente.
+
+### Baseline reproduzido
+
+- `node scripts/run-conference-e2e.mjs --project=chromium-desktop`: **FAIL** no fluxo com host e convidado admitidos.
+- As duas pessoas conectaram à mesma room, publicaram microfone por gesto explícito e receberam um elemento `<audio>` remoto.
+- O áudio remoto não possuía nome acessível: esperado `Áudio de <participante>`, observado `aria-label=null`.
+- A falha interrompeu o roteiro antes de provar câmera, mute remoto, encerramento e cleanup no mesmo fluxo.
+- Baseline focal web: **PASS — 6 arquivos, 74 testes**, seguido de build e `git diff --check` com exit `0`.
+- Baseline API: **PASS — 26 suites, 144 testes**, seguido de build e `git diff --check` com exit `0`.
+
+### Achados iniciais de produto e UI/UX
+
+1. O componente que anexa áudio remoto não preserva a identidade acessível da pessoa.
+2. O preview local depende de a pessoa existir na lista textual recebida pela view, mas o adapter de mídia não publica explicitamente a identidade local; o E2E ainda não chegou a essa asserção.
+3. A barra inferior mistura chamada, vídeo, transcrição, entrada, chat e pessoas com pesos concorrentes; em desktop ela ocupa largura excessiva e dificulta distinguir microfone da chamada de transcrição.
+4. O palco vazio domina a viewport e mostra “Aguardando o comunicador falar” mesmo quando a transcrição está pausada, produzindo estado contraditório.
+5. Ativação de câmera/microfone não tem estado visual de solicitação/permissão em andamento nem bloqueio explícito contra novas intenções.
+6. Não existe seleção/refresh de câmera na integração atual, apesar do contrato cross-browser exigir troca de câmera e fallback manual de dispositivos.
+
+### Loop de recuperação
+
+- reproduzir cada falha em um comando red-capable;
+- adicionar regressão antes da correção;
+- corrigir lifecycle antes de redesenhar o palco;
+- refazer hierarquia, estados, microcopy, responsividade, foco, zoom e reduced motion;
+- executar matriz Chromium/Firefox/WebKit e viewports mobile com dois contextos;
+- registrar separadamente automação, Brave real disponível e dispositivos reais não disponíveis.
+
+## 2026-09-14 — fechamento técnico para revisão
+
+### Correções do review
+
+- O encerramento foi consolidado em `session:end`; o endpoint REST paralelo foi removido.
+- A emissão de mídia relê a sessão antes e depois do provider, fecha a room se houver corrida com `ENDED`, limita o token a 60 segundos e aplica throttling por socket.
+- `room.auto_create: false` tornou terminal o `deleteRoom`: a credencial antiga não recria a sala.
+- Publicações tardias usam uma barreira de geração; cliente com conexão falha é descartado e uma tentativa posterior solicita credencial nova.
+- O teste local de microfone usa lease da origem física compartilhada; troca de entrada ganhou rollback e restauração dos consumidores.
+- Preview local, chamada, transcrição e origem física são liberados no fim canônico e no unmount.
+- A chamada volta ao estado anterior depois do teste de câmera/microfone, inclusive se a permissão for negada.
+- A modal de dispositivos ganhou foco inicial, `Escape`, contenção de `Tab` e restauração do foco.
+- A rota da sala passou a lazy-load; o chunk inicial medido caiu para `83,63 kB` gzip. O chunk da sala ainda gera aviso por ultrapassar 500 kB minificado e fica como alvo de otimização posterior.
+
+### Evidência final
+
+- Web: `pnpm test && pnpm build && git diff --check` — **PASS: 26 arquivos, 212 testes, build e diff-check**.
+- API: `pnpm exec jest --runInBand`, ESLint, build e diff-check — **PASS: 27 suites, 148 testes**.
+- API/PostgreSQL scratch: `pnpm prisma migrate deploy && pnpm test:e2e` — **PASS: 1 cenário E2E**.
+- Playwright/LiveKit/PostgreSQL scratch: **PASS: 17 execuções, 4 skips intencionais, 0 falhas**. Os skips correspondem à prova de token executada somente uma vez no Chromium desktop; os fluxos de produto passaram em Chromium desktop/mobile, Firefox desktop e WebKit desktop/mobile.
+- Autoplay bloqueado: **PASS**, com ação explícita para liberar áudio.
+- Token antigo: conecta antes do fim e falha depois de `session:end` + `deleteRoom()` com auto-criação desativada.
+- OpenAPI executada: nenhum `POST /sessions/:id/end` permanece exposto.
+- Auditoria de produção: web mantém 1 advisory alto herdado (`nanoid`); API mantém 10 altos herdados. Nenhum é introduzido pelas dependências de mídia desta branch.
+
+### Limites e publicação
+
+- Safari macOS/iOS, Chrome Android e Edge reais: **NÃO EXECUTADO**. Playwright WebKit/mobile não substitui dispositivo físico.
+- Capacidade de 25/50 participantes, troca real de rede e carga longa: **NÃO EXECUTADO**; nenhuma alegação pública de escala foi autorizada.
+- Não houve captura, persistência ou publicação de áudio/vídeo, token ou segredo. O E2E de credencial desativa trace e mantém o token somente em memória.
+- PRs web/API: `#13`, contra `dev`, sem merge automático. A documentação segue em PR separado contra `main`.
