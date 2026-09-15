@@ -1,6 +1,6 @@
 ---
 title: Mídia de conferência na sala caption-first
-status: em-revisao
+status: concluido
 atualizado: 2026-09-14
 card: 86e2j4wqw
 ---

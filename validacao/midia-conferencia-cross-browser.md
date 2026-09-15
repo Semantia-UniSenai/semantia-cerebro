@@ -1,6 +1,6 @@
 ---
 title: Validação da mídia de conferência
-status: em-revisao
+status: validacao-automatizada-concluida
 atualizado: 2026-09-14
 card: 86e2j4wqw
 ---

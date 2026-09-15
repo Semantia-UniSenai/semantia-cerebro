@@ -1,6 +1,6 @@
 ---
 title: Diário de execução — Card 13 mídia de conferência
-status: em-revisao
+status: concluido
 atualizado: 2026-09-14
 card: 86e2j4wqw
 ---
@@ -194,3 +194,12 @@ O relato de uso real classificou câmera e áudio como instáveis e invalidou qu
 - Capacidade de 25/50 participantes, troca real de rede e carga longa: **NÃO EXECUTADO**; nenhuma alegação pública de escala foi autorizada.
 - Não houve captura, persistência ou publicação de áudio/vídeo, token ou segredo. O E2E de credencial desativa trace e mantém o token somente em memória.
 - PRs web/API: `#13`, contra `dev`, sem merge automático. A documentação segue em PR separado contra `main`.
+
+## 2026-09-14 — integração autorizada
+
+- Foyth autorizou explicitamente a aprovação e o merge dos PRs.
+- Web PR `#13`: mergeada em `dev` no commit `15e23697d8322bba186497436ef23c65530993f1`.
+- API PR `#13`: mergeada em `dev` no commit `7c51db661a671e67ec70039016280bfe99ca9149`.
+- Cérebro PR `#11`: mergeada em `main` no commit `d7ac292be554eff03ba1621a01d3be5f452fdf9a`.
+- O resultado mergeado foi revalidado: web com 212 testes e build; API com 148 testes, lint, Prisma generate e build.
+- Os limites de dispositivos físicos, escala e rede continuam registrados e não foram convertidos em alegações de suporte.
