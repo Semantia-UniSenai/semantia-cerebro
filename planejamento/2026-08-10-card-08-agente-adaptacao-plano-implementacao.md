@@ -1,6 +1,6 @@
 ---
 title: Card 08 — plano de implementação do agente de adaptação
-status: reintegracao-em-execucao
+status: integracao-validada-aguardando-pr
 atualizado: 2026-09-16
 clickup: 86e2j4w7h
 repositorios:
@@ -62,8 +62,10 @@ chegaram à branch integrada. Foyth autorizou concluir o Card 08 em loop sem rei
 
 - testes focados de `useLiveSession`, contexto e `LiveRoomView`;
 - suíte Vitest completa, `vue-tsc`/build e `git diff --check`;
-- E2E no artefato final com host e participante, adaptação atrasada/fallback e mídia do Card 13 intacta;
-- nenhum seletor literal/adaptado novo: a apresentação dual continua pertencendo aos Cards 05/09.
+- E2E no artefato final com host e participante, falha/retry do contexto, seletor literal/adaptado e mídia
+  do Card 13 intacta;
+- escolha individual começa no literal, persiste somente a preferência de apresentação e usa literal quando
+  a adaptação está ausente, em fallback ou em bypass.
 
 ### Fechamento
 
@@ -71,6 +73,32 @@ chegaram à branch integrada. Foyth autorizou concluir o Card 08 em loop sem rei
 - atualizar este diário, ADR, requisitos e registro do Card 08 com evidência real;
 - publicar PRs finais API/web para `dev` e cérebro para `main`, mantendo-os em revisão e sem auto-merge;
 - ClickUp só muda após leitura do task ID `86e2j4w7h` e verificação pós-reload.
+
+## Fechamento técnico da reintegração — 2026-09-16
+
+- API promovida para a base pós-Card 13, com literal-first, snapshot coerente de contexto/versão e mesmo
+  `segmentId/seq` no derivado;
+- prompt imutável `pt-br-accessible-v1` preservado e `pt-br-accessible-v2` adicionado como default registrado;
+- riscos `urgent`, `ambiguous` e `preservation-risk` nunca materializam texto adaptado como sucesso;
+- densidade acima de 360 palavras/min marca `SUSPECT_DENSITY`, não chama o provider e persiste bypass
+  `SUSPECT_INPUT`, sem áudio ou hipótese bruta armazenados;
+- falha ao salvar contexto mantém o modal e a intenção para retry, sem iniciar captura; contexto inicial
+  parcial é rejeitado antes de formar snapshot inválido;
+- participante alterna entre literal e adaptado; fallback/bypass continuam mostrando o literal;
+- package Nest/Docker inclui o Prisma gerado, lock/overrides autocontidos e `start:prod` executável;
+- clean database: 10 migrations; N-1 preservou adaptação `FALLBACK/TIMEOUT` e adicionou o enum novo;
+- API: 51 suítes, 265 testes; E2E `disabled` e `fake`; corpus sintético 100/100 sem divergências;
+- web: 27 arquivos de teste, 226 testes; Playwright final 22 passes, quatro skips deliberados e zero falhas;
+- OpenAPI foi recapturado após o DTO final e Orval/build passaram; imagem final iniciou com health `ready`.
+
+### Limites honestos
+
+- não houve chamada Groq real nem envio de transcript real nesta reintegração;
+- benefício de compreensão continua sem promoção até avaliação pareada com pessoas surdas/especialistas;
+- um encerramento abrupto exatamente entre persistir o literal e criar a linha `PENDING` pode deixar o
+  derivado ausente; o literal permanece íntegro, mas o fechamento durável dessa janela exige outbox/job
+  transacional e fica registrado como evolução de confiabilidade;
+- PRs não autorizam merge automático.
 
 ## Objetivo
 
@@ -202,15 +230,14 @@ Card 10. Métricas e logs nunca contêm transcript, prompt completo, token, JWT 
 6. implementar adapter Groq e erros normalizados;
 7. implementar timeout, retry, circuit breaker e fila;
 8. integrar depois de `transcript:final` e persistir replay;
-9. consumir `transcript:adapted` no web sem seletor visual;
+9. consumir `transcript:adapted` e oferecer escolha individual literal/adaptado com fallback literal;
 10. criar corpus/harness e executar Groq apenas se a chave estiver disponível por env;
 11. executar gates, revisão em duas passadas, docs e PRs;
 12. mover ClickUp para `EM REVISÃO`, sem auto-merge.
 
 ## Fora do escopo
 
-- seletor literal/adaptado, pertencente ao Card 05;
-- renderização final/karaoke dual, pertencente ao Card 09;
+- visualização simultânea dos dois textos e explicação visual detalhada de cada código de fallback;
 - Libras, avatar ou substituição de intérprete;
 - RAG, memória, ferramentas ou chatbot;
 - Redis/outbox distribuído e múltiplas instâncias;

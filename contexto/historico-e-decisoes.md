@@ -222,8 +222,9 @@ em camadas no backend**:
 
 1. **Camada 1 (FEITA):** regex de disfluências — remove vícios de fala ("ééé", "né", "tipo
    assim"), gagueira e pontuação órfã. Conservadora (ambíguas ficam).
-2. **Camada 2 (A FAZER):** LLM rápido (Haiku/Gemini Flash) reescreve a frase final adaptada e
-   emite `transcript:adapted` (substitui na UI ~1s depois; toggle literal/adaptado).
+2. **Camada 2 (A FAZER, estado em 2026-07-04):** LLM rápido reescreve a frase final adaptada e emite
+   `transcript:adapted`. Esta lacuna foi tecnicamente implementada pelo Card 08 em 2026-09-16 com provider
+   desacoplado, fallback literal e toggle individual; promoção de qualidade continua humana.
 
 **ML próprio descartado:** não existe corpus PT→PT-adaptado-pra-surdos, não cabe no prazo; o
 prompt engineering da camada 2 vira a seção de metodologia do artigo, ML fica como trabalho
@@ -259,8 +260,8 @@ Libras fale normalmente e uma pessoa surda acompanhe a comunicação pela transc
 Chat, mãos levantadas, mídia de conferência, moderação, VLibras, análise sentimental e as
 ferramentas educativas permanecem desejáveis, mas não bloqueiam o núcleo.
 
-O anfitrião configura o contexto da plateia antes da sessão (tipo de encontro, faixa etária,
-familiaridade com português escrito, domínio e nível de simplificação). Cada participante pode
+Esta redação foi supersedida pelo contrato de reunião instantânea: o anfitrião entra primeiro e configura
+o contexto dentro da reunião, sem bloquear a abertura nem iniciar captura automaticamente. Cada participante pode
 escolher transcrição literal ou adaptada e mudar sua preferência durante a reunião. O agente de
 IA é consumido por token no backend e adapta o texto limpo sem alterar fatos; falha da IA deve
 manter o modo literal disponível.
@@ -428,8 +429,8 @@ triagem formal. A síntese, hash e limitações estão em
 
 No mesmo dia, uma aula real de Python no runtime local produziu 16 segmentos em cerca de 80 segundos. O
 texto exportado pelo usuário coincidiu exatamente com os literais persistidos; logo, o conteúdo absurdo foi
-originado pelo `faster-whisper`, não pela tela adaptada. O frontend recebeu adaptações, mas renderizou somente
-o literal, conforme o escopo conhecido do Card 08. Dez adaptações terminaram `SUCCEEDED`, seis em
+originado pelo `faster-whisper`, não pela tela adaptada. O frontend recebeu adaptações, mas à época do incidente renderizou somente
+o literal. Dez adaptações terminaram `SUCCEEDED`, seis em
 `PRESERVATION_FAILED`; só quatro sucessos alteraram texto. Uma janela nominal de 5 segundos gerou 51 palavras,
 equivalentes a 612 palavras/min, sinal objetivo de alucinação de ASR que o contrato atual não classifica.
 
@@ -467,11 +468,28 @@ a transcrição possuem controles independentes sobre origem física compartilh�
 
 Plano e decisão: [`../arquitetura/midia-conferencia.md`](../arquitetura/midia-conferencia.md).
 
+## 30. Card 08 reintegrado sobre Cards 12/13 (2026-09-16)
+
+A implementação histórica do agente existia em branches empilhadas que não chegaram à `dev`. Ela foi promovida
+para branches limpas pós-Card 13 sem duplicar o provider nem remover mídia, admissão ou encerramento canônico.
+O fluxo final mantém o literal soberano, captura snapshot/versionamento de contexto, persiste a derivação e emite
+`transcript:adapted` com o mesmo `seq`.
+
+O prompt `pt-br-accessible-v2` aplica regras explícitas por preferências/contexto; qualquer risco não nulo usa
+literal. Densidade acima de 360 palavras/min produz `SUSPECT_INPUT` sem chamar o provider. O frontend oferece
+toggle literal/adaptado, preserva literal em fallback/bypass e mantém o modal de contexto aberto quando salvar
+falha. A imagem de produção e o empacotamento Prisma foram corrigidos e validados por boot real.
+
+Evidência: 265 unitários API, E2E disabled/fake, corpus 100/100, 226 testes web, Playwright 22 passes/4 skips,
+10 migrations fresh e N-1 preservando adaptação existente. A branch está tecnicamente pronta para PR, mas não
+para merge automático. Groq real e benefício de compreensão permanecem não promovidos sem validação humana.
+
 ## Lacunas / perguntas em aberto (revisado 2026-09-16)
 
 - ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: limpeza conservadora + agente LLM).
-- ~~**Motor de adaptação semântica**~~ → **validado experimentalmente nas branches do Card 08**; faltam
-  qualidade de entrada ASR, prompt v2, guardas relacionais, seletor visual e validação com pessoas surdas.
+- ~~**Motor de adaptação semântica**~~ → **validado tecnicamente na branch final do Card 08** (§30), incluindo
+  qualidade de entrada por densidade, prompt v2, guardas relacionais e seletor visual; falta validação de
+  benefício com pessoas surdas e estado visual específico para entrada ASR suspeita.
 - ~~**Conta versus convidado**~~ → **resolvida** (§20: anfitrião com conta, participante convidado).
 - ~~**Duração, retenção e tamanho da sala**~~ → **resolvidos como contrato-alvo** (§20), ainda
   dependentes de implementação e teste.

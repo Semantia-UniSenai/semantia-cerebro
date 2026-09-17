@@ -1,6 +1,6 @@
 ---
 title: Diário do Card 08 — agente de adaptação
-status: em-execucao
+status: integracao-validada-aguardando-pr
 data: 2026-08-10
 clickup: 86e2j4w7h
 ---
@@ -355,3 +355,53 @@ Executados após os commits funcionais, sem alterações posteriores nos worktre
 Não alterar modelo, janela, decoder ou hotwords com base neste único incidente. Construir reprodução humana
 pareada e experimentar uma variável por vez. Até então, entrada ASR suspeita deve bloquear adaptação fluente,
 e nenhuma alegação de benefício linguístico é permitida.
+
+## Reintegração final na base pós-Card 13 — 2026-09-16
+
+### Contrato fechado
+
+- o transcript final limpo é persistido e emitido antes da adaptação;
+- o agente recebe snapshot coerente de contexto e `audienceContextVersion` capturados com o segmento;
+- `transcript:adapted` preserva `segmentId/sessionId/seq`; replay REST/Socket hidrata a projeção persistida;
+- contexto inicial incompleto é rejeitado; falha de salvamento mantém modal, dados e retry sem capturar mídia;
+- `pt-br-accessible-v1` ficou imutável; `pt-br-accessible-v2` virou default e aplica regras explícitas por
+  simplificação, familiaridade, faixa etária, tipo de reunião e domínio;
+- `urgent` faz bypass; `ambiguous` e `preservation-risk` fazem fallback literal;
+- ASR acima de 360 palavras/min recebe `SUSPECT_DENSITY`; o provider não é chamado e a adaptação termina
+  `BYPASSED/SUSPECT_INPUT`;
+- o palco oferece escolha individual `Literal`/`Adaptado`; somente `succeeded` exibe texto derivado e os
+  demais estados usam o literal canônico.
+
+### Gates frescos
+
+- API: 51 suítes e 265/265 unitários; ESLint, build, Prisma validate e `git diff --check` aprovados;
+- E2E API passou com adaptação default `disabled` e com provider `fake/ready`;
+- corpus defensivo: 100 casos, 20 categorias e zero divergências;
+- PostgreSQL fresh: 10 migrations; N-1 preservou uma adaptação sintética `FALLBACK/TIMEOUT`, contexto versão
+  1 e vínculo com o segmento ao adicionar `SUSPECT_INPUT`;
+- package compilado e imagem Docker final iniciaram via `migrate deploy + start:prod`; health retornou banco
+  conectado, provider fake `ready` e prompt v2;
+- OpenAPI final foi recapturado após `SessionDto.requiresApproval`; Orval, typecheck e build web passaram;
+- web: 27 arquivos de teste e 226/226 testes;
+- Playwright no build final: 22 passes, quatro skips deliberados do caso LiveKit restrito ao Chromium e zero
+  falhas em Chromium/Firefox/WebKit desktop, Chromium/WebKit mobile e autoplay bloqueado;
+- added-lines scan: nenhum conflito, segredo real, chamada de provider no frontend, persistência de áudio ou
+  log de transcript. Três matches de chave na API eram apenas `synthetic-test-secret` em specs.
+
+### Correções de release descobertas pela validação
+
+- `start:prod` apontava para `dist/main`, mas o Nest gera `dist/src/main`; script e Dockerfile foram alinhados;
+- o Prisma gerado não era empacotado em `dist`; o build agora gera e copia o client de forma verificável;
+- o Dockerfile não copiava a configuração de overrides do pnpm e `prune` reexecutava Husky já removido;
+  `pnpm-workspace.yaml`, `--ignore-scripts` e OpenSSL tornaram a imagem reproduzível;
+- o OpenAPI omitia `requiresApproval` na resposta de sessão; DTO e cliente gerado foram corrigidos;
+- o modal de contexto excedia a viewport no iPhone/WebKit; ganhou altura dinâmica, safe areas e scroll interno.
+
+### Limites e decisão
+
+- Groq real não foi chamada e nenhum transcript real foi enviado nesta reintegração;
+- a qualidade linguística continua sem aceite humano; não há alegação de tradução Libras nem de ganho de
+  compreensão até avaliação com pessoas surdas/especialistas;
+- existe uma janela rara de crash entre persistir o literal e criar `TranscriptAdaptation.PENDING`; o literal
+  permanece íntegro, mas fechar a ausência auditável do derivado exige outbox/job transacional futuro;
+- código está tecnicamente apto para PR e revisão; merge continua sem autorização.
