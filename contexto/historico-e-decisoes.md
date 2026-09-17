@@ -481,8 +481,9 @@ toggle literal/adaptado, preserva literal em fallback/bypass e mantém o modal d
 falha. A imagem de produção e o empacotamento Prisma foram corrigidos e validados por boot real.
 
 Evidência: 265 unitários API, E2E disabled/fake, corpus 100/100, 226 testes web, Playwright 22 passes/4 skips,
-10 migrations fresh e N-1 preservando adaptação existente. A branch está tecnicamente pronta para PR, mas não
-para merge automático. Groq real e benefício de compreensão permanecem não promovidos sem validação humana.
+10 migrations fresh e N-1 preservando adaptação existente. API #15, web #15 e cérebro #13 estão abertos e
+`CLEAN`, sem merge automático. Groq real e benefício de compreensão permanecem não promovidos sem validação
+humana.
 
 ## Lacunas / perguntas em aberto (revisado 2026-09-16)
 

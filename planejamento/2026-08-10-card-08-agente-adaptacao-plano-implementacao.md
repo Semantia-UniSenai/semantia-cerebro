@@ -1,6 +1,6 @@
 ---
 title: Card 08 — plano de implementação do agente de adaptação
-status: integracao-validada-aguardando-pr
+status: em-revisao
 atualizado: 2026-09-16
 clickup: 86e2j4w7h
 repositorios:
@@ -10,6 +10,10 @@ repositorios:
 branch_api: feat/card08-integration
 branch_web: feat/card08-integration
 branch_cerebro: docs/card08-integration
+pull_requests:
+  api: https://github.com/Semantia-UniSenai/semantia-api/pull/15
+  web: https://github.com/Semantia-UniSenai/semantia-web/pull/15
+  cerebro: https://github.com/Semantia-UniSenai/semantia-cerebro/pull/13
 depende:
   - card-04
   - card-07

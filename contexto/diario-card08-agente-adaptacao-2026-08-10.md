@@ -1,6 +1,6 @@
 ---
 title: Diário do Card 08 — agente de adaptação
-status: integracao-validada-aguardando-pr
+status: em-revisao
 data: 2026-08-10
 clickup: 86e2j4w7h
 ---
@@ -404,4 +404,7 @@ e nenhuma alegação de benefício linguístico é permitida.
   compreensão até avaliação com pessoas surdas/especialistas;
 - existe uma janela rara de crash entre persistir o literal e criar `TranscriptAdaptation.PENDING`; o literal
   permanece íntegro, mas fechar a ausência auditável do derivado exige outbox/job transacional futuro;
-- código está tecnicamente apto para PR e revisão; merge continua sem autorização.
+- PRs finais abertos: API [#15](https://github.com/Semantia-UniSenai/semantia-api/pull/15), web
+  [#15](https://github.com/Semantia-UniSenai/semantia-web/pull/15) e cérebro
+  [#13](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/13); todos `OPEN/CLEAN`, sem checks remotos
+  iniciados e sem autorização de merge.
