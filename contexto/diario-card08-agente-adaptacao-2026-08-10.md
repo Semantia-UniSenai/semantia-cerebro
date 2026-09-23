@@ -1,6 +1,6 @@
 ---
 title: Diário do Card 08 — agente de adaptação
-status: em-revisao
+status: concluido
 data: 2026-08-10
 clickup: 86e2j4w7h
 ---
@@ -404,7 +404,21 @@ e nenhuma alegação de benefício linguístico é permitida.
   compreensão até avaliação com pessoas surdas/especialistas;
 - existe uma janela rara de crash entre persistir o literal e criar `TranscriptAdaptation.PENDING`; o literal
   permanece íntegro, mas fechar a ausência auditável do derivado exige outbox/job transacional futuro;
-- PRs finais abertos: API [#15](https://github.com/Semantia-UniSenai/semantia-api/pull/15), web
-  [#15](https://github.com/Semantia-UniSenai/semantia-web/pull/15) e cérebro
-  [#13](https://github.com/Semantia-UniSenai/semantia-cerebro/pull/13); todos `OPEN/CLEAN`, sem checks remotos
-  iniciados e sem autorização de merge.
+- Foyth autorizou a integração em 2026-09-23. API [#15](https://github.com/Semantia-UniSenai/semantia-api/pull/15)
+  foi mergeada em `dev` no SHA `632e016`; web [#15](https://github.com/Semantia-UniSenai/semantia-web/pull/15)
+  foi mergeada em `5ce05e0` e recebeu a correção pós-merge
+  [#16](https://github.com/Semantia-UniSenai/semantia-web/pull/16), integrada em `02db944`.
+
+### Gate pós-merge
+
+- o pull fast-forward atualizou as refs locais `dev` para os SHAs remotos exatos;
+- API integrada: 51 suítes, 270/270 testes, ESLint e build;
+- o primeiro gate web reproduziu cinco falhas do `CaptionStage` e quatro propriedades duplicadas detectadas
+  pelo `vue-tsc`, resíduos do merge de conflito `98d7727`;
+- a correção manteve o botão único do design integrado, restaurou preferência antes do primeiro render,
+  manteve o controle sempre disponível e garantiu literal para fallback/bypass;
+- web final: 27 arquivos, 233/233 testes, typecheck e build;
+- Playwright final: 22 passes, quatro skips deliberados e zero falhas; o tree SHA da PR #16 é idêntico ao
+  tree SHA do squash `02db944`;
+- Card 08 está integrado tecnicamente. Validação de benefício linguístico com pessoas surdas continua como
+  gate de pesquisa, não como regressão do merge.

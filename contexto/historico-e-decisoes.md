@@ -480,10 +480,11 @@ literal. Densidade acima de 360 palavras/min produz `SUSPECT_INPUT` sem chamar o
 toggle literal/adaptado, preserva literal em fallback/bypass e mantém o modal de contexto aberto quando salvar
 falha. A imagem de produção e o empacotamento Prisma foram corrigidos e validados por boot real.
 
-Evidência: 265 unitários API, E2E disabled/fake, corpus 100/100, 226 testes web, Playwright 22 passes/4 skips,
-10 migrations fresh e N-1 preservando adaptação existente. API #15, web #15 e cérebro #13 estão abertos e
-`CLEAN`, sem merge automático. Groq real e benefício de compreensão permanecem não promovidos sem validação
-humana.
+Evidência pré-merge: 265 unitários API, E2E disabled/fake, corpus 100/100, 226 testes web, Playwright
+22 passes/4 skips, 10 migrations fresh e N-1 preservando adaptação existente. Em 2026-09-23, Foyth autorizou
+a integração: API #15 chegou a `dev` em `632e016`; web #15 chegou em `5ce05e0` e a correção pós-merge #16 em
+`02db944`. O gate no destino terminou com 270 testes API, 233 testes web, typecheck/build e a mesma matriz
+Playwright verde. Groq real e benefício de compreensão permanecem não promovidos sem validação humana.
 
 ## Lacunas / perguntas em aberto (revisado 2026-09-16)
 

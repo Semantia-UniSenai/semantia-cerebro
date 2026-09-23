@@ -1,7 +1,8 @@
 ---
 title: Card 08 — plano de implementação do agente de adaptação
-status: em-revisao
+status: concluido
 atualizado: 2026-09-16
+integrado_em: 2026-09-23
 clickup: 86e2j4w7h
 repositorios:
   - semantia-api
@@ -13,7 +14,11 @@ branch_cerebro: docs/card08-integration
 pull_requests:
   api: https://github.com/Semantia-UniSenai/semantia-api/pull/15
   web: https://github.com/Semantia-UniSenai/semantia-web/pull/15
+  web_correcao_pos_merge: https://github.com/Semantia-UniSenai/semantia-web/pull/16
   cerebro: https://github.com/Semantia-UniSenai/semantia-cerebro/pull/13
+merge_shas:
+  api_dev: 632e0167edd0f8bf142d59514856f43bf36aa371
+  web_dev: 02db9446e87c479a388e9fc4f978b0d6c2e47bad
 depende:
   - card-04
   - card-07
@@ -103,6 +108,17 @@ chegaram à branch integrada. Foyth autorizou concluir o Card 08 em loop sem rei
   derivado ausente; o literal permanece íntegro, mas o fechamento durável dessa janela exige outbox/job
   transacional e fica registrado como evolução de confiabilidade;
 - PRs não autorizam merge automático.
+
+### Integração autorizada — 2026-09-23
+
+Foyth autorizou merge e pull. API #15 foi integrada em `dev` no SHA `632e016`; web #15 havia sido
+integrada em `5ce05e0`, e o gate pós-merge encontrou resíduos do conflito no seletor literal/adaptado e em
+fixtures TypeScript. A correção TDD web #16 foi integrada em `02db944`. Após o pull das refs de destino:
+
+- API: 51 suítes, 270/270 testes, ESLint e build aprovados;
+- web: 27 arquivos, 233/233 testes, typecheck e build aprovados;
+- a árvore do squash web final é idêntica à validada no Playwright: 22 passes, quatro skips deliberados e
+  zero falhas.
 
 ## Objetivo
 
