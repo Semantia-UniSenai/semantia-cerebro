@@ -1,7 +1,7 @@
 ---
 title: Requisitos do MVP de transcrição em tempo real
 status: canônico
-atualizado: 2026-09-02
+atualizado: 2026-09-16
 ---
 
 # Requisitos do MVP de transcrição em tempo real
@@ -25,14 +25,14 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 | RF01 | Anfitrião cria conta, autentica-se e administra reuniões próprias. | P0 | VALIDADO NA BRANCH | Auth sem papel global e permissão contextual `HOST`/`MODERATOR`. |
 | RF02 | Anfitrião abre uma reunião instantânea em um clique e recebe link/token de convite. | P0 | VALIDADO NA BRANCH | Criação transacional já `LIVE`; não há preparação nem início manual. |
 | RF03 | Convidado entra pelo link com nome de exibição, sem conta. | P0 | VALIDADO NA BRANCH | REST e Socket.IO usam token efêmero limitado à reunião. |
-| RF04 | Anfitrião configura durante a reunião tipo do encontro, faixa etária, familiaridade com português, domínio e simplificação. | P0 | PLANEJADO | Não há modelo nem tela de contexto; essa configuração não bloqueia a abertura. |
+| RF04 | Anfitrião configura durante a reunião contexto e preferências acionáveis de leitura. | P0 | IMPLEMENTADO EM DEV | Cinco campos, persistência/versionamento e erro com retry estão cobertos; criação inicial parcial é rejeitada. `ageRange` no prompt v2 orienta somente vocabulário/exemplos, não intensidade automática. |
 | RF05 | Navegador do comunicador captura PCM em janelas fixas e backend publica o único final canônico. | P0 | VALIDADO NA BRANCH | Controle explícito on/off, 5 s + residual; sem ASR/VAD/prévia no cliente; `faster-whisper small` no backend. |
 | RF06 | Backend limpa disfluências inequívocas apenas nos segmentos finais. | P0 | VALIDADO NA BRANCH | `cleanCanonicalTranscript`, corpus sintético e estratégia imutável `pt-br-conservative-v1`; ambiguidade permanece. |
 | RF07 | Backend persiste o transcript literal com sequência estável. | P0 | VALIDADO NA BRANCH | `text`, `seq`, `clientSegmentId` e `cleaningStrategyVersion`; vazio não persiste e replay não reinfere no TTL. |
-| RF08 | Agente produz versão adaptada contextual sem alterar fatos ou intenção. | P0 | PLANEJADO | Camada de IA ainda não existe. |
-| RF09 | Falha/timeout da IA mantém a versão literal sem interromper a sala. | P0 | PLANEJADO | Deve ser implementado junto ao agente. |
-| RF10 | Participante escolhe literal ou adaptada e alterna durante a reunião. | P0 | PLANEJADO | Hoje existe somente o transcript literal. |
-| RF11 | Legenda karaokê acompanha a fala, permite releitura e retorno ao vivo. | P0 | PARCIAL | Palco literal existe; falta integrar versão adaptada e preferências. |
+| RF08 | Agente produz versão adaptada contextual sem alterar fatos ou intenção. | P0 | IMPLEMENTADO EM DEV | Provider desacoplado, prompt v2, snapshot versionado, persistência, evento e guardas relacionais passaram; benefício linguístico ainda depende de validação humana. |
+| RF09 | Falha/timeout/entrada suspeita da IA mantém a versão literal sem interromper a sala. | P0 | IMPLEMENTADO EM DEV | Provider, fila, circuito, resposta inválida, qualquer risco não nulo e densidade ASR suspeita materializam fallback/bypass literal auditável. |
+| RF10 | Participante escolhe literal ou adaptada e alterna durante a reunião. | P0 | IMPLEMENTADO EM DEV | Seletor acessível começa em literal, persiste preferência local e usa adaptação somente em `succeeded`; fallback/bypass exibem literal. |
+| RF11 | Legenda karaokê acompanha a fala, permite releitura e retorno ao vivo. | P0 | PARCIAL | Palco literal/adaptado, releitura e retorno estão cobertos em desktop/mobile. Falta apresentar ao usuário um estado específico para entrada ASR suspeita e, se validado por pesquisa, modo simultâneo. |
 | RF12 | Anfitrião encerra a reunião sem duplicar efeitos. | P0 | IMPLEMENTADO | REST/Socket.IO usam encerramento idempotente. |
 | RF13 | Anfitrião consulta e exclui transcript/chat dentro da política de 30 dias. | P0 | PLANEJADO | Consulta existe; exclusão e expiração automática não. |
 | RF14 | Participantes usam chat e mãos levantadas com moderação genérica. | P1 | VALIDADO NA BRANCH | Chat/mãos usam papéis contextuais; anfitrião e moderador gerenciam a sala. |
@@ -46,13 +46,13 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 | ID | Requisito | Estado | Critério de aceite |
 |---|---|---|---|
 | RNF01 | Acessibilidade e responsividade | PARCIAL | Teclado, foco, contraste, `aria-live`, movimento reduzido e QA mobile/desktop na sala. |
-| RNF02 | Continuidade da legenda | VALIDADO NA BRANCH | Fila PCM limitada/TTL/ACK/retry, reentrada antes do flush e idempotência por `clientSegmentId`; no-speech recebe ACK sem persistência. A futura IA adaptadora ainda deve preservar o literal. |
-| RNF03 | Latência observável | PARCIAL | Janela fixa de 5 s e benchmark local registrados; limpeza de até 5.000 caracteres ficou abaixo de 0,07 ms p95 no Card 07. Falta medir p95 ponta a ponta na VPS real e a futura adaptação. |
+| RNF02 | Continuidade da legenda | IMPLEMENTADO EM DEV | Fila PCM limitada/TTL/ACK/retry, idempotência por `clientSegmentId`, no-speech sem persistência e adaptação assíncrona com fallback literal sem bloquear ACK. |
+| RNF03 | Latência observável | PARCIAL | Janela fixa de 5 s, limpeza e latência da adaptação são registradas. Falta p95 ponta a ponta na VPS real, correlação por etapa e avaliação de atraso/estabilidade visual com pessoas surdas. |
 | RNF04 | Capacidade | PLANEJADO | Provar 25 participantes concorrentes; só anunciar alvo de 50 após teste de carga/reconexão. |
 | RNF05 | Duração da reunião | PLANEJADO | Suportar até 4 h sem reiniciar sequência nem perder ordem. |
 | RNF06 | Privacidade | PARCIAL | PCM efêmero é enviado ao backend protegido e descartado; testes cobrem ausência de arquivo/banco/storage/log. Aviso e expiração de 30/90 dias ainda não foram implementados. |
 | RNF07 | Segurança | PARCIAL | Somente `HOST`/`LIVE`, gateway sem entrada textual do cliente, limites, JWT e guest token contextual validados; rate limit ainda falta. |
-| RNF08 | Auditabilidade da IA | PARCIAL | Transcript literal registra `cleaningStrategyVersion`; a futura adaptação ainda deve registrar versão, latência e status sem logar segredo ou conteúdo fora da política. |
+| RNF08 | Auditabilidade da IA | VALIDADO NA BRANCH | Adaptação registra status, código, contexto/versão, prompt, provider/modelo, latência, tokens e tentativas sem segredo. Falta qualidade não textual da entrada ASR e governança do prompt v2. |
 | RNF09 | Compatibilidade | VALIDADO NA BRANCH | Captura Web Audio por capacidades, com `AudioWorklet` e fallback técnico; sem recomendar troca de browser. |
 | RNF10 | Observabilidade | PARCIAL | UX expõe captura, fila, processamento e erro; benchmark/E2Es preservam métricas sem áudio/texto. Falta telemetria agregada de produção. |
 
@@ -77,7 +77,10 @@ Builds e contagens antigas de testes não alteram o estado funcional deste docum
 | RN15 | O produto não promete tradução completa para Libras nem substituição de intérprete humano. |
 | RN16 | Estado implementado, planejado e legado deve permanecer explícito na documentação. |
 | RN17 | Sala e reunião são o mesmo conceito no MVP; `RoomSession` é detalhe interno e não pode gerar preparação, início manual ou histórico aninhado na UX. |
-| RN18 | Conferência usa mídia efêmera por SFU; câmera e áudio da chamada começam desligados, não são gravados e não podem interromper a sala textual. O microfone da chamada e a transcrição têm controles independentes. |
+| RN18 | Entrada ASR suspeita não pode ser embelezada pela IA nem apresentada como adaptação confiável; deve permanecer literal com estado explícito até validação. |
+| RN19 | Idade cronológica, diagnóstico ou uso de Libras não controlam automaticamente intensidade, léxico ou tom; preferências individuais observáveis prevalecem. |
+| RN20 | Termos técnicos são preservados; explicações só podem vir de glossário aprovado e versionado. |
+| RN21 | Conferência usa mídia efêmera por SFU; câmera e áudio da chamada começam desligados, não são gravados e não podem interromper a sala textual. O microfone da chamada e a transcrição têm controles independentes. |
 
 ## Casos de uso canônicos
 
@@ -117,7 +120,7 @@ preparação ou início manual.
    no-speech sem persistência.
 5. O texto reconhecido é limpo uma única vez; vazio recebe ACK sem linha/evento e conteúdo é persistido
    com `pt-br-conservative-v1`. Replay do mesmo descarte não reinfere durante o TTL.
-6. O futuro agente de adaptação tenta produzir o adaptado sem bloquear o literal.
+6. O agente tenta produzir o adaptado sem bloquear o literal e deve recusar reescrita quando a entrada ASR for suspeita ou a preservação não puder ser comprovada.
 
 **Resultado:** legenda final consistente entre navegadores, com pequeno atraso deliberado e sem prévia textual local.
 
@@ -166,10 +169,12 @@ Links individuais estão em
 
 - `PROFESSOR`/`ALUNO`, turmas e rotas `/aula` continuam integrados em `dev`, mas foram removidos do
   contrato ativo na branch de generalização e cobertos por migration preservadora.
-- Não existe preferência individual integrada; o agente adaptador já possui implementação em `dev`, mas seus gates de acessibilidade continuam separados.
-- A mídia de conferência está em implementação nas branches do Card 13 e ainda não foi validada nem publicada.
-- A robustez de captura/transporte do Card 06 está integrada em `dev`; o Card 07 permanece validado
-  em branches dedicadas até revisão e merge dos PRs.
+- Não existe preferência individual integrada; o agente de IA e o consumo do evento foram validados
+  nas branches do Card 08, mas ainda estão em reintegração sobre a `dev` atual e não possuem promoção
+  científica, guardas relacionais completas ou seletor visual.
+- A mídia de conferência do Card 13 está integrada em `dev`; validações em dispositivos físicos e escala
+  continuam registradas como limites, não como suporte comprovado.
+- A robustez de captura/transporte do Card 06 e o contrato canônico do Card 07 estão integrados em `dev`.
 - Não existe expiração de transcript/chat/metadados nem política automática de 90 dias para logs técnicos.
 - Documentos do Desafio Interdisciplinar de junho são snapshots históricos e não descrevem o
   backend atual nem o MVP vigente.

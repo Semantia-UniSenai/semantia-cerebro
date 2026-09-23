@@ -1,7 +1,7 @@
 ---
 tags: [tcc, senai, semantia, libras, acessibilidade]
 status: histórico-vivo
-atualizado: 2026-09-02
+atualizado: 2026-09-16
 ---
 
 # Semantia 🤟
@@ -222,8 +222,9 @@ em camadas no backend**:
 
 1. **Camada 1 (FEITA):** regex de disfluências — remove vícios de fala ("ééé", "né", "tipo
    assim"), gagueira e pontuação órfã. Conservadora (ambíguas ficam).
-2. **Camada 2 (A FAZER):** LLM rápido (Haiku/Gemini Flash) reescreve a frase final adaptada e
-   emite `transcript:adapted` (substitui na UI ~1s depois; toggle literal/adaptado).
+2. **Camada 2 (A FAZER, estado em 2026-07-04):** LLM rápido reescreve a frase final adaptada e emite
+   `transcript:adapted`. Esta lacuna foi tecnicamente implementada pelo Card 08 em 2026-09-16 com provider
+   desacoplado, fallback literal e toggle individual; promoção de qualidade continua humana.
 
 **ML próprio descartado:** não existe corpus PT→PT-adaptado-pra-surdos, não cabe no prazo; o
 prompt engineering da camada 2 vira a seção de metodologia do artigo, ML fica como trabalho
@@ -259,8 +260,8 @@ Libras fale normalmente e uma pessoa surda acompanhe a comunicação pela transc
 Chat, mãos levantadas, mídia de conferência, moderação, VLibras, análise sentimental e as
 ferramentas educativas permanecem desejáveis, mas não bloqueiam o núcleo.
 
-O anfitrião configura o contexto da plateia antes da sessão (tipo de encontro, faixa etária,
-familiaridade com português escrito, domínio e nível de simplificação). Cada participante pode
+Esta redação foi supersedida pelo contrato de reunião instantânea: o anfitrião entra primeiro e configura
+o contexto dentro da reunião, sem bloquear a abertura nem iniciar captura automaticamente. Cada participante pode
 escolher transcrição literal ou adaptada e mudar sua preferência durante a reunião. O agente de
 IA é consumido por token no backend e adapta o texto limpo sem alterar fatos; falha da IA deve
 manter o modo literal disponível.
@@ -416,30 +417,81 @@ gate dos Cards 11/17. Detalhes em
 
 O card permanece `EM REVISÃO` enquanto os PRs estiverem abertos, sem merge automático.
 
-## 27. Card 13 iniciado com SFU e compatibilidade cross-browser (2026-09-02)
+## 27. Pesquisa de adaptação e incidente real de ASR (2026-08-12)
 
-Após a retomada do desenvolvimento, Foyth autorizou iniciar o Card 13 antes dos Cards 10 e 11. A
-decisão não conclui os gates de privacidade/validação desses cards; inclui apenas os controles
-mínimos indispensáveis de autorização, token curto, ausência de gravação e cleanup.
+Foi recebido e preservado em `referencias/` um relatório analítico de 28 páginas sobre surdez,
+compreensão leitora, legendagem, simplificação e segurança semântica. O documento rejeita um estilo
+universal de “português para surdos”, reduz o papel automático de idade/diagnóstico, prioriza preferências
+individuais e recomenda guardas de relações, glossário aprovado, literal soberano e validação participativa.
+Ele é um mapeamento profundo, não uma revisão sistemática PRISMA; bases autenticadas ainda precisam de
+triagem formal. A síntese, hash e limitações estão em
+[`../referencias/2026-08-12-relatorio-surdez-acessibilidade-adaptacao-portugues-tempo-real.md`](../referencias/2026-08-12-relatorio-surdez-acessibilidade-adaptacao-portugues-tempo-real.md).
 
-A conferência usará LiveKit como SFU, não uma malha WebRTC. O Socket.IO `/live` continua responsável
-por identidade, admissão, ciclo, transcript, chat e mãos. A API só emite credencial de mídia para um
-socket já admitido em sessão `LIVE`; `session:end` também encerra a room do provider. Câmera e áudio
-da chamada começam desligados e qualquer falha mantém a experiência caption-first.
+No mesmo dia, uma aula real de Python no runtime local produziu 16 segmentos em cerca de 80 segundos. O
+texto exportado pelo usuário coincidiu exatamente com os literais persistidos; logo, o conteúdo absurdo foi
+originado pelo `faster-whisper`, não pela tela adaptada. O frontend recebeu adaptações, mas à época do incidente renderizou somente
+o literal. Dez adaptações terminaram `SUCCEEDED`, seis em
+`PRESERVATION_FAILED`; só quatro sucessos alteraram texto. Uma janela nominal de 5 segundos gerou 51 palavras,
+equivalentes a 612 palavras/min, sinal objetivo de alucinação de ASR que o contrato atual não classifica.
 
-O microfone da chamada e a transcrição possuem controles independentes. Para evitar duas capturas
-concorrentes no Safari/iOS, uma origem física fornecerá clones por consumidor. O suporte será
-declarado somente com automação em Chromium/Firefox/WebKit e evidência real em
-Brave/Chrome, Edge, Firefox, Safari macOS/iOS e Chrome Android. Compartilhamento de tela permanece na
-task separada `86e33mk6m`.
+O áudio foi descartado corretamente, então não existe base para calcular WER nem atribuir causalidade a
+microfone, ruído, janela, decoder ou modelo. Ficou proibido mascarar o caso com hotwords de Python ou prompt
+corretivo. O próximo passo é um experimento pareado com fala humana consentida, roteiro de referência, bytes
+congelados e uma variável por vez. A entrada ASR suspeita deve bloquear adaptação fluente e aparecer como
+estado explícito até validação.
+
+## 28. Medium medido e rejeitado no envelope KVM 2 (2026-08-13)
+
+O `faster-whisper medium/int8` foi implementado como candidato configurável, carregado em container
+isolado e comparado ao Small com os mesmos bytes sintéticos pt-BR, decoder, endpoint, duas CPUs, duas
+threads e uma inferência concorrente. Cada modelo teve um warm-up descartado e três rodadas medidas.
+
+Os dois modelos empataram em WER agregado de `15,79%`. O Small ficou em RTF p95 `0,729`; o Medium,
+em `2,477`, com pico de memória observado de `2,615 GiB` e as duas CPUs saturadas. O Medium também
+falhou em tempo real nas janelas completas (`1,668`) e no residual de 2.384 ms (`2,477`). A decisão
+pré-registrada foi `REJECT_OPERATIONAL`: nenhum ganho lexical sintético compensou a fila inevitável.
+
+O Medium não foi promovido nem deixado no runtime. O candidato foi parado e o Small voltou saudável
+ao endpoint `8108`. Nenhuma branch experimental, tag, credencial, áudio ou hipótese reconhecida foi
+publicada. O tooling local produz WER S/D/I, warm-up, p50/p95 e RTF sem embutir PCM. A promoção de
+qualquer modelo maior continua dependente de corpus humano consentido, matriz degradada e KVM 4.
+Detalhes: [ADR-005](../arquitetura/decisoes/ADR-005-qualidade-entrada-asr-e-promocao-modelo.md),
+[diário](diario-qualidade-transcricao-2026-08-12.md) e
+[evidência](../evidencias/card-08/asr-small-vs-medium-2026-08-13.json).
+
+## 29. Card 13 integrado com SFU e compatibilidade cross-browser (2026-09-16)
+
+Foyth autorizou e concluiu a integração do Card 13 em `dev`. A conferência usa LiveKit como SFU,
+mantém Socket.IO autoritativo para identidade, admissão e encerramento, inicia câmera/microfone
+desligados, não grava mídia e mantém falhas de mídia isoladas da sala textual. O microfone da chamada e
+a transcrição possuem controles independentes sobre origem física compartilhável.
 
 Plano e decisão: [`../arquitetura/midia-conferencia.md`](../arquitetura/midia-conferencia.md).
 
-## Lacunas / perguntas em aberto (revisado 2026-08-10)
+## 30. Card 08 reintegrado sobre Cards 12/13 (2026-09-16)
+
+A implementação histórica do agente existia em branches empilhadas que não chegaram à `dev`. Ela foi promovida
+para branches limpas pós-Card 13 sem duplicar o provider nem remover mídia, admissão ou encerramento canônico.
+O fluxo final mantém o literal soberano, captura snapshot/versionamento de contexto, persiste a derivação e emite
+`transcript:adapted` com o mesmo `seq`.
+
+O prompt `pt-br-accessible-v2` aplica regras explícitas por preferências/contexto; qualquer risco não nulo usa
+literal. Densidade acima de 360 palavras/min produz `SUSPECT_INPUT` sem chamar o provider. O frontend oferece
+toggle literal/adaptado, preserva literal em fallback/bypass e mantém o modal de contexto aberto quando salvar
+falha. A imagem de produção e o empacotamento Prisma foram corrigidos e validados por boot real.
+
+Evidência pré-merge: 265 unitários API, E2E disabled/fake, corpus 100/100, 226 testes web, Playwright
+22 passes/4 skips, 10 migrations fresh e N-1 preservando adaptação existente. Em 2026-09-23, Foyth autorizou
+a integração: API #15 chegou a `dev` em `632e016`; web #15 chegou em `5ce05e0` e a correção pós-merge #16 em
+`02db944`. O gate no destino terminou com 270 testes API, 233 testes web, typecheck/build e a mesma matriz
+Playwright verde. Groq real e benefício de compreensão permanecem não promovidos sem validação humana.
+
+## Lacunas / perguntas em aberto (revisado 2026-09-16)
 
 - ~~**IA: regras vs. OpenAI vs. ML**~~ → **resolvida** (§17: limpeza conservadora + agente LLM).
-- ~~**Motor de adaptação semântica**~~ → **especificado** (§17 + contrato canônico); falta
-  implementar a camada de IA.
+- ~~**Motor de adaptação semântica**~~ → **validado tecnicamente na branch final do Card 08** (§30), incluindo
+  qualidade de entrada por densidade, prompt v2, guardas relacionais e seletor visual; falta validação de
+  benefício com pessoas surdas e estado visual específico para entrada ASR suspeita.
 - ~~**Conta versus convidado**~~ → **resolvida** (§20: anfitrião com conta, participante convidado).
 - ~~**Duração, retenção e tamanho da sala**~~ → **resolvidos como contrato-alvo** (§20), ainda
   dependentes de implementação e teste.
