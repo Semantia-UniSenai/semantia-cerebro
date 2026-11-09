@@ -1,0 +1,44 @@
+name: Acessibilidade do protótipo (axe)
+
+on:
+  push:
+    branches: [main]
+    paths: ['prototipos/sala-ao-vivo/**', '.github/workflows/prototipo-acessibilidade.yml']
+  pull_request:
+    paths: ['prototipos/sala-ao-vivo/**', '.github/workflows/prototipo-acessibilidade.yml']
+  workflow_dispatch:
+
+jobs:
+  axe:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: prototipos/sala-ao-vivo
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Testes de contrato do protótipo
+        run: node --test prototype.spec.mjs
+      - name: Instalar axe-core e Playwright
+        run: |
+          npm init -y >/dev/null
+          npm install --no-save axe-core@4.12.1 playwright-core@1.62.1
+          npx playwright-core install --with-deps chromium firefox
+      - name: Matriz axe (14 estados x 2 variantes x 3 viewports x 2 navegadores = 168 páginas)
+        run: node axe-matriz.mjs --engines=chromium,firefox --out=axe-relatorio.json
+      - name: Guardar relatório
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: axe-relatorio-${{ github.sha }}
+          path: prototipos/sala-ao-vivo/axe-relatorio.json
+          retention-days: 90
+      - name: Resumo na página da execução
+        if: always()
+        run: |
+          echo '### Matriz axe do protótipo' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          node -e "console.log(JSON.stringify(JSON.parse(require('fs').readFileSync('axe-relatorio.json')).summary,null,2))" >> "$GITHUB_STEP_SUMMARY" || true
+          echo '```' >> "$GITHUB_STEP_SUMMARY"
